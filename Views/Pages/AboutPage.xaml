@@ -1,0 +1,89 @@
+﻿<Page x:Class="LMFS.Views.Pages.AboutPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="도움말">
+
+
+    <Page.Resources>
+        <Style x:Key="InfoCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+
+        <Style x:Key="CardTitleStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="맑은고딕 MDL2 Assets"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#333"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+        </Style>
+
+        <Style x:Key="CardContentStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#555"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+
+        <Style x:Key="CardLabelStyle" TargetType="TextBlock" BasedOn="{StaticResource CardContentStyle}">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+    </Page.Resources>
+
+
+    <Border Background="#F0F3F5" CornerRadius="10" BorderBrush="#D0D5D8" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="도움말" Grid.Row="0" FontWeight="Bold" FontSize="16" Margin="15" Foreground="#1C1C1C"/>
+
+            <StackPanel Grid.Row="1" Margin="15,0,15,15">
+
+                <Border Style="{StaticResource InfoCardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource CardTitleStyle}" Text="애플리케이션 정보"/>
+                        <TextBlock Style="{StaticResource CardContentStyle}" Text="{Binding Description }"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource InfoCardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource CardTitleStyle}" Text="개발자 정보"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <TextBlock Style="{StaticResource CardLabelStyle}" Text="개발사:"/>
+                            <TextBlock Style="{StaticResource CardContentStyle}" Margin="5,0,0,0" 
+                                       VerticalAlignment="Center" Text="{Binding Developer}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <TextBlock Style="{StaticResource CardLabelStyle}" Text="이메일:"/>
+                            <TextBlock Style="{StaticResource CardContentStyle}" Margin="5,0,0,0" 
+                                       VerticalAlignment="Center" Text="{Binding Contact}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource InfoCardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource CardTitleStyle}" Text="버전 정보"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <TextBlock Style="{StaticResource CardLabelStyle}" Text="현재 버전:"/>
+                            <TextBlock Style="{StaticResource CardContentStyle}" Margin="5,0,0,0" 
+                                       VerticalAlignment="Center" Text="{Binding VersionInfo}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </Border>
+
+    
+</Page>

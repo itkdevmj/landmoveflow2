@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="LMFS.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="LogPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">d:\CN_GWORK\LMFS\</Value>
+    </Setting>
+    <Setting Name="KeyCloakUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://118.217.247.240:18080</Value>
+    </Setting>
+    <Setting Name="RedirectUri" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://127.0.0.1:7890/</Value>
+    </Setting>
+    <Setting Name="RealmId" Type="System.String" Scope="User">
+      <Value Profile="(Default)">cn_gwork</Value>
+    </Setting>
+    <Setting Name="ClientId" Type="System.String" Scope="User">
+      <Value Profile="(Default)">cn_lmfs</Value>
+    </Setting>
+    <Setting Name="AutoUpdateEnabled" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="NotificationEnabled" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="DbHostIP" Type="System.String" Scope="User">
+      <Value Profile="(Default)">118.217.247.240</Value>
+    </Setting>
+    <Setting Name="DbHostPort" Type="System.String" Scope="User">
+      <Value Profile="(Default)">13306</Value>
+    </Setting>
+    <Setting Name="DbUserId" Type="System.String" Scope="User">
+      <Value Profile="(Default)">cn_usr</Value>
+    </Setting>
+    <Setting Name="DbPassword" Type="System.String" Scope="User">
+      <Value Profile="(Default)">cn#2108$99</Value>
+    </Setting>
+    <Setting Name="DbName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">cn_lmfs</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
+
