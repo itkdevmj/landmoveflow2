@@ -2,12 +2,14 @@
 using DevExpress.Diagram.Core.Native;
 using DevExpress.Xpf.CodeView;
 using DevExpress.Xpf.Diagram;
+using DevExpress.XtraPrinting.XamlExport;
 using DevExpress.XtraSpreadsheet.Model;
 using LMFS.Models;
 using LMFS.Services;
 using NLog;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -95,8 +97,83 @@ public class LandMoveFlowConverter
     // 외부로부터 받은 인수
     // -----------------------------------------------------------
     private string _pnu;//Vit.G//조회 필지코드(19자리)
-    private bool _isJimokChgShow;//Vit.G//조회 필지코드(19자리)
-    private bool _isPortrait;//[세로형 그리기]
+    //[지목변경]
+    private bool _isJimokChgShow;
+    public bool IsJimokChgShow
+    {
+        get => _isJimokChgShow;
+        set
+        {
+            if (_isJimokChgShow != value)
+            {
+                _isJimokChgShow = value;
+                OnPropertyChanged(nameof(IsJimokChgShow));
+            }
+        }
+    }
+    //[세로형 그리기]
+    private bool _isPortrait;
+    public bool IsPortrait
+    {
+        get => _isPortrait;
+        set
+        {
+            if (_isPortrait != value)
+            {
+                _isPortrait = value;
+                OnPropertyChanged(nameof(IsPortrait));
+            }
+        }
+    }
+    //[소유자명]
+    private bool _isOwnName;
+    public bool IsOwnName
+    {
+        get => _isOwnName;
+        set
+        {
+            if (_isOwnName != value)
+            {
+                _isOwnName = value;
+                OnPropertyChanged(nameof(IsOwnName));
+            }
+        }
+    }
+    //[지목]
+    private bool _isJimok;
+    public bool IsJimok
+    {
+        get => _isJimok;
+        set
+        {
+            if (_isJimok != value)
+            {
+                _isJimok = value;
+                OnPropertyChanged(nameof(IsJimok));
+            }
+        }
+    }
+    //[면적]
+    private bool _isArea;
+    public bool IsArea
+    {
+        get => _isArea;
+        set
+        {
+            if (_isArea != value)
+            {
+                _isArea = value;
+                OnPropertyChanged(nameof(IsArea));
+            }
+        }
+    }
+
+    //이렇게 하면 XAML의 IsChecked가 속성 상태를 자동으로 반영한다.
+    public event PropertyChangedEventHandler PropertyChanged;
+    protected void OnPropertyChanged(string name)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
 
     // -----------------------------------------------------------
     // DBMS 조회 데이터 및 그룹 정보
@@ -217,6 +294,7 @@ public class LandMoveFlowConverter
         _root.Add(items);
     }
 
+    //DB레코드 분석 및 파싱(Jibun, Connector, Label)
     private void AnalyzeData(List<LandMoveInfo> flowList)
     {
         foreach (var row in flowList)
@@ -413,6 +491,7 @@ public class LandMoveFlowConverter
             }
         }
 
+        //XML 구성하기
         MakeXmlData();
     }
     
@@ -781,7 +860,7 @@ public class LandMoveFlowConverter
     // ===========================================================
     // 메인 실행 로직
     // ===========================================================
-    public XDocument Run(List<LandMoveInfo> flowList, string pnu, bool isChecked, bool portrait)//Vit.G//[add]pnu, isChecked[지목변경 표시], portrait[세로형 그리기]
+    public XDocument Run(List<LandMoveInfo> flowList, string pnu)//Vit.G//[add]pnu
     {
         try
         {
@@ -790,8 +869,8 @@ public class LandMoveFlowConverter
 
             //Vit.G//조회 필지코드(19자리)
             _pnu = pnu;
-            _isJimokChgShow = isChecked;
-            _isPortrait = portrait;//Vit.G//[TODO]
+            //_isJimokChgShow = isChecked;
+            //_isPortrait = portrait;//Vit.G//[TODO]
 
 
             ProcessLandMoveFlow(flowList);
