@@ -30,65 +30,27 @@ namespace LMFS.ViewModels.Pages
         [ObservableProperty] private string _bubn;
         [ObservableProperty] private bool _jimokChgShow;
         [ObservableProperty] private bool _portrait;
+        [ObservableProperty] private string _currentPnu;
         [ObservableProperty] private List<LandMoveInfo> _gridDataSource;
         //[ObservableProperty] private string _landMoveFlowData;
         [ObservableProperty] private MemoryStream _landMoveFlowData;
 
+        //public bool JimokChgShow { get; set; }
+        //public bool Portrait { get; set; }
+        //public bool OwnName { get; set; }
+        //public bool Jimok { get; set; }
+        //public bool Area { get; set; }
+
+
         [RelayCommand]
         private void OnSearch()
         {
-            string pnu = "";
-            // string pnu = "4420035028104190033";
-            
-            try
-            {
-                string umdCd = SelectedUmd.umdCd;
-                string riCd = SelectedRi == null ? "00" : SelectedRi.riCd;
-                string gbn = IsSan == true ? "2" : "1";
-                string bobn = Bobn != null ? Bobn.PadLeft(4, '0') : "0000";
-                string bubn = Bubn != null ? Bubn.PadLeft(4, '0') : "0000";
-                bool jimokChgShow = JimokChgShow;//Vit.G//TEST// ;
-                bool portrait = Portrait;//Vit.G//TEST// ;
+            // 1. PNU 구성
+            // 2. 그리드 데이터 조회
+            SearchLandMoveData();
 
-                pnu = SelectedUmd.sidoSggCd + umdCd + riCd + gbn + bobn + bubn;
-
-                if (pnu.Length != 19)
-                {
-                    _logger.Debug($"지번 오류 {pnu}");
-                }
-                else
-                {
-                    // 그리드 데이터 조회
-                    List<LandMoveInfo> rtnList = DBService.ListLandMoveHistory(pnu);
-                    //Org//GridDataSource = rtnList;
-                    var filteredList = rtnList;
-                    if(!jimokChgShow)
-                        filteredList = rtnList.Where(item => item.rsn != "40").ToList();//40=>지목변경
-                    GridDataSource = filteredList;
-                    
-                    // 흐름도 데이터 조회
-                    var converter = new LandMoveFlowConverter();
-                    
-                    //Vit.G//TEST// 3th argu //
-                    XDocument rtnXml = converter.Run(rtnList, pnu, jimokChgShow, portrait);//Vit.G//[add]pnu, jimokChgShow, portrait
-                    string str = rtnXml.ToString();
-                    
-                    
-                    byte[] xmlBytes;
-                    using (var ms = new MemoryStream())
-                    {
-                        rtnXml.Save(ms);
-                        xmlBytes = ms.ToArray();
-                    }
-                    using (var stream = new MemoryStream(xmlBytes)) {
-                        LandMoveFlowData = stream;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Debug(pnu);    
-            }
+            // 3. 그리드 데이터 처리
+            UpdateFlowXml();
         }
 
         [RelayCommand]
@@ -161,12 +123,80 @@ namespace LMFS.ViewModels.Pages
             return list;
         }
 
-        [RelayCommand]
-        private void OnJimokChecked()
+        partial void OnJimokChgShowChanged(bool value)
         {
-            this.OnSearch();
+            //// 체크박스 값이 변경될 때마다 실행
+            //UpdateFlowXml();
+
+            // 검색 로직 실행
+            OnSearch();   // 또는 SearchCommand.Execute(null);
+        }
+        
+        partial void OnPortraitChanged(bool value)
+        {
+            //// 체크박스 값이 변경될 때마다 실행
+            //UpdateFlowXml();
+
+            // 검색 로직 실행
+            OnSearch();   // 또는 SearchCommand.Execute(null);
         }
 
-        public void ExecuteSearchCommand() => SearchCommand.Execute(null);
+        private string BuildPnu()
+        {
+            string umdCd = SelectedUmd.umdCd;
+            string riCd = SelectedRi == null ? "00" : SelectedRi.riCd;
+            string gbn = IsSan == true ? "2" : "1";
+            string bobn = Bobn != null ? Bobn.PadLeft(4, '0') : "0000";
+            string bubn = Bubn != null ? Bubn.PadLeft(4, '0') : "0000";
+
+            string pnu = SelectedUmd.sidoSggCd + umdCd + riCd + gbn + bobn + bubn;
+
+            try
+            {
+                if (pnu.Length != 19)
+                {
+                    _logger.Debug($"지번 오류 {pnu}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Debug(pnu);
+            }
+            return pnu;
+        }
+
+        private void SearchLandMoveData()
+        {
+            _currentPnu = BuildPnu(); // 기존 방식
+            GridDataSource = DBService.ListLandMoveHistory(_currentPnu);
+        }
+
+        private void UpdateFlowXml()
+        {         
+            var converter = new LandMoveFlowConverter();
+
+            var filteredList = GridDataSource;
+            if (!_jimokChgShow)
+                filteredList = GridDataSource.Where(item => item.rsn != "40").ToList();
+
+            ////Vit.G//TEST// 3th argu //
+            XDocument rtnXml = converter.Run(filteredList, _currentPnu);
+
+            // ... 이하 xml 스트림 처리
+            string str = rtnXml.ToString();
+
+
+            byte[] xmlBytes;
+            using (var ms = new MemoryStream())
+            {
+                rtnXml.Save(ms);
+                xmlBytes = ms.ToArray();
+            }
+            using (var stream = new MemoryStream(xmlBytes))
+            {
+                LandMoveFlowData = stream;
+            }
+        }
+
     }
 }
