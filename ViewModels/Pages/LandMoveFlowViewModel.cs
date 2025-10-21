@@ -9,6 +9,7 @@ using LMFS.Services;
 using NLog;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -28,18 +29,56 @@ namespace LMFS.ViewModels.Pages
         [ObservableProperty] private bool _isSan;
         [ObservableProperty] private string _bobn;
         [ObservableProperty] private string _bubn;
-        [ObservableProperty] private bool _jimokChgShow;
+        [ObservableProperty] private bool _jimokChg;
         [ObservableProperty] private bool _portrait;
+        //[ObservableProperty] private bool _isOwnName;
+        //[ObservableProperty] private bool _isJimok;
+        //[ObservableProperty] private bool _isArea;
         [ObservableProperty] private string _currentPnu;
         [ObservableProperty] private List<LandMoveInfo> _gridDataSource;
         //[ObservableProperty] private string _landMoveFlowData;
         [ObservableProperty] private MemoryStream _landMoveFlowData;
 
-        //public bool JimokChgShow { get; set; }
-        //public bool Portrait { get; set; }
-        //public bool OwnName { get; set; }
-        //public bool Jimok { get; set; }
-        //public bool Area { get; set; }
+        //private bool _isJimokChg;
+        //public bool IsJimokChg
+        //{
+        //    get => _isJimokChg;
+        //    set { _isJimokChg = value; OnPropertyChanged(); }
+        //}
+
+        //private bool _isPortrait;
+        //public bool IsPortrait
+        //{
+        //    get => _isPortrait;
+        //    set { _isPortrait = value; OnPropertyChanged(); }
+        //}
+
+        private bool _isOwnName;
+        public bool IsOwnName
+        {
+            get => _isOwnName;
+            set { _isOwnName = value; OnPropertyChanged(); }
+        }
+
+        private bool _isJimok;
+        public bool IsJimok
+        {
+            get => _isJimok;
+            set { _isJimok = value; OnPropertyChanged(); }
+        }
+
+        private bool _isArea;
+        public bool IsArea
+        {
+            get => _isArea;
+            set { _isArea = value; OnPropertyChanged(); }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
+        }
 
 
         [RelayCommand]
@@ -123,7 +162,7 @@ namespace LMFS.ViewModels.Pages
             return list;
         }
 
-        partial void OnJimokChgShowChanged(bool value)
+        partial void OnJimokChgChanged(bool value)
         {
             //// 체크박스 값이 변경될 때마다 실행
             //UpdateFlowXml();
@@ -176,11 +215,11 @@ namespace LMFS.ViewModels.Pages
             var converter = new LandMoveFlowConverter();
 
             var filteredList = GridDataSource;
-            if (!_jimokChgShow)
+            if (!JimokChg)
                 filteredList = GridDataSource.Where(item => item.rsn != "40").ToList();
 
             ////Vit.G//TEST// 3th argu //
-            XDocument rtnXml = converter.Run(filteredList, _currentPnu);
+            XDocument rtnXml = converter.Run(filteredList, this, _currentPnu);
 
             // ... 이하 xml 스트림 처리
             string str = rtnXml.ToString();
