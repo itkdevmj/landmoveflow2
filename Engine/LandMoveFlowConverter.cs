@@ -3,6 +3,8 @@ using DevExpress.Diagram.Core.Native;
 using DevExpress.Xpf.CodeView;
 using DevExpress.Xpf.Diagram;
 using DevExpress.XtraPrinting.XamlExport;
+using DevExpress.XtraScheduler.Drawing;
+using DevExpress.XtraSpreadsheet.DocumentFormats.Xlsb;
 using DevExpress.XtraSpreadsheet.Model;
 using LMFS.Models;
 using LMFS.Services;
@@ -88,6 +90,7 @@ public class LandMoveFlowConverter
     private List<string> _labelList = new();
     private List<string> _depthList = new();
     private List<string> _itemList = new();
+
     private List<(int x, int y, string label, bool focus)> _labelTuples = new(); // 라벨을 마지막에 그리기 위해 임시 저장//Vit.G//[add]focus
 
     private int _shapeCount;
@@ -98,9 +101,11 @@ public class LandMoveFlowConverter
     // 외부로부터 받은 인수
     // -----------------------------------------------------------
     private string _pnu;//Vit.G//조회 필지코드(19자리)
-    private bool _isJimokChgShow;
+    private bool _isJimokChg;
     private bool _isPortrait;
-
+    private bool _isOwnName;
+    private bool _isJimok;
+    private bool _isArea;
 
     // -----------------------------------------------------------
     // DBMS 조회 데이터 및 그룹 정보
@@ -109,11 +114,17 @@ public class LandMoveFlowConverter
     private int _currentGroupNo;
     private List<string> _dbLines = new();
 
+
+    // -----------------------------------------------------------
+    // 임시 파일 관련 정보
+    // -----------------------------------------------------------
+    private static string _tempDir;
+
     // -----------------------------------------------------------
     // XML 노드 구성용 변수
     // -----------------------------------------------------------
-    private XElement? _root;
-    private XElement? _children;
+    private XElement _root;
+    private XElement _children;
     private XDocument _xdoc;
     
     #endregion
@@ -124,6 +135,8 @@ public class LandMoveFlowConverter
     private void ReadCodeTables()
     {
         _listLawd = GlobalDataManager.Instance.sidoCodeList;
+        _listJimok = GlobalDataManager.Instance.JimokCode;
+        _listMovrsn = GlobalDataManager.Instance.ReasonCode;
     }
 
     private string GetCodeValue(int opt, string find)
@@ -135,6 +148,14 @@ public class LandMoveFlowConverter
             3 => _listMovrsn.GetValueOrDefault(find, ""), // LAND_MOV_RSN
             _ => ""
         };
+    }
+
+    private void GetCodeValueCategory(List<LandMoveInfoCategory> categoryList)
+    {
+        foreach (var row in categoryList)
+        {
+            row.rsn = GetCodeValue(3, row.rsn);//이동종목 코드 => 명칭
+        }
     }
 
     //option (1)지역명(동 or 리)
@@ -153,7 +174,7 @@ public class LandMoveFlowConverter
                 if (item.umdCd + item.riCd == lawdCd)
                 {
                     //lawdNm = item.umdNm + " " + item.riNm;
-                    lawdNm = item.riCd == "00" ? item.umdNm : item.riNm;//Vit.G//[add]'동지역'
+                    lawdNm = item.riCd == "00" ? item.umdNm + " " : item.riNm + " ";//Vit.G//[add]'동지역'
                     break;
                 }
             }
@@ -166,7 +187,7 @@ public class LandMoveFlowConverter
         {
             jibun = "산 " + jibun;
         }
-        return $"{lawdNm} {jibun}";
+        return $"{lawdNm}{jibun}";
         //return $"{jibun}";
     }
 
@@ -175,10 +196,30 @@ public class LandMoveFlowConverter
         // 각종 변수 초기화
         InitializeForNewGroup();
 
+        //_isJimokChg = vm.JimokChg;
+        //_isPortrait = vm.Portrait;
+        //_isOwnName = vm.IsOwnName;
+        //_isJimok = vm.IsJimok;
+        //_isArea = vm.IsArea;
+        //LandMoveFlowViewModel에서 가져온 값을 설정
+        SetExternalVariables(vm);
+
+        //for Saving _dfXml//
+        _currentGroupNo = rtnList.First().gSeq;
+
         // 데이터 분석 > XML 구성 > XML 저장
-        AnalyzeData(rtnList, vm);
+        AnalyzeData(rtnList);
     }
     #endregion
+
+    private void SetExternalVariables(LandMoveFlowViewModel vm)
+    {
+        _isJimokChg = vm.JimokChg;
+        _isPortrait = vm.Portrait;
+        _isOwnName = vm.IsOwnName;
+        _isJimok = vm.IsJimok;
+        _isArea = vm.IsArea;
+    }
     
 
     #region 데이터 분석 및 처리
@@ -190,7 +231,7 @@ public class LandMoveFlowConverter
         _depthList.Clear();
         _itemList.Clear();
         _labelTuples.Clear();
-        
+
         _shapeCount = 0;
         _labelCount = 0;
         _depthCount = 0;
@@ -222,14 +263,19 @@ public class LandMoveFlowConverter
     }
 
     //DB레코드 분석 및 파싱(Jibun, Connector, Label)
-    private void AnalyzeData(List<LandMoveInfo> flowList, LandMoveFlowViewModel vm)
+    private void AnalyzeData(List<LandMoveInfo> flowList)
     {
         foreach (var row in flowList)
         {
-            row.bfJibun = GetJibun(row.bfPnu, 1);//'읍면' 명칭 포함
-            row.afJibun = GetJibun(row.afPnu, 1);//'읍면' 명칭 포함
+            //CEO.REQ//
+            //row.bfJibun = GetJibun(row.bfPnu, 1);//'읍면' 명칭 포함
+            //row.afJibun = GetJibun(row.afPnu, 1);//'읍면' 명칭 포함
             row.bfPnu = GetJibun(row.bfPnu, 2);//'읍면' 명칭 제거
-            row.afPnu = GetJibun(row.afPnu, 2);//'읍면' 명칭 제거
+            row.afPnu = GetJibun(row.afPnu, 2);//'읍면' 명칭 제거               
+
+            row.bfJimok = GetCodeValue(2, row.bfJimok);//지목 코드 => 명칭
+            row.afJimok = GetCodeValue(2, row.afJimok);//지목 코드 => 명칭
+            row.rsn = GetCodeValue(3, row.rsn);//이동종목 코드 => 명칭
         }
 
         var rsnOld = "";
@@ -248,67 +294,61 @@ public class LandMoveFlowConverter
 
         foreach (var row in flowList)
         {
-            //Vit.G//[TODO]코드테이블매칭작업필요    
-            if (row.rsn == "01")
-                row.rsn = "신규";
-            else if (row.rsn == "10")
-                row.rsn = "등록전환";
-            else if (row.rsn == "20")
-                row.rsn = "분할";
-            else if (row.rsn == "30")
-                row.rsn = "합병";
-            else if (row.rsn == "40")
-                row.rsn = "지목변경";
-            else if (row.rsn == "55")
-                row.rsn = "지적재조사완료";
-            else if (row.rsn == "55")
-                row.rsn = "등록사항정정";
-
-            rsnNew = row.rsn;
-            dtNew = row.regDt;
-            bfJimok = row.bfJimok;
-            bfArea = row.bfArea;
-            afJimok = row.afJimok;
-            afArea = row.afArea;
-            ownName = row.ownName;
+            rsnNew = row.rsn ?? "";
+            dtNew = row.regDt ?? "";
+            bfJimok = row.bfJimok ?? "";
+            bfArea = row?.bfArea ?? 0.0;
+            afJimok = row.afJimok ?? "";
+            afArea = row?.afArea ?? 0.0;
+            ownName = row.ownName ?? "";
 
             //Vit.G//목록 : 지번만 표시, Diagram : (동 or 리) + 지번
-            var bfPnu = row.bfJibun;//row.bfPnu;
-            var afPnu = row.afJibun;//row.afPnu;
+            var bfPnu = row.bfPnu; //row.bfJibun;//row.bfPnu;
+            var afPnu = row.afPnu; //row.afJibun;//row.afPnu;
             var label = $"{rsnNew} {dtNew}";
+            var bfAtt = "";//지목+면적 속성
+            var afAtt = "";//지목+면적 속성
+            var newAtt = "";//지목+면적 속성
 
-
-            //Vit.G//[TODO]
-            ////- [Label]에 표시
-            if (vm.IsOwnName)//[소유자명] 체크
-                label = $"{label}&#xD;&#xA;[{ownName}]";
-
-            //- [Jibun]에 표시
-            if (vm.IsJimok && vm.IsArea)//[지목] && [면적] 체크
-            {
-                bfPnu = $"{bfPnu}&#xD;&#xA;[{bfJimok}/{bfArea}]";
-                bfPnu = $"{bfPnu}&#xD;&#xA;[{afJimok}/{afArea}]";
-            }
-            else if (vm.IsJimok)//Vit.G//[지목] 체크
-            {
-                bfPnu = $"{bfPnu}&#xD;&#xA;[{bfJimok}]";
-                afPnu = $"{afPnu}&#xD;&#xA;[{afJimok}]";
-            }
-            else if (vm.IsArea)//Vit.G//[면적] 체크
-            {
-                bfPnu = $"{bfPnu}&#xD;&#xA;[{bfArea}]";
-                bfPnu = $"{bfPnu}&#xD;&#xA;[{afArea}]";
-            }
+            pnuNew = rsnNew == "분할" ? bfPnu : afPnu;
 
             //Vit.G//251015 : [지목변경] 표시 - 체크박스에 따른 필터링
-            if (!vm.JimokChg && rsnNew == "지목변경")
+            if (!_isJimokChg && rsnNew == "지목변경")
             {
                 //'지목변경' 데이터 필터링//
                 continue;    
             }
 
-            pnuNew = rsnNew == "분할" ? bfPnu : afPnu;
-            
+            //Vit.G//[TODO]----------------------------------------
+              //- [Jibun]에 표시
+            if (_isJimok && _isArea)//[지목] && [면적] 체크
+            {
+                bfAtt = $"[{bfJimok}/{bfArea}]";
+                if (_isOwnName)//[소유자명] 체크
+                    afAtt = $"[{afJimok}/{afArea}/{ownName}]";
+                else
+                    afAtt = $"[{afJimok}/{afArea}]";
+                
+            }
+            else if (_isJimok)//Vit.G//[지목] 체크
+            {
+                bfAtt = $"[{bfJimok}]";
+                if (_isOwnName)//[소유자명] 체크
+                    afAtt = $"[{afJimok}/{ownName}]";
+                else
+                    afAtt = $"[{afJimok}]";
+            }
+            else if (_isArea)//Vit.G//[면적] 체크
+            {
+                bfAtt = $"[{bfArea}]";
+                if (_isOwnName)//[소유자명] 체크
+                    afAtt = $"[{afArea}/{ownName}]";
+                else
+                    afAtt = $"[{afArea}]";
+            }
+            newAtt = rsnNew == "분할" ? bfAtt : afAtt;
+            //---------------------------------------------
+
             if (!rsnNew.Equals(rsnOld) || !dtNew.Equals(dtOld)) // New Depth
             {
                 subIdx = 0;
@@ -356,11 +396,11 @@ public class LandMoveFlowConverter
 
             var pnu = rsnNew.Equals("합병") ? bfPnu : afPnu;
 
-            if (pnu.Equals("음봉면 신휴리 419-33"))
-            {
-                int x = 0;
-            }
-            
+            //if (pnu.Equals("음봉면 신휴리 419-33"))
+            //{
+            //    int x = 0;
+            //}
+
             var pnuIdx = _pnuList.IndexOf(pnu);
             if (pnuIdx >= 0)
             {
@@ -375,7 +415,7 @@ public class LandMoveFlowConverter
                 if (!_dfXml.Columns.Contains(tmbCol)) _dfXml.Columns.Add(tmbCol, typeof(string));
                 if (!_dfXml.Columns.Contains(pnuCol)) _dfXml.Columns.Add(pnuCol, typeof(string));
                 if (!_dfXml.Columns.Contains(itmCol)) _dfXml.Columns.Add(itmCol, typeof(string));
-                
+
                 //DataRow existingRow = _dfXml.AsEnumerable().FirstOrDefault(r => r.Field<string>("PNU") == pnu);
                 // _dfXml의 인덱스 pnuIdx 값
 
@@ -395,20 +435,28 @@ public class LandMoveFlowConverter
                 if (rsnNew.Equals("합병"))
                 {
                     existingRow["PNU"] = pnu;
-                    existingRow[dep0Itm] = "0";
+                    //Vit.G//
+                    //existingRow[dep0Itm] = "0";
+                    if ( !isExist )
+                        existingRow[dep0Itm] = bfAtt != "" ? bfAtt : "0";
+                    else
+                        existingRow[dep0Itm] = afAtt != "" ? afAtt : "0";
                     existingRow[subCol] = _labelCount.ToString();
                     existingRow[tmbCol] = (pnu == afPnu) ? "thumb" : "";
-                    existingRow[pnuCol] = (pnu == afPnu) ? afPnu : "";
-                    existingRow[itmCol] = (subIdx == 0) ? "0" : "";
+                    existingRow[pnuCol] = (pnu == afPnu) ? afPnu : "";                    
+                    existingRow[itmCol] = (subIdx == 0) ? (afAtt != "" ? afAtt : "0") : "";
                 }
                 else
                 {
                     existingRow["PNU"] = pnu;
-                    existingRow[dep0Itm] = "0";
+                    //Vit.G//
+                    //existingRow[dep0Itm] = "0";
+                    if( !isExist )
+                        existingRow[dep0Itm] = afAtt != "" ? afAtt : "0";                    
                     existingRow[subCol] = _labelCount.ToString();
                     existingRow[tmbCol] = (pnu == bfPnu) ? "thumb" : "";
                     existingRow[pnuCol] = afPnu;
-                    existingRow[itmCol] = "0";
+                    existingRow[itmCol] = afAtt != "" ? afAtt : "0";
                 }
 
                 if (isExist == false)
@@ -416,7 +464,11 @@ public class LandMoveFlowConverter
                     _dfXml.Rows.Add(existingRow);
                 }
             }
-        }
+        }//foreach (var row in flowList)
+
+        //XML 내용 => CSV 저장하기
+        String pathcsv = Path.Combine(_tempDir, $"DF_XML_{_currentGroupNo}.csv");
+        SaveDfXmlToCsv(_dfXml, pathcsv);
 
         //XML 구성하기
         MakeXmlData();
@@ -458,7 +510,7 @@ public class LandMoveFlowConverter
         bool focus = false;//Vit.G//251014 : 조회 필지 => BackgroundId 속성 추가
 
         //Vit.G//251014 : 조회 필지코드 => 지번명으로 변경
-        _pnu = GetJibun(_pnu, 1);
+        _pnu = GetJibun(_pnu, 2);//CEO.REQ//_pnu = GetJibun(_pnu, 1);
 
         //
         try
@@ -483,6 +535,8 @@ public class LandMoveFlowConverter
                 {
                     var tmbColName = $"DEP{depIdx + 1}_TMB";
                     var pnuColName = $"DEP{depIdx + 1}_PNU";
+                    var itmColName = $"DEP{depIdx + 1}_ITM";
+                    var attColName = "DEP0_ITM";
 
                     var filtered = _dfXml.AsEnumerable()
                         .Select((r, i) => new { Row = r, Index = i }) 
@@ -499,9 +553,15 @@ public class LandMoveFlowConverter
                         int rowIdx = item.Index;
                         
                         var pnu = row.Field<string>(pnuColName);
+                        var bfAtt = row.Field<string>(attColName);
+                        if (bfAtt == "0") bfAtt = ""; 
+                        var afAtt = "";
+                        bool bNewPnu = false;
+
                         if (string.IsNullOrEmpty(pnu))
                         {
                             pnu = row.Field<string>("PNU");
+                            bNewPnu = true;
                         }
 
                         //Vit.G//251014 : 조회 필지 => BackgroundId 속성 추가
@@ -510,17 +570,36 @@ public class LandMoveFlowConverter
                         else
                             focus = false;
 
-
                         //var isThumb = row.Field<string>(tmbColName) == "thumb";
                         var thumb = row.Field<string>(tmbColName);
+                        afAtt = row.Field<string>(itmColName);//Vit.G//
+                        if (afAtt == "0") afAtt = "";
 
                         bfDepth = depIdx;
+
+
+                        //if (pnu == "258-27")
+                        //{
+                        //    int a = 1;
+                        //}
+
+
+
 
                         if (thumb.Equals("thumb") || rsn.Equals("합병"))
                         {
                             var lastRow = _dfPnu
                                 .AsEnumerable()
-                                .LastOrDefault(r => r.Field<string>("PNU") == pnu);
+                                //.LastOrDefault(r => r.Field<string>("PNU") == pnu)
+                                .LastOrDefault(r =>
+                                {
+                                    var cell = r.Field<string>("PNU");
+                                    if (string.IsNullOrEmpty(cell)) return false;
+                                    
+                                    //개행 문자 전까지만 사용
+                                    var trimmed = cell.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)[0];
+                                    return trimmed.Equals(pnu, StringComparison.OrdinalIgnoreCase);
+                                });
                             
                             // lastRow의 갯수 확인
                             if (lastRow != null)
@@ -530,24 +609,35 @@ public class LandMoveFlowConverter
                             }
                             else
                             {
-                                begin = MakeXmlJibun(pnu, depIdx + 1, false, rowIdx, focus);//Vit.G//[add]focus
+                                if( (bNewPnu) || (thumb.Equals("thumb") && rsn.Equals("합병")) )
+                                    begin = MakeXmlJibun(bfAtt != "" ? pnu + "\r\n" + bfAtt : pnu, depIdx + 1, false, rowIdx, focus);//Vit.G//[add]focus
+                                else
+                                    begin = MakeXmlJibun(afAtt != "" ? pnu + "\r\n" + afAtt : pnu, depIdx + 1, false, rowIdx, focus);//Vit.G//[add]focus
                             }
 
                             if (thumb.Equals("thumb"))
                             {
-                                end = MakeXmlJibun(pnu, depIdx + 1, true, rowIdx, focus);//Vit.G//[add]focus
+                                end = MakeXmlJibun(afAtt != "" ? pnu + "\r\n" + afAtt : pnu, depIdx + 1, true, rowIdx, focus);//Vit.G//[add]focus
                                 MakeXmlConnector(bfDepth, depIdx + 1, begin - 1, end - 1, rowIdx, rowIdx, focus);//Vit.G//[add]focus
                                 MakeXmlLabel(label, depIdx + 1, rowIdx, focus);//Vit.G//[add]focus
                                 thumbidx = rowIdx;
                             }
                             else
                             {
+                                if (focus && rowIdx != thumbidx)//조회필지 && 모번지 => 꺽은선에 배경색 속성 추가//
+                                    UpdateItem(begin - 1, "BackgroundId", "Accent5");
                                 MakeXmlConnector(bfDepth, depIdx + 1, begin - 1, end - 1, rowIdx, thumbidx, focus);//Vit.G//[add]focus
                             }
                         }
                         else
                         {
-                            end = MakeXmlJibun(pnu, depIdx + 1, true, rowIdx, focus);//Vit.G//[add]focus
+                            end = MakeXmlJibun(afAtt != "" ? pnu + "\r\n" + afAtt : pnu, depIdx + 1, true, rowIdx, focus);//Vit.G//[add]focus
+                            if (focus && rowIdx != thumbidx)//조회필지 && 모번지 => 꺽은선에 배경색 속성 추가//
+                            {
+                                UpdateLabelTuples(_labelTuples.Count - 1, true);
+                                UpdateItem(begin - 1, "BackgroundId", "Accent5");
+                            }
+                                
                             MakeXmlConnector(bfDepth, depIdx + 1, begin - 1, end - 1, thumbidx, rowIdx, focus);//Vit.G//[add]focus
                         }
                     }
@@ -568,8 +658,8 @@ public class LandMoveFlowConverter
                 new XAttribute("FontSize", FontSize.ToString()),
                 new XAttribute("ThemeStyleId", "Variant2"),
                 //Vit.G//251014 : 조회 필지 => ForegroundId, StrokeId 속성 추가
-                bfocus ? new XAttribute("ForegroundId", "Accent5") : null,
-                bfocus ? new XAttribute("StrokeId", "Accent5") : null,
+                bfocus ? new XAttribute("Foreground", "#FF008000") : new XAttribute("ForegroundId", "Black"),
+                bfocus ? new XAttribute("Stroke", "FF008000") : new XAttribute("StrokeId", "Black"),
                 new XAttribute("Content", label),
                 new XAttribute("ItemKind", "DiagramShape")
             );
@@ -581,11 +671,7 @@ public class LandMoveFlowConverter
         //Vit.G//XML 파일 저장
         //DiagramControl.SaveFile()
         //SaveDocument(), LoadDocument()
-        string exePath = Assembly.GetExecutingAssembly().Location;
-        string exeDir = Path.GetDirectoryName(exePath);
-        // 상대경로 폴더명 지정
-        string folderPath = Path.Combine(exeDir, "_tempdir");
-        String pathxml = folderPath + @"\" + _pnu + ".xml";
+        String pathxml = Path.Combine(_tempDir, $"XML_{_pnu}.xml");
         _xdoc.Save(pathxml);
         //여기에서 오류발생으로 주석처리//--- string str = rtnXml.ToString();
         //String pathpdf = @"D:\MyDiagram.pdf";
@@ -620,7 +706,7 @@ public class LandMoveFlowConverter
         var item = new XElement($"Item{_itemList.Count + 1}",
             new XAttribute("Position", $"{x},{y}"),
             new XAttribute("Size", $"{ShapeW},{ShapeH}"),
-            focus ? new XAttribute("BackgroundId", "Accent5") : null,//Vit.G//251014 : 조회 필지 => BackgroundId 속성 추가
+            new XAttribute("BackgroundId", focus ? "Accent5" : "White_4"),//Vit.G//251014 : 조회 필지 => BackgroundId 속성 추가
             new XAttribute("Content", pnu),
             new XAttribute("ItemKind", "DiagramShape")
         );
@@ -700,7 +786,7 @@ public class LandMoveFlowConverter
                 new XAttribute("Points", "(Empty)"),
                 new XAttribute("ItemKind", "DiagramConnector"),
                 new XAttribute("BeginPoint", $"{x},{y}"),
-                _isPortrait ? new XAttribute("EndPoint", $"{x},{y2}") : new XAttribute("EndPoint", $"{x2},{y}"),
+                new XAttribute("EndPoint", _isPortrait ? $"{x},{y2}" : $"{x2},{y}"),
                 new XAttribute("BeginItem", begin),
                 new XAttribute("EndItem", end)
             );
@@ -716,13 +802,13 @@ public class LandMoveFlowConverter
 
             item = new XElement($"Item{_itemList.Count + 1}",
                     focus ? new XAttribute("StrokeId", "Accent5") : null,//Vit.G//251014 : 조회 필지 => StrokeId 속성 추가
-                    _isPortrait ? new XAttribute("BeginItemPointIndex", "2") : new XAttribute("BeginItemPointIndex", "1"),
-                    _isPortrait ? new XAttribute("EndItemPointIndex", "0") : new XAttribute("EndItemPointIndex", "3"),
+                    new XAttribute("BeginItemPointIndex", _isPortrait ? "2" : "1"),
+                    new XAttribute("EndItemPointIndex", _isPortrait ? "0" : "3"),
                     new XAttribute("Points", points),
                     new XAttribute("ItemKind", "DiagramConnector"),
                     new XAttribute("BeginItem", begin),
                     new XAttribute("EndItem", end),
-                    _isPortrait ? new XAttribute("BeginPoint", $"{x},{y}") : new XAttribute("BeginPoint", $"{x},{y2}"),
+                    new XAttribute("BeginPoint", _isPortrait ? $"{x},{y}" : $"{x},{y2}"),
                     new XAttribute("EndPoint", $"{x2},{y2}"),
                     new XAttribute("KeepMiddlePoints", "true")
                 );
@@ -732,10 +818,53 @@ public class LandMoveFlowConverter
         _itemList.Add(item.ToString());
     }
 
+    // 기존 아이템의 속성 수정
+    private void UpdateItem(int index, string attrName, string newValue)
+    {
+        if (index < 0 || index >= _itemList.Count) return;
+
+        // 문자열을 XElement로 변환
+        XElement element = XElement.Parse(_itemList[index]);
+
+        // 속성값 변경 (기존 없으면 새로 추가)
+        element.SetAttributeValue(attrName, newValue);
+
+        // 다시 string으로 저장
+        _itemList[index] = element.ToString();
+    }
+    private void UpdateLabelTuples(int index, bool newValue)
+    {
+        if (index < 0 || index >= _labelTuples.Count) return;
+
+        // 문자열을 XElement로 변환
+        var item = _labelTuples[index];
+
+        // 다시 string으로 저장
+        _labelTuples[index] = (item.x, item.y, item.label, newValue);
+    }
+
+
+    //임시 파일 저장할 폴더 생성
+    private string SetTempDir()
+    {
+        string exePath = Assembly.GetExecutingAssembly().Location;
+        // 상대경로 폴더명 지정
+        return Path.Combine(Path.GetDirectoryName(exePath), "_tempdir");
+    }
+
+    private void SaveDfXmlToCsv(DataTable dt, string filePath)
+    {
+        var lines = dt.AsEnumerable()
+            .Select(row => string.Join(",", row.ItemArray.Select(field => field.ToString())));
+        var csv = string.Join(Environment.NewLine,
+            new[] { string.Join(",", dt.Columns.Cast<DataColumn>().Select(c => c.ColumnName)) }.Concat(lines));
+        File.WriteAllText(filePath, csv);
+    }
+
+
     #endregion
 
     #region 파일 저장
-
     /*private void EnsureDirectoryExists(string path)
     {
         var directory = Path.GetDirectoryName(path);
@@ -751,7 +880,7 @@ public class LandMoveFlowConverter
         EnsureDirectoryExists(filePath);
         File.WriteAllLines(filePath, _dbLines, Encoding.UTF8);
     }*/
-    
+
     /*private void SaveDfXmlToCsv()
     {
         var filePath = Path.Combine(ResultPath, DfPath, $"DF_XML_{_currentGroupNo}.csv");
@@ -781,24 +910,27 @@ public class LandMoveFlowConverter
         xdoc.Save(filePath);
         //PrintLog($"{filePath} 파일 저장 완료.");
     }*/
-    
+
     #endregion
-    
+
     // ===========================================================
     // 메인 실행 로직
     // ===========================================================
-    public XDocument Run(List<LandMoveInfo> flowList, LandMoveFlowViewModel vm, string pnu)//Vit.G//[add]pnu, vm
+    public XDocument Run(List<LandMoveInfo> flowList, LandMoveFlowViewModel vm, List<LandMoveInfoCategory> categoryList, string pnu)//Vit.G//[add]pnu, vm
     {
         try
         {
             // 시군구 코드 등 공통 코드 조회
             ReadCodeTables();
 
+            // 임시 파일 저장할 경로 설정//
+            _tempDir = SetTempDir();
+
             //Vit.G//조회 필지코드(19자리)
             _pnu = pnu;
-            //_isJimokChgShow = isChecked;
-            //_isPortrait = portrait;//Vit.G//[TODO]
 
+            //정리일+종목=Category 종목코드=>명칭 변경
+            GetCodeValueCategory(categoryList);
 
             ProcessLandMoveFlow(flowList, vm);
             string str = _xdoc.ToString();
