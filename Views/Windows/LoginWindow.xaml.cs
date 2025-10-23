@@ -1,10 +1,11 @@
 ﻿//using LMFS.Utils;
 using CommunityToolkit.Mvvm.Messaging;
 using LMFS.Messages;
+using LMFS.Services;
 using LMFS.ViewModels.Pages;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using LMFS.Services;
 
 namespace LMFS.Views.Windows
 {
@@ -33,6 +34,8 @@ namespace LMFS.Views.Windows
 
         public async void Receive(LoginSuccessMessage message)
         {
+            await Task.Delay(100); //[WarningFixed] 비동기 대기//async 사용 시 추가
+
             if (message.User != null && message.User.name != null)
             {
                 // 응용프로그램 세션에 User 객체 저장
