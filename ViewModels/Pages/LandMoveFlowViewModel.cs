@@ -1,11 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DevExpress.Data.Browsing;
+using DevExpress.Mvvm.Native;
 using DevExpress.Xpf.Grid;
 using LMFS.Db;
 using LMFS.Engine;
 using LMFS.Models;
 using LMFS.Services;
+using LMFS.Views.Pages;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -29,29 +31,15 @@ namespace LMFS.ViewModels.Pages
         [ObservableProperty] private bool _isSan;
         [ObservableProperty] private string _bobn;
         [ObservableProperty] private string _bubn;
-        [ObservableProperty] private bool _jimokChg;
-        [ObservableProperty] private bool _portrait;
-        //[ObservableProperty] private bool _isOwnName;
-        //[ObservableProperty] private bool _isJimok;
-        //[ObservableProperty] private bool _isArea;
-        [ObservableProperty] private string _currentPnu;
+        [ObservableProperty] private bool _jimokChg;//vm.JimokChg
+        [ObservableProperty] private bool _portrait;//vm.Portrait
+        //[ObservableProperty] private string _currentPnu;
         [ObservableProperty] private List<LandMoveInfo> _gridDataSource;
+        [ObservableProperty] private List<LandMoveInfoCategory> _gridCategoryDataSource;
         //[ObservableProperty] private string _landMoveFlowData;
         [ObservableProperty] private MemoryStream _landMoveFlowData;
 
-        //private bool _isJimokChg;
-        //public bool IsJimokChg
-        //{
-        //    get => _isJimokChg;
-        //    set { _isJimokChg = value; OnPropertyChanged(); }
-        //}
-
-        //private bool _isPortrait;
-        //public bool IsPortrait
-        //{
-        //    get => _isPortrait;
-        //    set { _isPortrait = value; OnPropertyChanged(); }
-        //}
+        private string _currentPnu;
 
         private bool _isOwnName;
         public bool IsOwnName
@@ -74,11 +62,11 @@ namespace LMFS.ViewModels.Pages
             set { _isArea = value; OnPropertyChanged(); }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(string propName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
-        }
+        //public event PropertyChangedEventHandler PropertyChanged;
+        //protected void OnPropertyChanged(string propName)
+        //{
+        //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
+        //}
 
 
         [RelayCommand]
@@ -109,17 +97,47 @@ namespace LMFS.ViewModels.Pages
             System.Diagnostics.Debug.WriteLine($"행이 더블클릭됨: {item}");
         }
 
-        
-
-        partial void OnSelectedUmdChanged(SidoCode? data)
+        [RelayCommand]
+        private void OnRowDoubleClick(MouseButtonEventArgs arg)
         {
-            RiList = GenerateRiList(data!.umdCd);
+            var selectedItem = (arg.Source as GridControl)?.CurrentItem;
+            var item = selectedItem as LandMoveInfo;
+
+            LandMoveDetailPage page = new LandMoveDetailPage();
+            Window window = new Window
+            {
+                Content = page,
+                Title = "Land Move Detail",
+                Width = 800,
+                Height = 320
+            };
+            window.Show(); 
+            //window = new LandMoveDetailPage();
+            //{
+            //    DataContext = new LandMoveDetailViewModel
+            //    {
+            //        RegDate = selectedItem.regDt,
+            //        Reason = selectedItem.rsn,
+            //        Description = $"{RegDate} {Reason}을 선택했습니다."
+
+            //    }
+            //};
+            //System.Diagnostics.Debug.WriteLine($"행이 더블클릭됨: {item}");
+        }
+
+
+
+        partial void OnSelectedUmdChanged(SidoCode value)
+        {
+            RiList = GenerateRiList(value!.umdCd);
             SelectedRi = RiList.FirstOrDefault()!;
         }
 
         public LandMoveFlowViewModel()
         {
             GetSidoCodeList();
+            GetJimokCodeDictionary();
+            GetReasonCodeDictionary();
         }
         
         private void GetSidoCodeList()
@@ -129,6 +147,7 @@ namespace LMFS.ViewModels.Pages
             UmdList = GenerateUmdList();
             SelectedUmd = UmdList.FirstOrDefault()!;
         }
+
 
         private List<SidoCode> GenerateUmdList()
         {
@@ -148,6 +167,11 @@ namespace LMFS.ViewModels.Pages
 
         private List<SidoCode> GenerateRiList(string umdCd)
         {
+            //Vit.G//
+            Bobn = string.Empty;
+            Bubn = string.Empty;
+
+
             List<SidoCode> list = null;
             try
             {
@@ -161,6 +185,20 @@ namespace LMFS.ViewModels.Pages
             }
             return list;
         }
+
+        private void GetJimokCodeDictionary()
+        {
+            Dictionary<string, string> dict = DBService.GetJimokDictionary("CD01");
+            GlobalDataManager.Instance.JimokCode = dict;
+        }
+
+
+        private void GetReasonCodeDictionary()
+        {
+            Dictionary<string, string> dict = DBService.GetReasonDictionary("CD02");
+            GlobalDataManager.Instance.ReasonCode = dict;
+        }
+
 
         partial void OnJimokChgChanged(bool value)
         {
@@ -199,7 +237,7 @@ namespace LMFS.ViewModels.Pages
             }
             catch (Exception ex)
             {
-                _logger.Debug(pnu);
+                _logger.Debug($"{pnu} : {ex.Message}");
             }
             return pnu;
         }
@@ -208,6 +246,7 @@ namespace LMFS.ViewModels.Pages
         {
             _currentPnu = BuildPnu(); // 기존 방식
             GridDataSource = DBService.ListLandMoveHistory(_currentPnu);
+            GridCategoryDataSource = DBService.ListLandMoveCategory(_currentPnu);
         }
 
         private void UpdateFlowXml()
@@ -215,26 +254,34 @@ namespace LMFS.ViewModels.Pages
             var converter = new LandMoveFlowConverter();
 
             var filteredList = GridDataSource;
+            var categoryList = GridCategoryDataSource;
             if (!JimokChg)
+            {
                 filteredList = GridDataSource.Where(item => item.rsn != "40").ToList();
+                GridDataSource = filteredList;
+                categoryList = GridCategoryDataSource.Where(item => item.rsn != "40").ToList();
+                GridCategoryDataSource = categoryList;
+            }
 
             ////Vit.G//TEST// 3th argu //
-            XDocument rtnXml = converter.Run(filteredList, this, _currentPnu);
+            if (filteredList.Count > 0)
+            {                
+                XDocument rtnXml = converter.Run(filteredList, this, categoryList, _currentPnu);
 
-            // ... 이하 xml 스트림 처리
-            string str = rtnXml.ToString();
+                // ... 이하 xml 스트림 처리
+                string str = rtnXml.ToString();
 
-
-            byte[] xmlBytes;
-            using (var ms = new MemoryStream())
-            {
-                rtnXml.Save(ms);
-                xmlBytes = ms.ToArray();
-            }
-            using (var stream = new MemoryStream(xmlBytes))
-            {
-                LandMoveFlowData = stream;
-            }
+                byte[] xmlBytes;
+                using (var ms = new MemoryStream())
+                {
+                    rtnXml.Save(ms);
+                    xmlBytes = ms.ToArray();
+                }
+                using (var stream = new MemoryStream(xmlBytes))
+                {
+                    LandMoveFlowData = stream;
+                }
+            }//if (filteredList.Count > 0)
         }
 
     }

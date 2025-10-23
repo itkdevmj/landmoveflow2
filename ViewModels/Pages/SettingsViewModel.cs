@@ -53,7 +53,7 @@ namespace LMFS.ViewModels.Pages
             }
             catch (Exception ex)
             {
-                _messageBoxService.ShowMessage("저장에 문제가 발생했습니다.", "DB정보 저장");
+                _messageBoxService.ShowMessage($"저장에 문제가 발생했습니다.\n\n{ex.Message}", "DB정보 저장");
             }
         }
 
