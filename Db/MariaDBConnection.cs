@@ -9,7 +9,7 @@ namespace LMFS.Db
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
-        public static MySqlConnection? connectDB()
+        public static MySqlConnection connectDB()
         {
             try
             {
