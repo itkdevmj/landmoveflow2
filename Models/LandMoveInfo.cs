@@ -20,4 +20,10 @@
         public string afJibun { get; set; }
 
     }
+
+    public class LandMoveInfoCategory
+    {        
+        public string rsn { get; set; }    
+        public string regDt { get; set; }        
+    }
 }
