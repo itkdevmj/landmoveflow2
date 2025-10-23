@@ -108,12 +108,91 @@
                 </dxlc:LayoutGroup>
                 <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="1" CornerRadius="5" Height="30">
                     <dxlc:LayoutGroup Orientation="Horizontal" HorizontalAlignment="Right" Height="25" Padding="4">
-                        <CheckBox Content="[지목변경] 표시" Name="IsJimokChg" IsChecked="{Binding JimokChgShow, Mode=TwoWay}" Height="25" Width="300" />
+                        <CheckBox Content="[지목변경] 표시" IsChecked="{Binding JimokChg, Mode=TwoWay}" Height="25" Width="300">
+                        </CheckBox>
                     </dxlc:LayoutGroup>
                 </Border>
             </StackPanel>
 
-            <dxg:GridControl Grid.Row="2" Name="FlowDataGrid" AutoExpandAllGroups="True" AllowColumnMRUFilterList="False"
+<!--            <dxg:GridControl Grid.Row="2" Name="FlowDataGrid" AutoExpandAllGroups="True" AllowColumnMRUFilterList="False"
+                                ItemsSource="{Binding GridDataSource}" SelectionMode="Row"
+                                dx:ScrollBarExtensions.ScrollBarMode="TouchOverlap" ShowBorder="True"
+                                Margin="4,0,4,4" Cursor="Hand">
+
+                <dxmvvm:Interaction.Behaviors>
+                    <dxmvvm:EventToCommand EventName="MouseDoubleClick" 
+                                            Command="{Binding FlowDataDoubleClickCommand}"
+                                            PassEventArgsToCommand="True"
+                                            />
+                </dxmvvm:Interaction.Behaviors>
+
+                <dxg:GridControl.View>
+                    <dxg:TableView ShowIndicator="False" ShowGroupPanel="False" NavigationStyle="Row" AutoWidth="False">
+                    </dxg:TableView>
+                </dxg:GridControl.View>
+                <dxg:GridControl.Columns>
+                    <dxg:GridColumn FieldName="bfPnu" Header="이동전" Width="1*" UnboundDataType="{x:Type sys:String}"
+                                    ReadOnly="True" HorizontalHeaderContentAlignment="Center" />
+                    <dxg:GridColumn FieldName="afPnu" Header="이동후" Width="1*" UnboundDataType="{x:Type sys:String}"
+                                    ReadOnly="True" HorizontalHeaderContentAlignment="Center" />
+                    <dxg:GridColumn FieldName="regDt" Header="정리일" Width="1*" HorizontalHeaderContentAlignment="Center"
+                                    ReadOnly="True">
+                        <dxg:GridColumn.EditSettings>
+                            <dxe:DateEditSettings DisplayFormat="yyyyMMdd" ShowPopupIfReadOnly="False" HorizontalContentAlignment="Center" />
+                        </dxg:GridColumn.EditSettings>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn FieldName="rsn" Header="종목" Width="1.2*" MinWidth="120" HorizontalHeaderContentAlignment="Center" 
+                                    ReadOnly="True">
+                        <dxg:GridColumn.EditSettings>
+                            <dxe:TextEditSettings HorizontalContentAlignment="Center" />
+                        </dxg:GridColumn.EditSettings>
+                    </dxg:GridColumn>
+                </dxg:GridControl.Columns>                
+            </dxg:GridControl>
+-->
+
+
+            <dxg:GridControl Grid.Row="2" Name="AnotherFlowDataGrid"
+                             AutoExpandAllGroups="True" AllowColumnMRUFilterList="False"
+                                ItemsSource="{Binding GridCategoryDataSource}"
+                                SelectedItem="{Binding SelectedFlowData}" SelectionMode="Row"
+                                dx:ScrollBarExtensions.ScrollBarMode="TouchOverlap" ShowBorder="True"
+                                Margin="4,0,4,4" Cursor="Hand">
+
+                <dxmvvm:Interaction.Behaviors>
+                    <dxmvvm:EventToCommand EventName="MouseDoubleClick" 
+                                            Command="{Binding RowDoubleClickCommand}"
+                                            CommandParameter="{Binding Path=SelectedItem, ElementName=AnotherFlowDataGrid}"
+                                            PassEventArgsToCommand="True"
+                                            />
+                </dxmvvm:Interaction.Behaviors>
+
+                <dxg:GridControl.View>
+                    <dxg:TableView ShowIndicator="False" ShowGroupPanel="False" NavigationStyle="Row" AutoWidth="False">
+                    </dxg:TableView>
+                </dxg:GridControl.View>
+                <dxg:GridControl.Columns>
+                    <dxg:GridColumn FieldName="regDt" Header="정리일" Width="1*" HorizontalHeaderContentAlignment="Center"
+                                    ReadOnly="True">
+                        <dxg:GridColumn.EditSettings>
+                            <dxe:DateEditSettings DisplayFormat="yyyyMMdd" ShowPopupIfReadOnly="False" HorizontalContentAlignment="Center" />
+                        </dxg:GridColumn.EditSettings>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn FieldName="rsn" Header="종목" Width="1.2*" MinWidth="120" HorizontalHeaderContentAlignment="Center" 
+                                    ReadOnly="True">
+                        <dxg:GridColumn.EditSettings>
+                            <dxe:TextEditSettings HorizontalContentAlignment="Center" />
+                        </dxg:GridColumn.EditSettings>
+                    </dxg:GridColumn>
+                </dxg:GridControl.Columns>
+                <!--<dxg:GridControl.TotalSummary>
+                    <dxg:GridSummaryItem SummaryType="Count" Alignment="Right" />
+                    <dxg:GridSummaryItem FieldName="FullName" SummaryType="Count" />
+                </dxg:GridControl.TotalSummary>-->
+            </dxg:GridControl>
+             <!--- Hide : Unvisible(Collapsed) => Real DB Record -->
+            <dxg:GridControl Grid.Row="2" Name="FlowDataGrid" Visibility="Collapsed" 
+                             AutoExpandAllGroups="True" AllowColumnMRUFilterList="False"
                                 ItemsSource="{Binding GridDataSource}" SelectionMode="Row"
                                 dx:ScrollBarExtensions.ScrollBarMode="TouchOverlap" ShowBorder="True"
                                 Margin="4,0,4,4" Cursor="Hand">
@@ -180,13 +259,14 @@
                             <ColumnDefinition Width="70" />
                             <ColumnDefinition Width="70" />
                         </Grid.ColumnDefinitions>
-                        <CheckBox Grid.Column="0" Name="IsName" Content="소유자명" Height="25" Margin="10 0 0 0" />
-                        <CheckBox Grid.Column="1" Name="IsJimok" Content="면적" Height="25" Margin="0" />
-                        <CheckBox Grid.Column="2" Name="IsArea" Content="지목" Height="25" Margin="0" />
+                        <!--Mode=TwoWay 라는 건 화면에서 변경해도 ViewModel로 반영되고, ViewModel에서 변경해도 화면에 반영된다는 뜻-->
+                        <CheckBox Grid.Column="0" IsChecked="{Binding IsOwnName, Mode=TwoWay}" Content="소유자명" Height="25" Margin="10 0 0 0" />
+                        <CheckBox Grid.Column="1" IsChecked="{Binding IsJimok, Mode=TwoWay}" Content="지목" Height="25" Margin="0" />
+                        <CheckBox Grid.Column="2" IsChecked="{Binding IsArea, Mode=TwoWay}" Content="면적" Height="25" Margin="0" />
                     </Grid>
                 </Border>
                 <!-- Spacer: Grid.Column="3"는 나머지 영역을 차지해서 오른쪽으로 밀어줍니다 -->
-                <CheckBox Grid.Column="4" Name="IsPortrait" IsChecked="{Binding Portrait, Mode=TwoWay}" Content="세로형 그리기" Foreground="#6C7A89" FontWeight="Bold" Height="25" Margin="10 10 5 0" />
+                <CheckBox Grid.Column="4" IsChecked="{Binding Portrait, Mode=TwoWay}" Content="세로형 그리기" Foreground="#6C7A89" FontWeight="Bold" Height="25" Margin="10 10 5 0" />
             </Grid>
             <!--<StackPanel Grid.Col="0" Margin="5,5,5,5">
                     <dxlc:LayoutGroup Orientation="Horizontal" Margin="10 5 0 0" Width="120"
