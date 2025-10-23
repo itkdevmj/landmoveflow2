@@ -14,8 +14,10 @@ namespace LMFS.Services
     {
         public static readonly Logger logger = LogManager.GetCurrentClassLogger();
         
-        public async Task<(bool, VersionInfo?)> CheckForUpdatesAsync()
+        public async Task<(bool, VersionInfo)> CheckForUpdatesAsync()
         {
+            await Task.Delay(100); //[WarningFixed] 비동기 대기//async 사용 시 추가
+
             try
             {
                 var currentVersion = Assembly.GetExecutingAssembly().GetName().Version;
