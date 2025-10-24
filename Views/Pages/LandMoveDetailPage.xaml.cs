@@ -1,11 +1,13 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using DevExpress.Xpf.Core.Native;
+using LMFS.Messages;
+using LMFS.Models;
+using LMFS.ViewModels.Pages;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows;
-using DevExpress.Xpf.Core.Native;
-using LMFS.ViewModels.Pages;
 using System.Windows.Controls;
-using CommunityToolkit.Mvvm.Messaging;
-using LMFS.Messages;
 
 namespace LMFS.Views.Pages
 {
@@ -14,10 +16,14 @@ namespace LMFS.Views.Pages
     /// </summary>
     public partial class LandMoveDetailPage : Page
     {
-        public LandMoveDetailPage()
+        //regDt : 정리일
+        //rsn : 이동종목
+        public LandMoveDetailPage(List<LandMoveInfo> sourceList, string regDt, string rsn)
         {
             InitializeComponent();
-            DataContext = new LandMoveDetailViewModel();            
+            var vm = new LandMoveDetailViewModel();
+            this.DataContext = vm;
+            vm.FilterDetail(sourceList, regDt, rsn);
         }
 
         private void UpdateDataGridMaxHeight()
@@ -29,7 +35,7 @@ namespace LMFS.Views.Pages
 
             if (calculatedMaxHeight > 0)
             {
-                FlowDataGrid.MaxHeight = calculatedMaxHeight;
+                DetailGrid.MaxHeight = calculatedMaxHeight;
             }
         }
 

@@ -98,31 +98,23 @@ namespace LMFS.ViewModels.Pages
         }
 
         [RelayCommand]
-        private void OnRowDoubleClick(MouseButtonEventArgs arg)
+        //CommandParameter로 선택된 행의 데이터 받기
+        private void OnRowClick(LandMoveInfoCategory cate)
         {
-            var selectedItem = (arg.Source as GridControl)?.CurrentItem;
-            var item = selectedItem as LandMoveInfo;
-
-            LandMoveDetailPage page = new LandMoveDetailPage();
-            Window window = new Window
+            if (cate != null)
             {
-                Content = page,
-                Title = "Land Move Detail",
-                Width = 800,
-                Height = 320
-            };
-            window.Show(); 
-            //window = new LandMoveDetailPage();
-            //{
-            //    DataContext = new LandMoveDetailViewModel
-            //    {
-            //        RegDate = selectedItem.regDt,
-            //        Reason = selectedItem.rsn,
-            //        Description = $"{RegDate} {Reason}을 선택했습니다."
-
-            //    }
-            //};
-            //System.Diagnostics.Debug.WriteLine($"행이 더블클릭됨: {item}");
+                var page = new LandMoveDetailPage(GridDataSource.ToList(), cate.regDt, cate.rsn);//생성자에 값 전달
+                Window window = new Window
+                {
+                    Content = page,
+                    Title = "Land Move Detail",
+                    Width = 800,
+                    Height = 320,
+                    Owner = Application.Current.MainWindow
+                };
+                window.WindowStartupLocation = WindowStartupLocation.CenterScreen;//부모화면의 가운데 표시
+                window.ShowDialog();//부모화면 제어 불가
+            }
         }
 
 

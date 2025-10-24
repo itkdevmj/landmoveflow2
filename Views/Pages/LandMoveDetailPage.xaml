@@ -20,28 +20,37 @@
 
     <DockPanel>
 
-        <Grid DockPanel.Dock="Left" Width="800">
+        <Grid DockPanel.Dock="Left" Width="780">
 
             <Grid.RowDefinitions>
-                <RowDefinition Height="50" />
+                <RowDefinition Height="45" />
                 <RowDefinition />
             </Grid.RowDefinitions>
-            <StackPanel Grid.Row="0" Margin="5,5,5,5">
-                <dxlc:LayoutGroup Orientation="Horizontal" HorizontalAlignment="Right" Height="30"
-                                  Margin="5">
-                    <Button Content="변경사항 저장" Width="120"/>
-                </dxlc:LayoutGroup>
-            </StackPanel>
-            
-            <dxg:GridControl Grid.Row="2" Name="FlowDataGrid" 
+            <StackPanel Margin="5,0,5,0">
+                <Border Grid.Row="0" Grid.Column="0" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="1" CornerRadius="5" Height="40">
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Label Grid.Column="0" Content="{Binding RegDt}" VerticalAlignment="Center" />
+                        <Label Grid.Column="1" Content="{Binding Rsn}" VerticalAlignment="Center" />
+                        <Button Grid.Column="2" Content="변경사항 저장" Width="120" Height="25"/>
+                    </Grid>
+                    
+                </Border>
+            </StackPanel>            
+            <dxg:GridControl Grid.Row="1" Name="DetailGrid" 
                              AutoExpandAllGroups="True" AllowColumnMRUFilterList="False"
-                                ItemsSource="{Binding GridDataSource}" SelectionMode="Row"
+                                ItemsSource="{Binding GridDetailDataSource}" SelectionMode="Row"
                                 dx:ScrollBarExtensions.ScrollBarMode="TouchOverlap" ShowBorder="True"
                                 Margin="4,0,4,4" Cursor="Hand">
 
                 <dxmvvm:Interaction.Behaviors>
                     <dxmvvm:EventToCommand EventName="MouseDoubleClick" 
-                                            Command="{Binding FlowDataDoubleClickCommand}"
+                                            Command="{Binding RowDoubleClickCommand}"
                                             PassEventArgsToCommand="True"
                                             />
                 </dxmvvm:Interaction.Behaviors>
@@ -51,19 +60,27 @@
                     </dxg:TableView>
                 </dxg:GridControl.View>
                 <dxg:GridControl.Columns>
-                    <dxg:GridColumn FieldName="bfPnu" Header="이동전" Width="1*" UnboundDataType="{x:Type sys:String}"
+                    <dxg:GridColumn FieldName="bfPnu" Header="이동전" Width="0.8*" UnboundDataType="{x:Type sys:String}"
                                     ReadOnly="True" HorizontalHeaderContentAlignment="Center" />
-                    <dxg:GridColumn FieldName="afPnu" Header="이동후" Width="1*" UnboundDataType="{x:Type sys:String}"
+                    <dxg:GridColumn FieldName="afPnu" Header="이동후" Width="0.8*" UnboundDataType="{x:Type sys:String}"
                                     ReadOnly="True" HorizontalHeaderContentAlignment="Center" />
-                    <dxg:GridColumn FieldName="bfJimok" Header="이동전_지목" Width="1*" UnboundDataType="{x:Type sys:String}"
+                    <dxg:GridColumn FieldName="bfJimok" Header="이동전_지목" Width="0.7*" UnboundDataType="{x:Type sys:String}"
+                                    ReadOnly="True" HorizontalHeaderContentAlignment="Center">
+                        <dxg:GridColumn.EditSettings>
+                            <dxe:DateEditSettings HorizontalContentAlignment="Center" />
+                        </dxg:GridColumn.EditSettings>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn FieldName="bfArea" Header="이동전_면적" Width="0.8*" UnboundDataType="{x:Type sys:String}"
                                     ReadOnly="True" HorizontalHeaderContentAlignment="Center" />
-                    <dxg:GridColumn FieldName="bfArea" Header="이동전_면적" Width="1*" UnboundDataType="{x:Type sys:String}"
+                    <dxg:GridColumn FieldName="afJimok" Header="이동후_지목" Width="0.7*" UnboundDataType="{x:Type sys:String}"
+                                    ReadOnly="True" HorizontalHeaderContentAlignment="Center">
+                        <dxg:GridColumn.EditSettings>
+                            <dxe:DateEditSettings HorizontalContentAlignment="Center" />
+                        </dxg:GridColumn.EditSettings>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn FieldName="afArea" Header="이동후_면적" Width="0.8*" UnboundDataType="{x:Type sys:String}"
                                     ReadOnly="True" HorizontalHeaderContentAlignment="Center" />
-                    <dxg:GridColumn FieldName="afJimok" Header="이동후_지목" Width="1*" UnboundDataType="{x:Type sys:String}"
-                                    ReadOnly="True" HorizontalHeaderContentAlignment="Center" />
-                    <dxg:GridColumn FieldName="afArea" Header="이동후_면적" Width="1*" UnboundDataType="{x:Type sys:String}"
-                                    ReadOnly="True" HorizontalHeaderContentAlignment="Center" />
-                    <dxg:GridColumn FieldName="OwnName" Header="소유자명" Width="1*" UnboundDataType="{x:Type sys:String}"
+                    <dxg:GridColumn FieldName="ownName" Header="소유자명" Width="2*" UnboundDataType="{x:Type sys:String}"
                                     ReadOnly="True" HorizontalHeaderContentAlignment="Center" />
                 </dxg:GridControl.Columns>
             </dxg:GridControl>

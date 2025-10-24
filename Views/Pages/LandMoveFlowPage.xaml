@@ -160,8 +160,8 @@
                                 Margin="4,0,4,4" Cursor="Hand">
 
                 <dxmvvm:Interaction.Behaviors>
-                    <dxmvvm:EventToCommand EventName="MouseDoubleClick" 
-                                            Command="{Binding RowDoubleClickCommand}"
+                    <dxmvvm:EventToCommand EventName="MouseLeftButtonUp" 
+                                            Command="{Binding RowClickCommand}"
                                             CommandParameter="{Binding Path=SelectedItem, ElementName=AnotherFlowDataGrid}"
                                             PassEventArgsToCommand="True"
                                             />
