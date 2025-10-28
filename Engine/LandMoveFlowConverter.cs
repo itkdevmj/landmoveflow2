@@ -2,6 +2,7 @@
 using DevExpress.Diagram.Core.Native;
 using DevExpress.Xpf.CodeView;
 using DevExpress.Xpf.Diagram;
+using DevExpress.Xpo;
 using DevExpress.XtraPrinting.XamlExport;
 using DevExpress.XtraScheduler.Drawing;
 using DevExpress.XtraSpreadsheet.DocumentFormats.Xlsb;
@@ -9,6 +10,7 @@ using DevExpress.XtraSpreadsheet.Model;
 using LMFS.Models;
 using LMFS.Services;
 using LMFS.ViewModels.Pages;
+using LMFS.Views.Pages;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -28,7 +30,9 @@ namespace LMFS.Engine;
 public class LandMoveFlowConverter
 {
     public static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-    
+    private readonly LandMoveSettingViewModel _settings;//251027//
+
+
     // ===========================================================
     // 개요
     // 데이터 원본 : DBMS
@@ -126,11 +130,28 @@ public class LandMoveFlowConverter
     private XElement _root;
     private XElement _children;
     private XDocument _xdoc;
-    
+
     #endregion
 
-    
+
+    #region 생성자     ----------------------------------------
+
+    //Page를 직접 접근하지 않고, ViewModel을 통해서 접근하기//
+    public LandMoveFlowConverter(LandMoveSettingViewModel settings)
+    {
+        //기본 색상 (or 사용자 정의 색상) 가져오기
+        //page.SettingDefaultColor();
+        //_settings = page.ViewModel;
+        settings.SettingDefaultColor();
+        _settings = settings;
+        //필요한 데이터는 _settings에서 가져옴
+    }
+    #endregion 생성자  ----------------------------------------
+
+
+
     #region 데이터 조회 및 가공
+
 
     private void ReadCodeTables()
     {
@@ -501,7 +522,8 @@ public class LandMoveFlowConverter
 
     #region XML 생성
 
-    private void MakeXmlData()
+    //251027//private => public : Converter에서 참조//
+    public void MakeXmlData()
     {
         int begin = 0;
         int end = 0;
@@ -578,10 +600,10 @@ public class LandMoveFlowConverter
                         bfDepth = depIdx;
 
 
-                        //if (pnu == "258-27")
-                        //{
-                        //    int a = 1;
-                        //}
+                        if (pnu == "120")
+                        {
+                            int a = 1;
+                        }
 
 
 
@@ -650,6 +672,7 @@ public class LandMoveFlowConverter
         }
 
         // 마지막에 라벨 추가 (Bring to Front 효과)
+        var labelCol = _settings.LabelColors;
         foreach (var (x, y, label, bfocus) in _labelTuples)//Vit.G//[add]focus
         {
             var item = new XElement($"Item{_itemList.Count + 1}",
@@ -657,9 +680,12 @@ public class LandMoveFlowConverter
                 new XAttribute("Size", $"{LabelW},{LabelH}"),
                 new XAttribute("FontSize", FontSize.ToString()),
                 new XAttribute("ThemeStyleId", "Variant2"),
-                //Vit.G//251014 : 조회 필지 => ForegroundId, StrokeId 속성 추가
-                bfocus ? new XAttribute("Foreground", "#FF008000") : new XAttribute("ForegroundId", "Black"),
-                bfocus ? new XAttribute("Stroke", "FF008000") : new XAttribute("StrokeId", "Black"),
+                //251027//[색상설정 - 사용자정의]//Vit.G//251014 : 조회 필지 => ForegroundId, StrokeId 속성 추가
+                //bfocus ? new XAttribute("Foreground", "#FF008000") : new XAttribute("ForegroundId", "Black"),
+                //bfocus ? new XAttribute("Stroke", "FF008000") : new XAttribute("StrokeId", "Black"),
+                new XAttribute("Foreground", bfocus ? labelCol[1, 2] : labelCol[0, 2]),//글자색
+                new XAttribute("Background", bfocus ? labelCol[1, 0] : labelCol[0, 0]),//배경색
+                new XAttribute("Stroke", bfocus ? labelCol[1, 1] : labelCol[0, 1]),//테두리
                 new XAttribute("Content", label),
                 new XAttribute("ItemKind", "DiagramShape")
             );
@@ -686,6 +712,8 @@ public class LandMoveFlowConverter
     {
         int x = 0;
         int y = 0;
+        var jibunCol = _settings.JibunColors;
+
 
         if (_isPortrait)//[세로형 그리기]
         {
@@ -706,7 +734,11 @@ public class LandMoveFlowConverter
         var item = new XElement($"Item{_itemList.Count + 1}",
             new XAttribute("Position", $"{x},{y}"),
             new XAttribute("Size", $"{ShapeW},{ShapeH}"),
-            new XAttribute("BackgroundId", focus ? "Accent5" : "White_4"),//Vit.G//251014 : 조회 필지 => BackgroundId 속성 추가
+            //251027//[색상설정 - 사용자정의]
+            //new XAttribute("BackgroundId", focus ? "Accent5" : "White_4"),//Vit.G//251014 : 조회 필지 => BackgroundId 속성 추가
+            new XAttribute("Foreground", focus ? jibunCol[1,2] : jibunCol[0,2]),//글자색
+            new XAttribute("Background", focus ? jibunCol[1,0] : jibunCol[0,0]),//배경색
+            new XAttribute("StrokeId", focus ? jibunCol[1,1] : jibunCol[0,1]),//테두리
             new XAttribute("Content", pnu),
             new XAttribute("ItemKind", "DiagramShape")
         );
@@ -721,6 +753,7 @@ public class LandMoveFlowConverter
     {
         int x = 0;
         int y = 0;
+
 
         if (_isPortrait)//[세로형 그리기]
         {            
@@ -759,6 +792,7 @@ public class LandMoveFlowConverter
         int x2 = 0;
         int y2 = 0;
         int mid = 0;
+        var connCol = _settings.ConnectorColors;
 
         if (_isPortrait)//[세로형 그리기]
         {
@@ -782,7 +816,9 @@ public class LandMoveFlowConverter
         if (startIdx == endIdx) // 직선
         {
             item = new XElement($"Item{_itemList.Count + 1}",
-                focus ? new XAttribute("StrokeId", "Accent5") : null,//Vit.G//251014 : 조회 필지 => StrokeId 속성 추가
+                //251027//[색상설정 - 사용자정의]
+                //focus ? new XAttribute("StrokeId", "Accent5") : null,//Vit.G//251014 : 조회 필지 => StrokeId 속성 추가
+                new XAttribute("Stroke", focus ? connCol[1, 0] : connCol[0, 0]),//테두리
                 new XAttribute("Points", "(Empty)"),
                 new XAttribute("ItemKind", "DiagramConnector"),
                 new XAttribute("BeginPoint", $"{x},{y}"),
@@ -801,7 +837,9 @@ public class LandMoveFlowConverter
                 points = $"{x2 - mid},{y} {x2 - mid},{y2}";
 
             item = new XElement($"Item{_itemList.Count + 1}",
-                    focus ? new XAttribute("StrokeId", "Accent5") : null,//Vit.G//251014 : 조회 필지 => StrokeId 속성 추가
+                    //251027//[색상설정 - 사용자정의]
+                    //focus ? new XAttribute("StrokeId", "Accent5") : null,//Vit.G//251014 : 조회 필지 => StrokeId 속성 추가
+                    new XAttribute("Stroke", focus ? connCol[1, 0] : connCol[0, 0]),//테두리                    
                     new XAttribute("BeginItemPointIndex", _isPortrait ? "2" : "1"),
                     new XAttribute("EndItemPointIndex", _isPortrait ? "0" : "3"),
                     new XAttribute("Points", points),

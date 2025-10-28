@@ -98,7 +98,7 @@
 
                     <dxlc:LayoutGroup Orientation="Horizontal" HorizontalAlignment="Right" Height="28" Margin="4">
                         <Button Content="검색" Width="120" Command="{Binding SearchCommand}"/>
-                    </dxlc:LayoutGroup>
+                    </dxlc:LayoutGroup>                    
                 </StackPanel>
             </Border>
             <StackPanel Grid.Row="1" Margin="5,5,5,5">
@@ -242,17 +242,17 @@
                     <RowDefinition Height = "50"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="110" />
-                    <ColumnDefinition Width="80" />
-                    <ColumnDefinition Width="80" />
+                    <ColumnDefinition Width="260" />
                     <ColumnDefinition Width="*" /><!-- Space -->
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="120" />
                     <ColumnDefinition Width="120" />
                 </Grid.ColumnDefinitions>
-                <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="2" CornerRadius="5" Height="30" Margin="10 0 0 0">
+                <Border Grid.Row="0" Grid.Column="0" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="2" CornerRadius="5" Height="30" Margin="10 0 0 0">
                     <!-- 내부 Grid는 3컬럼을 하나로 감싸는 역할 -->
                     <Grid>                        
                         <Grid.RowDefinitions>
-                            <RowDefinition Height = "40"/>
+                            <RowDefinition Height = "Auto"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="100" />
@@ -260,13 +260,19 @@
                             <ColumnDefinition Width="70" />
                         </Grid.ColumnDefinitions>
                         <!--Mode=TwoWay 라는 건 화면에서 변경해도 ViewModel로 반영되고, ViewModel에서 변경해도 화면에 반영된다는 뜻-->
-                        <CheckBox Grid.Column="0" IsChecked="{Binding IsOwnName, Mode=TwoWay}" Content="소유자명" Height="25" Margin="10 0 0 0" />
-                        <CheckBox Grid.Column="1" IsChecked="{Binding IsJimok, Mode=TwoWay}" Content="지목" Height="25" Margin="0" />
-                        <CheckBox Grid.Column="2" IsChecked="{Binding IsArea, Mode=TwoWay}" Content="면적" Height="25" Margin="0" />
+                        <CheckBox Grid.Column="0" IsChecked="{Binding IsOwnName, Mode=TwoWay}" Content="소유자명" Height="25" Margin="10 5 0 0"/>
+                        <CheckBox Grid.Column="1" IsChecked="{Binding IsJimok, Mode=TwoWay}" Content="지목" Height="25" Margin="10 5 0 0" />
+                        <CheckBox Grid.Column="2" IsChecked="{Binding IsArea, Mode=TwoWay}" Content="면적" Height="25" Margin="10 5 0 0" />
                     </Grid>
                 </Border>
-                <!-- Spacer: Grid.Column="3"는 나머지 영역을 차지해서 오른쪽으로 밀어줍니다 -->
-                <CheckBox Grid.Column="4" IsChecked="{Binding Portrait, Mode=TwoWay}" Content="세로형 그리기" Foreground="#6C7A89" FontWeight="Bold" Height="25" Margin="10 10 5 0" />
+                <!-- Spacer: Grid.Column="1"는 나머지 영역을 차지해서 오른쪽으로 밀어줍니다 -->
+                <CheckBox Grid.Column="2" IsChecked="{Binding Portrait, Mode=TwoWay}" Content="세로형 그리기" Foreground="#6C7A89" FontWeight="Bold" Height="25" Margin="10 10 10 0" />
+                <dxe:TrackBarEdit Grid.Column="3" Minimum="0.1" Maximum="3" TickFrequency="0.5" Value="{Binding ElementName=LmfControl, Path=ZoomFactor, Mode=TwoWay}" 
+                                ValueToolTipPlacement="TopLeft" ValueToolTipStringFormat="N0" />
+                <!-- TrackBarEdit 옆 혹은 아래 추가 -->
+                <!--<TextBlock Grid.Column="4" Text="{Binding ElementName=LmfControl, Path=ZoomFactor, Converter={StaticResource ZoomPercentConverter}}" 
+                        VerticalAlignment="Center" Margin="8,0,0,0"/>-->
+                <Button Grid.Column="4" Content="색상 설정" Width="100" Height="25" Command="{Binding SettingColorCommand}" Margin="10" />
             </Grid>
             <!--<StackPanel Grid.Col="0" Margin="5,5,5,5">
                     <dxlc:LayoutGroup Orientation="Horizontal" Margin="10 5 0 0" Width="120"

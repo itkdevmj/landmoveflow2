@@ -36,9 +36,9 @@ namespace LMFS.ViewModels.Pages
             set { _rsn = value; OnPropertyChanged(nameof(Rsn)); }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(string name)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        //public event PropertyChangedEventHandler PropertyChanged;
+        //protected void OnPropertyChanged(string name)
+        //    => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
 
         public Action CloseAction { get; set; }

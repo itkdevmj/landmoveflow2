@@ -1,11 +1,12 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using DevExpress.Xpf.Core.Native;
+using DevExpress.Xpf.Editors;
+using LMFS.Messages;
+using LMFS.ViewModels.Pages;
+using System;
 using System.IO;
 using System.Windows;
-using DevExpress.Xpf.Core.Native;
-using LMFS.ViewModels.Pages;
 using System.Windows.Controls;
-using CommunityToolkit.Mvvm.Messaging;
-using LMFS.Messages;
 
 namespace LMFS.Views.Pages
 {
@@ -53,7 +54,8 @@ namespace LMFS.Views.Pages
             if (message.filePath != null)
             {
                 await using FileStream fs = new FileStream(message.filePath, FileMode.Open);
-                LmfControl.LoadDocument(fs);
+                LmfControl.ZoomFactor = 1.0;//251027// 
+                LmfControl.LoadDocument(fs);                
             }
         }
 

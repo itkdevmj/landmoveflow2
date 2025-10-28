@@ -107,7 +107,7 @@ namespace LMFS.ViewModels.Pages
                 Window window = new Window
                 {
                     Content = page,
-                    Title = "Land Move Detail",
+                    Title = "토지이동흐름도 일자/종목별 필지정보(상세)",
                     Width = 800,
                     Height = 320,
                     Owner = Application.Current.MainWindow
@@ -117,6 +117,36 @@ namespace LMFS.ViewModels.Pages
             }
         }
 
+        [RelayCommand]
+        //Diagram Color 설정화면으로 이동//
+        private void OnSettingColor()
+        {
+            var page = new LandMoveSettingPage();
+            Window window = new Window
+            {
+                Content = page,
+                Title = "토지이동흐름도 다이어그램 색상 설정",
+                Width = 340,
+                Height = 240,
+                Owner = Application.Current.MainWindow,
+
+                //[닫기]버튼만 남긴다.
+                WindowStyle = WindowStyle.SingleBorderWindow,
+                ResizeMode = ResizeMode.NoResize
+            };
+            window.WindowStartupLocation = WindowStartupLocation.Manual;//부모화면의 임의위치로 지정
+
+            // 부모(Window)의 실제 스크린 위치 좌표 구하기
+            var parent = Application.Current.MainWindow;
+            // 부모창의 스크린 좌표를 가져오기
+            var parentTopLeft = parent.PointToScreen(new System.Windows.Point(0, 0));
+
+            // 부모창의 우측 상단 위치에 새 창을 붙이기
+            window.Left = parentTopLeft.X + parent.ActualWidth - window.Width - 10;
+            window.Top = parentTopLeft.Y + 100;
+
+            window.ShowDialog();//부모화면 제어 불가
+        }
 
 
         partial void OnSelectedUmdChanged(SidoCode value)
@@ -242,8 +272,11 @@ namespace LMFS.ViewModels.Pages
         }
 
         private void UpdateFlowXml()
-        {         
-            var converter = new LandMoveFlowConverter();
+        {
+            //251027//[색상설정 - 사용자정의]
+            var viewModel = new LandMoveSettingViewModel();
+
+            var converter = new LandMoveFlowConverter(viewModel);
 
             var filteredList = GridDataSource;
             var categoryList = GridCategoryDataSource;
