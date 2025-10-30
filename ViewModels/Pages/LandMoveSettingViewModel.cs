@@ -107,7 +107,7 @@ namespace LMFS.ViewModels.Pages
 
         [RelayCommand]
         //Diagram Color 변경내용 저장//
-        private void SaveColor()
+        private void OnSaveColor()
         {
             //색상 저장 로직
             //...

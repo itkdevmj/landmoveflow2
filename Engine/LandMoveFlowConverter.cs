@@ -378,7 +378,10 @@ public class LandMoveFlowConverter
                 {
                     AddShapeToList(bfPnu);
                 }
-                AddShapeToList(afPnu);
+                //'합병'인 경우 모든 필지가 항상 맨처음 필지를 기준으로 합병되는 것이 아니다. (예, 4420041023.120-4)
+                //'합병'인 경우 depth변경 혹은 다른 subgrp 이 되는 경우에만 해당 pnu가 _pnuList에 존재하는지 확인 후 Add할 것//
+                if ( !rsnNew.Equals("합병") ) 
+                    AddShapeToList(afPnu);
                 AddLabelToList(label);
             }
             else // Same Depth
@@ -417,7 +420,7 @@ public class LandMoveFlowConverter
 
             var pnu = rsnNew.Equals("합병") ? bfPnu : afPnu;
 
-            //if (pnu.Equals("음봉면 신휴리 419-33"))
+            //if (pnu.Equals("120-4"))
             //{
             //    int x = 0;
             //}
@@ -600,10 +603,10 @@ public class LandMoveFlowConverter
                         bfDepth = depIdx;
 
 
-                        if (pnu == "120")
-                        {
-                            int a = 1;
-                        }
+                        //if (pnu == "120")
+                        //{
+                        //    int a = 1;
+                        //}
 
 
 

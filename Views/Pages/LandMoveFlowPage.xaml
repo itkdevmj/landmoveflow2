@@ -53,7 +53,7 @@
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="130" />
-                <RowDefinition Height="90" />
+                <RowDefinition Height="85" />
                 <RowDefinition />
             </Grid.RowDefinitions>
 
@@ -69,11 +69,12 @@
                                           ValueMember="riCd" DisplayMember="riCdNm"
                                           SelectedItem="{Binding SelectedRi}"/>
                     </dxlc:LayoutGroup>
-                    <dxlc:LayoutGroup Orientation="Horizontal" Height="28" Margin="2">
-                        <CheckBox Content="산" Name="IsSan" Width="78"/>
+                    <dxlc:LayoutGroup Orientation="Horizontal" Height="28" Margin="4">
+                        <Label Content="" Width="98" Margin="0" HorizontalContentAlignment="Center"/>
+                        <CheckBox Content="산" Name="IsSan" Width="40"/>
                         <!-- 본번 -->
                         <dxe:TextEdit EditValue="{Binding Bobn, UpdateSourceTrigger=PropertyChanged}"
-                                      MaxLength="4" MaskType="Numeric" Mask="0000" MaskUseAsDisplayFormat="True"
+                                      Width="60" MaxLength="4" MaskType="Numeric" Mask="0000" MaskUseAsDisplayFormat="True"
                                       GotFocus="TextEdit_GotFocus"
                                       HorizontalContentAlignment="Center"
                                       VerticalContentAlignment="Center"
@@ -82,10 +83,10 @@
                                 <KeyBinding Key="Enter" Command="{Binding EnterCommand}"></KeyBinding>
                             </dxe:TextEdit.InputBindings>
                         </dxe:TextEdit>
-                        <Label Content="-" Width="15" Margin="0"/>
+                        <Label Content="-" Width="15" Margin="0" HorizontalContentAlignment="Center"/>
                         <!-- 부번 -->
                         <dxe:TextEdit EditValue="{Binding Bubn, UpdateSourceTrigger=PropertyChanged}"
-                                      MaxLength="4" MaskType="Numeric" Mask="0000" MaskUseAsDisplayFormat="True"
+                                      Width="60" MaxLength="4" MaskType="Numeric" Mask="0000" MaskUseAsDisplayFormat="True"
                                       GotFocus="TextEdit_GotFocus"
                                       HorizontalContentAlignment="Center"
                                       VerticalContentAlignment="Center"
@@ -96,25 +97,25 @@
                         </dxe:TextEdit>
                     </dxlc:LayoutGroup>
 
-                    <dxlc:LayoutGroup Orientation="Horizontal" HorizontalAlignment="Right" Height="28" Margin="4">
-                        <Button Content="검색" Width="120" Command="{Binding SearchCommand}"/>
-                    </dxlc:LayoutGroup>                    
+                    <dxlc:LayoutGroup Orientation="Horizontal" HorizontalAlignment="Right" Height="28" Margin="4 4 4 2">
+                        <Button Content="검색" Width="142" Command="{Binding SearchCommand}" FontWeight="Bold" Background="#FF3786BC" Foreground="White" BorderBrush="White"/>
+                    </dxlc:LayoutGroup>
                 </StackPanel>
             </Border>
             <StackPanel Grid.Row="1" Margin="5,5,5,5">
-                <dxlc:LayoutGroup Orientation="Horizontal" HorizontalAlignment="Right" Height="30"
-                                  Margin="4 10 4 10">
-                    <Button Content="다시 그리기" Width="120"/>
+                <dxlc:LayoutGroup Orientation="Horizontal" HorizontalAlignment="Right" Height="28"
+                                  Margin="10 5 10 5">
+                    <Button Content="자료(CSV) 추가" Width="142" Command="{Binding LoadCsvFileDataCommand}" Foreground="White" BorderBrush="White" Background="#FFFF7F00" FontWeight="Bold"/>
                 </dxlc:LayoutGroup>
-                <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="1" CornerRadius="5" Height="30">
-                    <dxlc:LayoutGroup Orientation="Horizontal" HorizontalAlignment="Right" Height="25" Padding="4">
-                        <CheckBox Content="[지목변경] 표시" IsChecked="{Binding JimokChg, Mode=TwoWay}" Height="25" Width="300">
+                <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="#A3C6C4" Background="#FFE0E7E9" BorderThickness="1" CornerRadius="5" Height="30" Margin="0 5 0 0">
+                    <dxlc:LayoutGroup Orientation="Horizontal" HorizontalAlignment="Right" Height="28" Margin="0 5 0 5">
+                        <CheckBox Content="[지목변경] 표시" IsChecked="{Binding JimokChg, Mode=TwoWay}" Height="28" Width="300" Background="White">
                         </CheckBox>
                     </dxlc:LayoutGroup>
                 </Border>
             </StackPanel>
 
-<!--            <dxg:GridControl Grid.Row="2" Name="FlowDataGrid" AutoExpandAllGroups="True" AllowColumnMRUFilterList="False"
+            <!--            <dxg:GridControl Grid.Row="2" Name="FlowDataGrid" AutoExpandAllGroups="True" AllowColumnMRUFilterList="False"
                                 ItemsSource="{Binding GridDataSource}" SelectionMode="Row"
                                 dx:ScrollBarExtensions.ScrollBarMode="TouchOverlap" ShowBorder="True"
                                 Margin="4,0,4,4" Cursor="Hand">
@@ -190,7 +191,7 @@
                     <dxg:GridSummaryItem FieldName="FullName" SummaryType="Count" />
                 </dxg:GridControl.TotalSummary>-->
             </dxg:GridControl>
-             <!--- Hide : Unvisible(Collapsed) => Real DB Record -->
+            <!--- Hide : Unvisible(Collapsed) => Real DB Record -->
             <dxg:GridControl Grid.Row="2" Name="FlowDataGrid" Visibility="Collapsed" 
                              AutoExpandAllGroups="True" AllowColumnMRUFilterList="False"
                                 ItemsSource="{Binding GridDataSource}" SelectionMode="Row"
@@ -242,15 +243,14 @@
                     <RowDefinition Height = "50"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="260" />
-                    <ColumnDefinition Width="*" /><!-- Space -->
-                    <ColumnDefinition Width="130" />
-                    <ColumnDefinition Width="120" />
-                    <ColumnDefinition Width="120" />
+                    <ColumnDefinition Width="270" />
+                    <ColumnDefinition Width="*" />
+                    <!-- Space -->
+                    <ColumnDefinition Width="450" />
                 </Grid.ColumnDefinitions>
-                <Border Grid.Row="0" Grid.Column="0" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="2" CornerRadius="5" Height="30" Margin="10 0 0 0">
+                <Border Grid.Row="0" Grid.Column="0" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="2" CornerRadius="5" Height="40" Margin="10 0 0 0">
                     <!-- 내부 Grid는 3컬럼을 하나로 감싸는 역할 -->
-                    <Grid>                        
+                    <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height = "Auto"/>
                         </Grid.RowDefinitions>
@@ -260,19 +260,33 @@
                             <ColumnDefinition Width="70" />
                         </Grid.ColumnDefinitions>
                         <!--Mode=TwoWay 라는 건 화면에서 변경해도 ViewModel로 반영되고, ViewModel에서 변경해도 화면에 반영된다는 뜻-->
-                        <CheckBox Grid.Column="0" IsChecked="{Binding IsOwnName, Mode=TwoWay}" Content="소유자명" Height="25" Margin="10 5 0 0"/>
-                        <CheckBox Grid.Column="1" IsChecked="{Binding IsJimok, Mode=TwoWay}" Content="지목" Height="25" Margin="10 5 0 0" />
-                        <CheckBox Grid.Column="2" IsChecked="{Binding IsArea, Mode=TwoWay}" Content="면적" Height="25" Margin="10 5 0 0" />
+                        <CheckBox Grid.Column="0" IsChecked="{Binding IsOwnName, Mode=TwoWay}" Content="소유자명" Height="25" Margin="10 10 0 10"/>
+                        <CheckBox Grid.Column="1" IsChecked="{Binding IsJimok, Mode=TwoWay}" Content="지목" Height="25" Margin="10 10 0 10" />
+                        <CheckBox Grid.Column="2" IsChecked="{Binding IsArea, Mode=TwoWay}" Content="면적" Height="25" Margin="10 10 0 10" />
                     </Grid>
                 </Border>
                 <!-- Spacer: Grid.Column="1"는 나머지 영역을 차지해서 오른쪽으로 밀어줍니다 -->
-                <CheckBox Grid.Column="2" IsChecked="{Binding Portrait, Mode=TwoWay}" Content="세로형 그리기" Foreground="#6C7A89" FontWeight="Bold" Height="25" Margin="10 10 10 0" />
-                <dxe:TrackBarEdit Grid.Column="3" Minimum="0.1" Maximum="3" TickFrequency="0.5" Value="{Binding ElementName=LmfControl, Path=ZoomFactor, Mode=TwoWay}" 
-                                ValueToolTipPlacement="TopLeft" ValueToolTipStringFormat="N0" />
-                <!-- TrackBarEdit 옆 혹은 아래 추가 -->
-                <!--<TextBlock Grid.Column="4" Text="{Binding ElementName=LmfControl, Path=ZoomFactor, Converter={StaticResource ZoomPercentConverter}}" 
+                <Border Grid.Row="0" Grid.Column="2" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="2" CornerRadius="5" Height="40" Margin="10 0 10 0">
+                    <!-- 내부 Grid는 3컬럼을 하나로 감싸는 역할 -->
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height = "Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <!--Mode=TwoWay 라는 건 화면에서 변경해도 ViewModel로 반영되고, ViewModel에서 변경해도 화면에 반영된다는 뜻-->
+                        <CheckBox Grid.Column="0" IsChecked="{Binding Portrait, Mode=TwoWay}" Content="세로형 그리기" Foreground="#6C7A89" FontWeight="Bold" Height="25" Margin="10 10 0 10" />
+                        <dxe:TrackBarEdit Grid.Column="1" Minimum="0.1" Maximum="3" TickFrequency="0.5" Value="{Binding ElementName=LmfControl, Path=ZoomFactor, Mode=TwoWay}" 
+                                ValueToolTipPlacement="TopLeft" ValueToolTipStringFormat="N0" Margin="10 10 0 10" />
+                        <!-- TrackBarEdit 옆 혹은 아래 추가 -->
+                        <!--<TextBlock Grid.Column="4" Text="{Binding ElementName=LmfControl, Path=ZoomFactor, Converter={StaticResource ZoomPercentConverter}}" 
                         VerticalAlignment="Center" Margin="8,0,0,0"/>-->
-                <Button Grid.Column="4" Content="색상 설정" Width="100" Height="25" Command="{Binding SettingColorCommand}" Margin="10" />
+                        <Button Grid.Column="2" Content="색상 설정" Width="100" Height="28" Command="{Binding SettingColorCommand}" Margin="10 0 0 10" BorderBrush="White" Background="#FF66B821" Foreground="White" FontWeight="Bold"/>
+                    </Grid>
+                </Border>
             </Grid>
             <!--<StackPanel Grid.Col="0" Margin="5,5,5,5">
                     <dxlc:LayoutGroup Orientation="Horizontal" Margin="10 5 0 0" Width="120"
@@ -281,11 +295,11 @@
                     </dxlc:LayoutGroup>
                 </StackPanel>
             -->
-        </Border>            
+        </Border>
 
         <Border Background="#A3C6C4" BorderThickness="1" CornerRadius="5" Padding="3">
             <dxdiag:DiagramControl ShowRulers="False" IsReadOnly="True" x:Name="LmfControl" 
-                                   DocumentSource="{Binding LandMoveFlowData}">
+                                   DocumentSource="{Binding LandMoveFlowData}" Opacity="1">
                 <!--<dxmvvm:Interaction.Behaviors>
                     <dxdiag:DiagramDataBindingBehavior
                         ItemsSource="{Binding Path=Nodes}"
@@ -299,10 +313,10 @@
         </Border>
     </DockPanel>
 
-<!-- [참고]텍스트 중앙 정렬
+    <!-- [참고]텍스트 중앙 정렬
 HorizontalContentAlignment="Center"
 VerticalContentAlignment="Center"
 Text="중앙 정렬 텍스트"
 -->
- 
+
 </Page>

@@ -1,9 +1,10 @@
 ﻿<Application x:Class="LMFS.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:LMFS.Engine"
              StartupUri="Views/Windows/LoginWindow.xaml"
              ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
-
+        <local:MultiFormatConverter x:Key="MultiFormatConverter" />
     </Application.Resources>
 </Application>

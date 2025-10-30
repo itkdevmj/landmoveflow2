@@ -1,0 +1,116 @@
+﻿<Page
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:dxdiag="http://schemas.devexpress.com/winfx/2008/xaml/diagram"
+      xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+      xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+      xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+      xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+      xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+      x:Class="LMFS.Views.Pages.CsvUploaderPage"
+      xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+      xmlns:xtraEditors="clr-namespace:DevExpress.XtraEditors;assembly=DevExpress.XtraEditors.v23.2"
+      mc:Ignorable="d" 
+      d:DesignHeight="320" d:DesignWidth="800"
+      Title="[토지이동정리현황"
+      Loaded="CsvUploaderPage_OnLoaded"
+      SizeChanged="CsvUploaderPage_OnSizeChanged">
+
+    <DockPanel>
+        <Grid DockPanel.Dock="Left" Width="780">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="80"/>
+            </Grid.RowDefinitions>
+
+            <!-- Row 0 -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
+                <Border BorderBrush="#A3C6C4" Background="#FF4C8DA0" BorderThickness="1" CornerRadius="5" Height="40">
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="51*" />
+                            <ColumnDefinition Width="13*"/>
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="폴더 선택"  Command="{Binding OpenFolderCommand}" Width="120" Height="25" Margin="0,2,8,2" Grid.ColumnSpan="2" />
+                        <TextBox Grid.Column="2" x:Name="FolderPathTextBox" Width="640" Height="25" IsReadOnly="True" IsEnabled="False" Foreground="White" SelectionBrush="White" SelectionTextBrush="#FF4C8DA0" Margin="0,2,0,2" />
+                    </Grid>
+                </Border>
+            </StackPanel>
+
+            <!-- Row 1 -->
+            <dxg:GridControl Grid.Row="1" Name="GridFileList" 
+                             AutoExpandAllGroups="True" AllowColumnMRUFilterList="False"
+                                ItemsSource="{Binding GridFileListDataSource}" SelectionMode="Row"
+                                dx:ScrollBarExtensions.ScrollBarMode="TouchOverlap" ShowBorder="True"
+                                Margin="0" Cursor="Hand">
+                <dxg:GridControl.View>
+                    <dxg:TableView ShowIndicator="False" ShowGroupPanel="False" NavigationStyle="Row" AutoWidth="False">
+                    </dxg:TableView>
+                </dxg:GridControl.View>
+                <dxg:GridControl.Columns>
+                    <dxg:GridColumn FieldName="fileName" Header="파일목록" Width="1*" UnboundDataType="{x:Type sys:String}"
+                                    ReadOnly="True" HorizontalHeaderContentAlignment="Center" />
+                    <dxg:GridColumn FieldName="startDt" Header="시작일자" Width="0.2*" UnboundDataType="{x:Type sys:String}"
+                                    ReadOnly="True" HorizontalHeaderContentAlignment="Center">
+                        <dxg:GridColumn.CellDisplayTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding startDt, Converter={StaticResource MultiFormatConverter}, ConverterParameter=Date}" 
+                                                HorizontalAlignment="Center" />
+                            </DataTemplate>
+                        </dxg:GridColumn.CellDisplayTemplate>
+                        <dxg:GridColumn.EditSettings>
+                            <dxe:DateEditSettings HorizontalContentAlignment="Center" />
+                        </dxg:GridColumn.EditSettings>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn FieldName="lastDt" Header="종료일자" Width="0.2*" UnboundDataType="{x:Type sys:String}"
+                                    ReadOnly="True" HorizontalHeaderContentAlignment="Center">
+                            <dxg:GridColumn.EditSettings>
+                                <dxe:DateEditSettings HorizontalContentAlignment="Center" />
+                            </dxg:GridColumn.EditSettings>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn FieldName="recordCnt" Header="레코드 건수" Width="0.2*" UnboundDataType="{x:Type sys:String}"
+                                ReadOnly="True" HorizontalHeaderContentAlignment="Center">
+                        <dxg:GridColumn.EditSettings>
+                            <dxe:DateEditSettings HorizontalContentAlignment="Right" />
+                        </dxg:GridColumn.EditSettings>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn FieldName="uploadCnt" Header="업로드 건수" Width="0.2*" UnboundDataType="{x:Type sys:String}"
+                                ReadOnly="True" HorizontalHeaderContentAlignment="Center">
+                        <dxg:GridColumn.EditSettings>
+                            <dxe:DateEditSettings HorizontalContentAlignment="Right" />
+                        </dxg:GridColumn.EditSettings>
+                    </dxg:GridColumn>
+                </dxg:GridControl.Columns>
+            </dxg:GridControl>
+
+            <!-- Row 2 -->
+            <Border Grid.Row="2" Grid.Column="0" BorderBrush="#A3C6C4" Background="#FFE0E7E9" BorderThickness="1" CornerRadius="5" Height="65">
+                <Grid Margin="5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <!-- Row 0 -->
+                    <Button Content="DB업로드" Command="{Binding UploadCommand}" Grid.Row="0" Width="120" Height="25" HorizontalAlignment="Left" Margin="0,0,0,8" Background="#FFE65604" Foreground="White"/>
+
+                    <!-- Row 1 -->
+                    <StackPanel Grid.Row="1" Orientation="Horizontal">
+                        <TextBlock x:Name="ProgressPercent" Width="120" Height="18" Text="0%" Margin="8,0,0,0" TextAlignment="Center" VerticalAlignment="Center"/>
+                        <ProgressBar x:Name="ProgressBar" Width="640" Height="18" Minimum="0" Maximum="100"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </DockPanel>
+
+    <!-- [참고]텍스트 중앙 정렬
+HorizontalContentAlignment="Center"
+VerticalContentAlignment="Center"
+Text="중앙 정렬 텍스트"
+-->
+
+</Page>
