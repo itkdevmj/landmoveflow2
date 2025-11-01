@@ -24,7 +24,7 @@ namespace LMFS.Engine
             }
             else if (formatType == "Number")
             {
-                if (!decimal.TryParse(value?.ToString(), out decimal number))
+                if (decimal.TryParse(value?.ToString(), out decimal number))
                 {
                     return number.ToString("#,##0");
                 }

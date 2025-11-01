@@ -54,11 +54,11 @@
                 <dxg:GridControl.Columns>
                     <dxg:GridColumn FieldName="fileName" Header="파일목록" Width="1*" UnboundDataType="{x:Type sys:String}"
                                     ReadOnly="True" HorizontalHeaderContentAlignment="Center" />
-                    <dxg:GridColumn FieldName="startDt" Header="시작일자" Width="0.2*" UnboundDataType="{x:Type sys:String}"
+                    <dxg:GridColumn FieldName="startDt" Header="시작일자" Width="0.2*"
                                     ReadOnly="True" HorizontalHeaderContentAlignment="Center">
                         <dxg:GridColumn.CellDisplayTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding RowData.row.startDt, Converter={StaticResource MultiFormatConverter}, ConverterParameter=Date}" 
+                                <TextBlock Text="{Binding RowData.Row.startDt, Converter={StaticResource MultiFormatConverter}, ConverterParameter=Date}" 
                                                 HorizontalAlignment="Center" />
                             </DataTemplate>
                         </dxg:GridColumn.CellDisplayTemplate>
@@ -96,7 +96,25 @@
                     </Grid.RowDefinitions>
                     <!-- Row 0 -->
                     <Button Content="DB 업로드" Command="{Binding UploadCommand}" IsEnabled="{Binding IsUploading, Converter={StaticResource InverseBoolConverter}}" Grid.Row="0" Width="120" Height="25" HorizontalAlignment="Left" Margin="0,0,0,8" Background="#FFE65604" Foreground="White"/>
-
+                                    <!-- ✅ TextBlock으로 알림 표시 -->
+                    <TextBlock x:Name="txtUploadReady"
+                               Text="✓ 파일 로드 완료! 업로드 가능합니다."
+                               Foreground="#28a745"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"
+                               Margin="10,0,0,0">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsUploadReady}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                     <!-- Row 1 -->
                     <StackPanel Grid.Row="1" Orientation="Horizontal"
                                 Visibility="{Binding IsUploading, Converter={StaticResource BoolToVisibilityConverter}}" >                        

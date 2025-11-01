@@ -36,6 +36,10 @@ namespace LMFS.ViewModels.Pages
         [ObservableProperty] private string _progressText = "대기 중";
         [ObservableProperty] private bool _isUploading = false;
 
+        [ObservableProperty]
+        private bool isUploadReady = false;
+
+
         //public ICommand OpenFolderCommand { get; }
 
         public Action CloseAction { get; set; }
@@ -80,8 +84,8 @@ namespace LMFS.ViewModels.Pages
                                 GridFileList.Add(new LandMoveFileList
                                 {
                                     fileName = fName,
-                                    startDt = sttDt,
-                                    lastDt = lstDt,
+                                    startDt = ConvertDateFormat(sttDt),
+                                    lastDt = ConvertDateFormat(lstDt),
                                     recordCnt = recCnt,
                                     uploadCnt = upCnt
                                 });
@@ -120,6 +124,37 @@ namespace LMFS.ViewModels.Pages
             });
 
             IsUploading = false;
+        }
+
+
+        // ✅ 날짜 포맷 변환 메서드
+        private string ConvertDateFormat(string yyyymmdd)
+        {
+            if (!string.IsNullOrEmpty(yyyymmdd) && yyyymmdd.Length == 8)
+            {
+                if (DateTime.TryParseExact(yyyymmdd, "yyyyMMdd",
+                    CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None,
+                    out DateTime dt))
+                {
+                    return dt.ToString("yyyy-MM-dd");
+                }
+            }
+            return yyyymmdd;
+        }
+
+        // ✅ 업로드 준비 알림 표시
+        private void ShowUploadReadyNotification()
+        {
+            IsUploadReady = true;
+
+            // 3초 후 자동으로 숨김
+            Task.Delay(3000).ContinueWith(_ =>
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    IsUploadReady = false;
+                });
+            });
         }
         #endregion
     }
