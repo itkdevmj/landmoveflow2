@@ -246,7 +246,7 @@
                     <ColumnDefinition Width="270" />
                     <ColumnDefinition Width="*" />
                     <!-- Space -->
-                    <ColumnDefinition Width="450" />
+                    <ColumnDefinition Width="390" />
                 </Grid.ColumnDefinitions>
                 <Border Grid.Row="0" Grid.Column="0" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="2" CornerRadius="5" Height="40" Margin="10 0 0 0">
                     <!-- 내부 Grid는 3컬럼을 하나로 감싸는 역할 -->

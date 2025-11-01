@@ -21,11 +21,15 @@ using System.Windows.Input;
 
 namespace LMFS.ViewModels.Pages
 {
+    //ViewModel은 "UI와 데이터 바인딩·상태만 관리"하는 역할이 가장 좋음.
     public partial class CsvUploaderViewModel : ObservableObject
     {
         //CommunityToolkit의 [ObservableProperty]를 사용하면,
-        //"_gridFileList" 필드는 숨기고, 자동 생성된 "GridFileList" 속성을 사용해야 합니다.                                       
-        [ObservableProperty] private List<LandMoveFileList> _gridFileList;
+        //"_gridFileList" 필드는 숨기고, 자동 생성된 "GridFileList" 속성을 사용해야 합니다.
+        //List<T> 대신 ObservableCollection<T>를 사용해야 함
+        //XAML에서 데이터 바인딩 시, 리스트에 변화가 생길 때 UI가 자동 갱신되는 타입은 ObservableCollection<T>입니다.
+        [ObservableProperty] private ObservableCollection<LandMoveFileList> _gridFileList;
+
 
         //public ICommand OpenFolderCommand { get; }
 
@@ -35,6 +39,7 @@ namespace LMFS.ViewModels.Pages
         public CsvUploaderViewModel()
         {
             CloseCommand = new RelayCommand(ExecuteClose);
+            _gridFileList = new ObservableCollection<LandMoveFileList>();//초기화를 해줘야 GridFileList.Add 시 예외가 발생하지 않음//
             //OpenFolderCommand = new RelayCommand(OnOpenFolder);
         }
 
@@ -43,6 +48,8 @@ namespace LMFS.ViewModels.Pages
             throw new NotImplementedException();
         }
 
+
+#region 바인딩 영역
         [RelayCommand]
         //Diagram Color 설정화면으로 이동//
         private void OnOpenFolder()
@@ -58,7 +65,7 @@ namespace LMFS.ViewModels.Pages
                     //CommunityToolkit의 [ObservableProperty]를 사용하면,
                     //"_gridFileList" 필드는 숨기고, 자동 생성된 "GridFileList" 속성을 사용해야 합니다.                                       
                     // 이후 선택 경로 활용 (예: CSV 파일 읽기 함수 호출 등)
-                    var records = CsvUploader.LoadLandMoveCsvFiles(folderPath, 
+                    CsvUploader.LoadLandMoveCsvFiles(folderPath, 
                             (fName, sttDt, lstDt, recCnt, upCnt) 
                             => {GridFileList.Add(new LandMoveFileList 
                                 { 
@@ -78,31 +85,13 @@ namespace LMFS.ViewModels.Pages
         //Diagram Color 설정화면으로 이동//
         private void OnUploadCommand()
         {
-            //var page = new CsvUploaderPage();
-            //Window window = new Window
-            //{
-            //    Content = page,
-            //    Title = "토지이동흐름도 자료(CSV) 업로드",
-            //    Width = 340,
-            //    Height = 240,
-            //    Owner = Application.Current.MainWindow,
-
-            //    //[닫기]버튼만 남긴다.
-            //    WindowStyle = WindowStyle.SingleBorderWindow,
-            //    ResizeMode = ResizeMode.NoResize
-            //};
-            //window.WindowStartupLocation = WindowStartupLocation.Manual;//부모화면의 임의위치로 지정
-
-            //// 부모(Window)의 실제 스크린 위치 좌표 구하기
-            //var parent = Application.Current.MainWindow;
-            //// 부모창의 스크린 좌표를 가져오기
-            //var parentTopLeft = parent.PointToScreen(new System.Windows.Point(0, 0));
-
-            //// 부모창의 우측 상단 위치에 새 창을 붙이기
-            //window.Left = parentTopLeft.X + parent.ActualWidth - window.Width - 10;
-            //window.Top = parentTopLeft.Y + 100;
-
-            //window.ShowDialog();//부모화면 제어 불가
+            //
         }
+        #endregion
+
+
+        #region 내부 함수 영역
+
+        #endregion
     }
 }

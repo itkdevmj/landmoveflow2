@@ -26,6 +26,8 @@ namespace LMFS.Views.Pages
         public CsvUploaderPage()
         {
             InitializeComponent();
+            var vm = new CsvUploaderViewModel();//Binding OpenFolderCommand => OnOpenFolder()로 연결//
+            this.DataContext = vm;
         }
 
         private void UpdateDataGridMaxHeight()
