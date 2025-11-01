@@ -5,6 +5,7 @@ using LMFS.Services;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Windows;
@@ -366,7 +367,7 @@ namespace LMFS.Db
                 string afParams = string.Join(",", pnuList.Select((_, i) => $"@af_pnu{i}"));
 
                 // 첫 번째 쿼리: DISTINCT GROUP_SEQNO 조회
-                string query = 
+                string query =
                     $"""
                     SELECT DISTINCT {qryColumn} 
                     FROM landmove_info_{DbConInfo.id}_{today} 
@@ -374,6 +375,11 @@ namespace LMFS.Db
                         OR af_pnu IN ({afParams}) 
                     GROUP BY {qryColumn}
                     """;
+
+                // 디버그: 쿼리 출력
+                //Debug.WriteLine("=== Generated Query ===");
+                //Debug.WriteLine(query);
+
 
                 List<int> listgrp = new List<int>();
 
@@ -383,8 +389,13 @@ namespace LMFS.Db
                     for (int i = 0; i < pnuList.Count; i++)
                     {
                         //파라미터 이름이 같으면 MySQLCommand에서 중복 등록이 불가능합니다. 그래서 같은 이름을 가진 파라미터를 2번 이상 추가하면 오류 발생.
-                        cmd.Parameters.AddWithValue($"@bf_pnu{i}", pnuList[i]);
-                        cmd.Parameters.AddWithValue($"@af_pnu{i}", pnuList[i]);
+                        //cmd.Parameters.AddWithValue($"@bf_pnu{i}", pnuList[i]);
+                        //cmd.Parameters.AddWithValue($"@af_pnu{i}", pnuList[i]);
+                        //Debug.WriteLine($"@bf_pnu{i} = '{pnuList[i]}'");
+                        //Debug.WriteLine($"@af_pnu{i} = '{pnuList[i]}'");
+                        cmd.Parameters.Add(new MySqlParameter($"@bf_pnu{i}", MySqlDbType.VarChar) { Value = pnuList[i] });
+                        cmd.Parameters.Add(new MySqlParameter($"@af_pnu{i}", MySqlDbType.VarChar) { Value = pnuList[i] });
+
                     }
 
                     using (var reader = cmd.ExecuteReader())
@@ -394,6 +405,8 @@ namespace LMFS.Db
                             listgrp.Add(reader.GetInt32(0));//결과값이 정수일 때//
                         }
                     }
+
+                    Console.WriteLine(query); // 또는 Debug.WriteLine(query);
                 }
 
                 return listgrp;

@@ -2,7 +2,6 @@
 {
     public class LandMoveInfo
     {
-        public string areaCd { get; set; }
         public int gSeq { get; set; }
         public int idx { get; set; }
         public string bfPnu { get; set; }
@@ -15,6 +14,8 @@
         public double afArea { get; set; }
         public string ownName { get; set; }
         public int pSeq { get; set; }
+        public string areaCd { get; set; }
+
         public string userId { get; set; }
         public string uploadDt { get; set; }
 

@@ -151,6 +151,18 @@ public class CsvUploader
     }
     #endregion
 
+    #region 공통함수
+    // 숫자 천 단위 콤마(,) 표기
+    private static string ConvertNumberFormat(string num)
+    {
+        if (decimal.TryParse(num?.ToString(), out decimal number))
+        {
+            return number.ToString("#,##0");
+        }
+        return num;
+        ;
+    }
+    #endregion
 
 
     #region 데이터 가져오기
@@ -175,7 +187,7 @@ public class CsvUploader
                     MissingFieldFound = null//없는 필드 예외 무시
                 };
                 using (var csv = new CsvReader(reader, config))
-                {                    
+                {
                     try
                     {
                         var records = csv.GetRecords<LandMoveCsv>().ToList();
@@ -257,7 +269,7 @@ public class CsvUploader
                             r.afPnu = (r.lawd?.ToString() ?? "")
                                         + (r.rsn == "등록전환" ? "1" : r.lndGbn)
                                         + bobn
-                                        + bubn;                            
+                                        + bubn;
 
                             // 필요시 코드 변환 딕셔너리 활용, 날짜 파싱, 기타 로직 (함수로 분리하여 작업)
                         }
@@ -291,13 +303,14 @@ public class CsvUploader
 
                         // ----------------------------------------------------------
                         // 파일명 콜백 전달
-                        MessageBox.Show($"콜백 호출 준비: {file}, {sttDt}, {lstDt}, {recCnt}, {records.Count}");
+                        //[디버깅용]
+                        //MessageBox.Show($"콜백 호출 준비: {file}, {sttDt}, {lstDt}, {recCnt.ToString()}, {records.Count.ToString()}");
                         onFileRoad?.Invoke(Path.GetFileName(file), sttDt, lstDt, recCnt, records.Count);
 
                         // ----------------------------------------------------------
                         //allRecords.AddRange(records);
                         // <LandMoveCsv> => <LandMoveInfo>
-                        allRecords.AddRange(ConvertDataCsvToInfo(records));                        
+                        allRecords.AddRange(ConvertDataCsvToInfo(records));
                     }
                     catch (Exception ex)
                     {
@@ -333,14 +346,14 @@ public class CsvUploader
             //------------------------------------
             // [1] PNU 합침 (bfPnu, afPnu)
             //------------------------------------
-            onProgress?.Invoke(0, totalCount, "PNU 목록 생성 중..."); 
+            onProgress?.Invoke(0, totalCount, "PNU 목록 생성 중...");
             UpdatePnuList();
 
 
             //------------------------------------
             // [2] 기존자료 백업 및 작업 테이블 준비
             //------------------------------------
-            onProgress?.Invoke(0, totalCount, "기존 자료 백업 중..."); 
+            onProgress?.Invoke(0, totalCount, "기존 자료 백업 중...");
             if (DBService.BackupLandMoveInfoOrg() <= 0)
             {
                 MessageBox.Show("기존 자료 백업에 문제가 발생했습니다. 사업수행자에게 문의하세요.");
@@ -356,7 +369,7 @@ public class CsvUploader
             //------------------------------------
             // [3] 현재 DB g_seq 최대값을 가져온다. (새로 추가할 데이터는 g_seq를 새로 count할 것이므로)
             //------------------------------------
-            onProgress?.Invoke(0, totalCount, "그룹 번호 확인 중..."); 
+            onProgress?.Invoke(0, totalCount, "그룹 번호 확인 중...");
             _groupSeqno = DBService.GetMaxGroupSeqno();
 
 
@@ -369,7 +382,7 @@ public class CsvUploader
             // 5. 기존 데이터 레코드 delete >
             // 6. 머지된 데이터 insert
             //------------------------------------
-            onProgress?.Invoke(0, totalCount, "데이터 업로드 중..."); 
+            onProgress?.Invoke(0, totalCount, "데이터 업로드 중...");
             GetLandMoveAll(onProgress, totalCount);
         }
         catch (Exception ex)
@@ -381,7 +394,7 @@ public class CsvUploader
             onProgress?.Invoke(totalCount, totalCount, "업로드 완료!");
             MessageBox.Show("업로드가 완료되었습니다!");
         }
-    } 
+    }
     #endregion
 
 
@@ -450,7 +463,7 @@ public class CsvUploader
     {
         var filtered = RecordsMove
             .Where(r => r.bfPnu == landcd || r.afPnu == landcd)
-            .Select(r => new LandMovePnuPair{ bfPnu = r.bfPnu, afPnu = r.afPnu })
+            .Select(r => new LandMovePnuPair { bfPnu = r.bfPnu, afPnu = r.afPnu })
             .ToList();
 
         if (filtered.Count == 0) return false;
@@ -548,7 +561,7 @@ public class CsvUploader
     //[Important("이 함수는 핵심 로직입니다")]
     // 현재 필지 기준 => 연관 필지 Recursive 조회
     public static void GetLandMovePartial(string landcd)
-    {        
+    {
         if (!QueryPnuList(landcd))// 연관 필지 찾기//
             return;
         if (PnuList.Count == 0)
@@ -558,10 +571,13 @@ public class CsvUploader
 
 
         // [디버깅용]
-        if (landcd == "4420041023101200004")
+        bool exists = PnuList.Any(item => item.pnu == "4420010100101910010");
+        if(exists)
         {
             int a = 1;
         }
+
+        
 
 
 
@@ -575,7 +591,7 @@ public class CsvUploader
                 idx++;
                 continue;
             }
-            var pnu = PnuList[idx].pnu;            
+            var pnu = PnuList[idx].pnu;
             if (!QueryPnuList(pnu))// 연관 필지 찾기//
             {
                 idx++;
@@ -621,7 +637,7 @@ public class CsvUploader
 
             // (5) DB에서 기존 그룹 데이터 가져와서 병합
             // 예시:
-            var dbFlowList =  SqlQueryFlowList(); // List<LandMoveInfo>
+            var dbFlowList = SqlQueryFlowList(); // List<LandMoveInfo>
             if (dbFlowList.Count > 0)
             {
                 // 'SEQ' 컬럼 제거는 클래스에서 속성 제외
@@ -661,7 +677,7 @@ public class CsvUploader
             foreach (var item in resultData)
             {
                 RecordsMoveDebug.Add(item);
-            }          
+            }
 
         }
         //----------------------------------------
@@ -698,13 +714,6 @@ public class CsvUploader
         // 전체 PNU 기준
         for (int idx = 0; idx < PnuListAll.Count; idx++)
         {
-            //[TODO]
-            //if (idx > 0 && ((idx % 100 == 0) || (idx == PnuListAll.Count - 1)))
-            //{
-            //    // 프로그레스바 등
-            //    System.Threading.Thread.Sleep(10);
-            //}
-
             if (PnuListAll[idx].bChecked)
                 continue;
 
@@ -724,6 +733,13 @@ public class CsvUploader
 
             // 필지 리스트 초기화
             PnuList.Clear();
+
+            // 실제 처리 로직...
+            // 중간중간 진행률 업데이트
+            processedCount = totalCount - RecordsMove.Count;
+            if (processedCount % 100 == 0 || processedCount == totalCount)
+                onProgress?.Invoke(processedCount, totalCount, $"처리 중... {ConvertNumberFormat(processedCount.ToString())}/{ConvertNumberFormat(totalCount.ToString())}");
+
         }
 
 
@@ -742,7 +758,7 @@ public class CsvUploader
             .Select(csv => csv.ToLandMoveInfo())
             .ToList();
 
-        return listInfo;        
+        return listInfo;
     }
     #endregion
 
@@ -753,7 +769,7 @@ public class CsvUploader
     //(Flowlist DB 쿼리)
     public static List<LandMoveInfo> SqlQueryFlowList()
     {
-        List <LandMoveInfo> listOldDBResult = new List<LandMoveInfo>();
+        List<LandMoveInfo> listOldDBResult = new List<LandMoveInfo>();
         if (PnuList == null || PnuList.Count == 0)
             return listOldDBResult;
 

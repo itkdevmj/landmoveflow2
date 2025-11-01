@@ -91,6 +91,13 @@ namespace LMFS.ViewModels.Pages
                                 });
                             } /* 파일명 추가 */
                             );
+
+
+                                    // 파일 로드 완료 후 알림 표시
+                    if (GridFileList.Count > 0)
+                    {
+                        ShowUploadReadyNotification();
+                    }
                 }
             }
         }
@@ -98,13 +105,16 @@ namespace LMFS.ViewModels.Pages
 
         [RelayCommand]
         //Diagram Color 설정화면으로 이동//
-        private async void OnUploadCommand()
+        private async void OnUpload()
         {
             if (string.IsNullOrEmpty(FolderPath))
             {
                 MessageBox.Show("먼저 폴더를 선택하세요.");
                 return;
             }
+
+                    // 업로드 시작 시 준비 완료 메시지 숨김
+            IsUploadReady = false;
 
             IsUploading = true;
             ProgressValue = 0;
@@ -118,7 +128,7 @@ namespace LMFS.ViewModels.Pages
                     {
                         ProgressMax = total;
                         ProgressValue = current;
-                        ProgressText = $"{message} ({current}/{total})";
+                    ProgressText = $"{message}";
                     });
                 });
             });
@@ -127,7 +137,7 @@ namespace LMFS.ViewModels.Pages
         }
 
 
-        // ✅ 날짜 포맷 변환 메서드
+        // 날짜 포맷 변환 메서드
         private string ConvertDateFormat(string yyyymmdd)
         {
             if (!string.IsNullOrEmpty(yyyymmdd) && yyyymmdd.Length == 8)
@@ -142,19 +152,20 @@ namespace LMFS.ViewModels.Pages
             return yyyymmdd;
         }
 
-        // ✅ 업로드 준비 알림 표시
+
+        // 업로드 준비 알림 표시
         private void ShowUploadReadyNotification()
         {
             IsUploadReady = true;
 
-            // 3초 후 자동으로 숨김
-            Task.Delay(3000).ContinueWith(_ =>
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    IsUploadReady = false;
-                });
-            });
+                    // 3초 후 자동으로 숨김
+            //Task.Delay(3000).ContinueWith(_ =>
+            //{
+            //    Application.Current.Dispatcher.Invoke(() =>
+            //    {
+            //        IsUploadReady = false;
+            //    });
+            //});
         }
         #endregion
     }
