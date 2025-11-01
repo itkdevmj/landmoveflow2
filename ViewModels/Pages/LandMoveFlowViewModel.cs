@@ -76,9 +76,32 @@ namespace LMFS.ViewModels.Pages
             // 2. 그리드 데이터 조회
             SearchLandMoveData();
 
-            // 3. 그리드 데이터 처리
+            // 3. GridDataSource가 비어있는지 확인
+            if (GridDataSource == null || !GridDataSource.Any())
+            {
+                ShowNoDataPopup();
+                return; // 데이터가 없으면 이후 처리 중단
+            }
+
+            // 4. 그리드 데이터 처리
             UpdateFlowXml();
         }
+
+        private void ShowNoDataPopup()
+        {
+            // WPF MessageBox 사용
+            MessageBox.Show(
+                "조회된 데이터가 없습니다.",
+                "알림",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
+
+            // 또는 커스텀 팝업을 사용하는 경우
+            // var popup = new CustomPopup("조회된 데이터가 없습니다.");
+            // popup.ShowDialog();
+        }
+
 
         [RelayCommand]
         private void OnEnter()

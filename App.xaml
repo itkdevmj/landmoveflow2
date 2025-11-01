@@ -6,5 +6,7 @@
              ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
         <local:MultiFormatConverter x:Key="MultiFormatConverter" />
+        <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <local:InverseBoolConverter x:Key="InverseBoolConverter"/>
     </Application.Resources>
 </Application>

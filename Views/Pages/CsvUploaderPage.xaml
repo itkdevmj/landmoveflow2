@@ -36,15 +36,15 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <Button Grid.Column="0" Content="폴더 선택"  Command="{Binding OpenFolderCommand}" Width="120" Height="25" Margin="0,2,8,2" Grid.ColumnSpan="2" />
-                        <TextBox Grid.Column="2" x:Name="FolderPathTextBox" Width="640" Height="25" IsReadOnly="True" IsEnabled="False" Foreground="White" SelectionBrush="White" SelectionTextBrush="#FF4C8DA0" Margin="0,2,0,2" />
+                        <TextBox Grid.Column="2" Name="FolderPathTextBox" Text="{Binding FolderPath, Mode=OneWay}" Width="640" Height="25" IsReadOnly="True" IsEnabled="False" Foreground="White" SelectionBrush="White" SelectionTextBrush="White" Margin="0,2,0,2" />
                     </Grid>
                 </Border>
             </StackPanel>
 
             <!-- Row 1 -->
-            <dxg:GridControl Grid.Row="1" Name="GridFileList" 
+            <dxg:GridControl Grid.Row="1" Name="GridFileList"
                              AutoExpandAllGroups="True" AllowColumnMRUFilterList="False"
-                                ItemsSource="{Binding GridFileListDataSource}" SelectionMode="Row"
+                                ItemsSource="{Binding GridFileList}" SelectionMode="Row"
                                 dx:ScrollBarExtensions.ScrollBarMode="TouchOverlap" ShowBorder="True"
                                 Margin="0" Cursor="Hand">
                 <dxg:GridControl.View>
@@ -58,7 +58,7 @@
                                     ReadOnly="True" HorizontalHeaderContentAlignment="Center">
                         <dxg:GridColumn.CellDisplayTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding startDt, Converter={StaticResource MultiFormatConverter}, ConverterParameter=Date}" 
+                                <TextBlock Text="{Binding RowData.row.startDt, Converter={StaticResource MultiFormatConverter}, ConverterParameter=Date}" 
                                                 HorizontalAlignment="Center" />
                             </DataTemplate>
                         </dxg:GridColumn.CellDisplayTemplate>
@@ -95,12 +95,13 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <!-- Row 0 -->
-                    <Button Content="DB업로드" Command="{Binding UploadCommand}" Grid.Row="0" Width="120" Height="25" HorizontalAlignment="Left" Margin="0,0,0,8" Background="#FFE65604" Foreground="White"/>
+                    <Button Content="DB 업로드" Command="{Binding UploadCommand}" IsEnabled="{Binding IsUploading, Converter={StaticResource InverseBoolConverter}}" Grid.Row="0" Width="120" Height="25" HorizontalAlignment="Left" Margin="0,0,0,8" Background="#FFE65604" Foreground="White"/>
 
                     <!-- Row 1 -->
-                    <StackPanel Grid.Row="1" Orientation="Horizontal">
-                        <TextBlock x:Name="ProgressPercent" Width="120" Height="18" Text="0%" Margin="8,0,0,0" TextAlignment="Center" VerticalAlignment="Center"/>
-                        <ProgressBar x:Name="ProgressBar" Width="640" Height="18" Minimum="0" Maximum="100"/>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal"
+                                Visibility="{Binding IsUploading, Converter={StaticResource BoolToVisibilityConverter}}" >                        
+                        <TextBlock Text="{Binding ProgressText}" FontWeight="SemiBold" Width="120" Height="18" Margin="8,0,0,0" TextAlignment="Center" VerticalAlignment="Center"/>
+                        <ProgressBar Value="{Binding ProgressValue}" Maximum="{Binding ProgressMax}" Width="640" Height="25"/>
                     </StackPanel>
                 </Grid>
             </Border>

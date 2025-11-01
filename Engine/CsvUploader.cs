@@ -291,6 +291,7 @@ public class CsvUploader
 
                         // ----------------------------------------------------------
                         // 파일명 콜백 전달
+                        MessageBox.Show($"콜백 호출 준비: {file}, {sttDt}, {lstDt}, {recCnt}, {records.Count}");
                         onFileRoad?.Invoke(Path.GetFileName(file), sttDt, lstDt, recCnt, records.Count);
 
                         // ----------------------------------------------------------
@@ -308,73 +309,83 @@ public class CsvUploader
 
         // <LandMoveInfo>
         RecordsMove = allRecords;
+    }
+
+
+    public static void UploadLandMoveToDB(Action<int, int, string> onProgress = null)
+    {
+        // <LandMoveInfo>RecordsMove
 
         // records가 IEnumerable<T> 또는 List<T> 타입일 때
         //records가 정말 null로 나오는 경우를 방지하려면, 위처럼 ?.Count() 또는 .ToList().Count 사용
-        int cnt = allRecords?.Count() ?? 0; // .Count() 확장메서드 사용, null 방지
-        if (cnt > 0)
+        int totalCount = RecordsMove?.Count() ?? 0; // .Count() 확장메서드 사용, null 방지
+
+        if (totalCount == 0)
         {
-            try
+            MessageBox.Show("업로드할 데이터가 없습니다!");
+            return;
+        }
+
+        onProgress?.Invoke(0, totalCount, "업로드 준비 중...");
+
+        try
+        {
+            //------------------------------------
+            // [1] PNU 합침 (bfPnu, afPnu)
+            //------------------------------------
+            onProgress?.Invoke(0, totalCount, "PNU 목록 생성 중..."); 
+            UpdatePnuList();
+
+
+            //------------------------------------
+            // [2] 기존자료 백업 및 작업 테이블 준비
+            //------------------------------------
+            onProgress?.Invoke(0, totalCount, "기존 자료 백업 중..."); 
+            if (DBService.BackupLandMoveInfoOrg() <= 0)
             {
-                //------------------------------------
-                // [1] PNU 합침 (bfPnu, afPnu)
-                //------------------------------------
-                UpdatePnuList();
-
-
-                //------------------------------------
-                // [2] 기존자료 백업 및 작업 테이블 준비
-                //------------------------------------
-                if (DBService.BackupLandMoveInfoOrg() <= 0)
-                {
-                    MessageBox.Show("기존 자료 백업에 문제가 발생했습니다. 사업수행자에게 문의하세요.");
-                    return;
-                }
-                if (DBService.CreateLandMoveInfoUser() <= 0)
-                {
-                    MessageBox.Show("기존 자료 백업에 문제가 발생했습니다. 사업수행자에게 문의하세요.");
-                    return;
-                }
-
-
-                //------------------------------------
-                // [3] 현재 DB g_seq 최대값을 가져온다. (새로 추가할 데이터는 g_seq를 새로 count할 것이므로)
-                //------------------------------------
-                _groupSeqno = DBService.GetMaxGroupSeqno();
-
-
-                //------------------------------------
-                // [4] 업로드 한 데이터 기준으로
-                // 1. 그룹핑 >
-                // 2. 기존 필지 찾기 >
-                // 3. Merge(new+old) >
-                // 4. 중복제거 >
-                // 5. 기존 데이터 레코드 delete >
-                // 6. 머지된 데이터 insert
-                //------------------------------------
-                GetLandMoveAll();
+                MessageBox.Show("기존 자료 백업에 문제가 발생했습니다. 사업수행자에게 문의하세요.");
+                return;
             }
-            finally
+            if (DBService.CreateLandMoveInfoUser() <= 0)
             {
-                // [TODO]
-                //if (DBService.CommitLandMoveInfoOrg() <= 0)
-                //{
-                //    MessageBox.Show("업로드에 문제가 발생했습니다. 사업수행자에게 문의하세요.");
-                //    return;
-                //}
+                MessageBox.Show("기존 자료 백업에 문제가 발생했습니다. 사업수행자에게 문의하세요.");
+                return;
             }
 
 
+            //------------------------------------
+            // [3] 현재 DB g_seq 최대값을 가져온다. (새로 추가할 데이터는 g_seq를 새로 count할 것이므로)
+            //------------------------------------
+            onProgress?.Invoke(0, totalCount, "그룹 번호 확인 중..."); 
+            _groupSeqno = DBService.GetMaxGroupSeqno();
 
 
-
+            //------------------------------------
+            // [4] 업로드 한 데이터 기준으로
+            // 1. 그룹핑 >
+            // 2. 기존 필지 찾기 >
+            // 3. Merge(new+old) >
+            // 4. 중복제거 >
+            // 5. 기존 데이터 레코드 delete >
+            // 6. 머지된 데이터 insert
+            //------------------------------------
+            onProgress?.Invoke(0, totalCount, "데이터 업로드 중..."); 
+            GetLandMoveAll(onProgress, totalCount);
         }
-        else
+        catch (Exception ex)
         {
-            MessageBox.Show("데이터가 없습니다!");
+            MessageBox.Show($"업로드 중 오류 발생: {ex.Message}");
         }
-    }
+        finally
+        {
+            onProgress?.Invoke(totalCount, totalCount, "업로드 완료!");
+            MessageBox.Show("업로드가 완료되었습니다!");
+        }
+    } 
     #endregion
+
+
+
 
     #region PNU 합침
     public static void UpdatePnuList()
@@ -543,11 +554,15 @@ public class CsvUploader
         if (PnuList.Count == 0)
             return;
 
+
+
+
         // [디버깅용]
-        if (landcd == "4420010100102600058")
+        if (landcd == "4420041023101200004")
         {
             int a = 1;
         }
+
 
 
         //----------------------------------------
@@ -603,9 +618,23 @@ public class CsvUploader
 
             // (4) GROUP_SEQNO 부여 (전역 static int 사용)
             _groupSeqno += 1;
+
+            // (5) DB에서 기존 그룹 데이터 가져와서 병합
+            // 예시:
+            var dbFlowList =  SqlQueryFlowList(); // List<LandMoveInfo>
+            if (dbFlowList.Count > 0)
+            {
+                // 'SEQ' 컬럼 제거는 클래스에서 속성 제외
+                resultData.AddRange(dbFlowList);
+                // 다시 중복 제거
+                resultData = DropDuplicatesInfo(resultData);
+            }
+
+
+            // (6) 그룹번호 재부여
             foreach (var item in resultData) item.gSeq = _groupSeqno;
 
-            // (5) PNU_SEQ 그룹순번 부여 (예를 들어, AfPnu 기준 그룹화)
+            // (7) PNU_SEQ 그룹순번 부여 (예를 들어, AfPnu 기준 그룹화)
             var grouped = resultData.GroupBy(x => x.afPnu).ToList();
             int groupSeq = 0;
             foreach (var group in grouped)
@@ -617,20 +646,7 @@ public class CsvUploader
                 groupSeq++;
             }
 
-            // (6) DB에서 기존 그룹 데이터 가져와서 병합
-            // 예시:
-            var dbFlowList = SqlQueryFlowList(); // List<LandMoveInfo>
-            if (dbFlowList.Count > 0)
-            {
-                // 'SEQ' 컬럼 제거는 클래스에서 속성 제외
-                foreach (var item in dbFlowList) item.gSeq = _groupSeqno;
-                resultData.AddRange(dbFlowList);
-
-                // 다시 중복 제거
-                resultData = DropDuplicatesInfo(resultData);
-            }
-
-            // (7) DB 에 <기존+신규 레코드> Insert
+            // (8) DB 에 <기존+신규 레코드> Insert
             DBService.InsertLandMoveUpload(resultData);
 
 
@@ -668,8 +684,17 @@ public class CsvUploader
     // 5. 기존 데이터 레코드 delete >
     // 6. 머지된 데이터 insert
     //------------------------------------
-    public static void GetLandMoveAll()
+    // GetLandMoveAll에 진행률 콜백 추가
+    public static void GetLandMoveAll(Action<int, int, string> onProgress = null, int totalCount = 0)
     {
+        // 기존 로직에 진행률 업데이트 추가
+        // 예: 처리된 레코드 수를 추적
+        int processedCount = 0;
+
+        // 실제 처리 로직...
+        // 중간중간 진행률 업데이트
+        onProgress?.Invoke(processedCount, totalCount, $"처리 중... {processedCount}/{totalCount}");
+
         // 전체 PNU 기준
         for (int idx = 0; idx < PnuListAll.Count; idx++)
         {

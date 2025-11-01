@@ -13,7 +13,7 @@ namespace LMFS.Db
         {
             try
             {
-                string connString = $"host={DbConInfo.ip};port={DbConInfo.port};user id={DbConInfo.id};password={DbConInfo.password};database={DbConInfo.db};";
+                string connString = $"host={DbConInfo.ip};port={DbConInfo.port};user id={DbConInfo.id};password={DbConInfo.password};database={DbConInfo.db};Allow User Variables=true;";
                 var connection = new MySqlConnection(connString);
                 connection.Open();
                 return connection;
