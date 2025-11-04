@@ -363,16 +363,15 @@ namespace LMFS.Db
 
                 // IN 절을 위한 파라미터 생성
                 string qryColumn = "g_seq";
-                string bfParams = string.Join(",", pnuList.Select((_, i) => $"@bf_pnu{i}"));
-                string afParams = string.Join(",", pnuList.Select((_, i) => $"@af_pnu{i}"));
+                string pnuParams = string.Join(",", pnuList.Select((_, i) => $"@pnu{i}"));
 
                 // 첫 번째 쿼리: DISTINCT GROUP_SEQNO 조회
                 string query =
                     $"""
                     SELECT DISTINCT {qryColumn} 
                     FROM landmove_info_{DbConInfo.id}_{today} 
-                    WHERE bf_pnu IN ({bfParams}) 
-                        OR af_pnu IN ({afParams}) 
+                    WHERE bf_pnu IN ({pnuParams}) 
+                        OR af_pnu IN ({pnuParams}) 
                     GROUP BY {qryColumn}
                     """;
 
@@ -380,7 +379,7 @@ namespace LMFS.Db
                 //Debug.WriteLine("=== Generated Query ===");
                 //Debug.WriteLine(query);
 
-
+                //[결과]
                 List<int> listgrp = new List<int>();
 
                 using (MySqlCommand cmd = new MySqlCommand(query, connection))
@@ -393,9 +392,8 @@ namespace LMFS.Db
                         //cmd.Parameters.AddWithValue($"@af_pnu{i}", pnuList[i]);
                         //Debug.WriteLine($"@bf_pnu{i} = '{pnuList[i]}'");
                         //Debug.WriteLine($"@af_pnu{i} = '{pnuList[i]}'");
-                        cmd.Parameters.Add(new MySqlParameter($"@bf_pnu{i}", MySqlDbType.VarChar) { Value = pnuList[i] });
-                        cmd.Parameters.Add(new MySqlParameter($"@af_pnu{i}", MySqlDbType.VarChar) { Value = pnuList[i] });
-
+                        //cmd.Parameters.Add(new MySqlParameter($"@pnu{i}", MySqlDbType.VarChar) { Value = pnuList[i] });
+                        cmd.Parameters.AddWithValue($"@pnu{i}", pnuList[i]);
                     }
 
                     using (var reader = cmd.ExecuteReader())
@@ -424,30 +422,66 @@ namespace LMFS.Db
 
                 // IN 절을 위한 파라미터 생성
                 string qryColumn = "g_seq";
-                string paramPlaceholders = string.Join(",", grpList.Select((_, i) => $"@grp{i}"));
+                string grpParam = string.Join(",", grpList.Select((_, i) => $"@grp{i}"));
 
                 // 첫 번째 쿼리: DISTINCT GROUP_SEQNO 조회
                 string query =
                     $"""
                     SELECT *
                     FROM landmove_info_{DbConInfo.id}_{today}  
-                    WHERE {qryColumn} IN ({paramPlaceholders})
+                    WHERE {qryColumn} IN ({grpParam})
                     ORDER BY {qryColumn}
                     """;
 
-                List<int> listgrp = new List<int>();
+                List<LandMoveInfo> resultList = new List<LandMoveInfo>();
 
+                //[방법1]
                 using (MySqlCommand cmd = new MySqlCommand(query, connection))
                 {
-                    // BF_PNU와 AF_PNU 파라미터 추가
+                    // G_SEQ 파라미터 추가
                     for (int i = 0; i < grpList.Count; i++)
                     {
                         //파라미터 이름이 같으면 MySQLCommand에서 중복 등록이 불가능합니다. 그래서 같은 이름을 가진 파라미터를 2번 이상 추가하면 오류 발생.
                         cmd.Parameters.AddWithValue($"@grp{i}", grpList[i]);
                     }
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            // LandMoveInfo 객체 생성 및 매핑
+                            // 컬럼명과 LandMoveInfo 클래스의 프로퍼티에 맞게 수정 필요
+                            var info = new LandMoveInfo
+                            {
+                                // Sreader에서 값을 읽어 객체에 할당
+                                // NULL 체크 및 안전한 타입 변환
+                                gSeq = reader.IsDBNull(reader.GetOrdinal("g_seq")) ? 0 : reader.GetInt32("g_seq"),
+                                idx = reader.IsDBNull(reader.GetOrdinal("idx")) ? 0 : reader.GetInt32("idx"),
+                                bfPnu = reader.IsDBNull(reader.GetOrdinal("bf_pnu")) ? null : reader.GetString("bf_pnu"),
+                                afPnu = reader.IsDBNull(reader.GetOrdinal("af_pnu")) ? null : reader.GetString("af_pnu"),
+                                rsn = reader.IsDBNull(reader.GetOrdinal("rsn")) ? null : reader.GetString("rsn"),
+                                regDt = reader.IsDBNull(reader.GetOrdinal("reg_dt")) ? null : reader.GetString("reg_dt"),
+                                bfJimok = reader.IsDBNull(reader.GetOrdinal("bf_jimok")) ? null : reader.GetString("bf_jimok"),
+                                bfArea = reader.IsDBNull(reader.GetOrdinal("bf_area")) ? 0.0 : reader.GetDouble("bf_area"),
+                                afJimok = reader.IsDBNull(reader.GetOrdinal("af_jimok")) ? null : reader.GetString("af_jimok"),
+                                afArea = reader.IsDBNull(reader.GetOrdinal("af_area")) ? 0.0 : reader.GetDouble("af_area"),
+                                ownName = reader.IsDBNull(reader.GetOrdinal("own_name")) ? null : reader.GetString("own_name"),
+                                pSeq = reader.IsDBNull(reader.GetOrdinal("p_seq")) ? 0 : reader.GetInt32("p_seq"),
+                                areaCd = reader.IsDBNull(reader.GetOrdinal("area_cd")) ? null : reader.GetString("area_cd"),
+                                userId = reader.IsDBNull(reader.GetOrdinal("user_id")) ? null : reader.GetString("user_id"),
+                                uploadDt = reader.IsDBNull(reader.GetOrdinal("upload_dt")) ? null : reader.GetString("upload_dt")
+                            };
+                            resultList.Add(info);
+                        }
+                    }
+                    Console.WriteLine(query); // 디버깅용
                 }
 
-                return connection.Query<LandMoveInfo>(query).ToList();
+                return resultList;
+
+                //[방법2]
+                //var result = connection.Query<LandMoveInfo>(query, new { grp = _grplist }).ToList();
+                //return result;
             }
         }
 

@@ -31,42 +31,16 @@ namespace LMFS.ViewModels.Pages
         [ObservableProperty] private bool _isSan;
         [ObservableProperty] private string _bobn;
         [ObservableProperty] private string _bubn;
+
         [ObservableProperty] private bool _jimokChg;//vm.JimokChg
         [ObservableProperty] private bool _portrait;//vm.Portrait
-        //[ObservableProperty] private string _currentPnu;
+        [ObservableProperty] private string _currentPnu;
+        [ObservableProperty] private bool _isOwnName;
+        [ObservableProperty] private bool _isJimok;
+        [ObservableProperty] private bool _isArea;
         [ObservableProperty] private List<LandMoveInfo> _gridDataSource;
         [ObservableProperty] private List<LandMoveInfoCategory> _gridCategoryDataSource;
-        //[ObservableProperty] private string _landMoveFlowData;
         [ObservableProperty] private MemoryStream _landMoveFlowData;
-
-        private string _currentPnu;
-
-        private bool _isOwnName;
-        public bool IsOwnName
-        {
-            get => _isOwnName;
-            set { _isOwnName = value; OnPropertyChanged(); }
-        }
-
-        private bool _isJimok;
-        public bool IsJimok
-        {
-            get => _isJimok;
-            set { _isJimok = value; OnPropertyChanged(); }
-        }
-
-        private bool _isArea;
-        public bool IsArea
-        {
-            get => _isArea;
-            set { _isArea = value; OnPropertyChanged(); }
-        }
-
-        //public event PropertyChangedEventHandler PropertyChanged;
-        //protected void OnPropertyChanged(string propName)
-        //{
-        //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
-        //}
 
 
         [RelayCommand]
@@ -132,7 +106,7 @@ namespace LMFS.ViewModels.Pages
                     Content = page,
                     Title = "토지이동흐름도 일자/종목별 필지정보(상세)",
                     Width = 800,
-                    Height = 320,
+                    Height = 400,
                     Owner = Application.Current.MainWindow
                 };
                 window.WindowStartupLocation = WindowStartupLocation.CenterScreen;//부모화면의 가운데 표시
@@ -181,7 +155,7 @@ namespace LMFS.ViewModels.Pages
                 Content = page,
                 Title = "토지이동흐름도 자료(CSV) 업로드",
                 Width = 800,
-                Height = 320,
+                Height = 350,
                 Owner = Application.Current.MainWindow,
 
                 //[닫기]버튼만 남긴다.
@@ -214,7 +188,7 @@ namespace LMFS.ViewModels.Pages
             GetJimokCodeDictionary();
             GetReasonCodeDictionary();
         }
-        
+
         private void GetSidoCodeList()
         {
             List<SidoCode> list = DBService.ListSidoCode(GlobalDataManager.Instance.loginUser.areaCd);
@@ -271,6 +245,22 @@ namespace LMFS.ViewModels.Pages
         private void GetReasonCodeDictionary()
         {
             Dictionary<string, string> dict = DBService.GetReasonDictionary("CD02");
+
+            //'분할' > '지목변경'
+            //'지목변경' > '합병'으로 변경
+            // 사용자가 정의한 우선순위 리스트 (변할 수 있음)
+            var desiredOrder = new List<string> { "20", "40", "30" };
+            // 리스트로 변환
+            var list = dict.ToList();
+            // "30"과 "40"의 순서 바꾸기
+            int idx30 = list.FindIndex(x => x.Key == "30");
+            int idx40 = list.FindIndex(x => x.Key == "40");
+
+            // swap
+            var temp = list[idx30];
+            list[idx30] = list[idx40];
+            list[idx40] = temp;
+
             GlobalDataManager.Instance.ReasonCode = dict;
         }
 
@@ -319,9 +309,9 @@ namespace LMFS.ViewModels.Pages
 
         private void SearchLandMoveData()
         {
-            _currentPnu = BuildPnu(); // 기존 방식
-            GridDataSource = DBService.ListLandMoveHistory(_currentPnu);
-            GridCategoryDataSource = DBService.ListLandMoveCategory(_currentPnu);
+            CurrentPnu = BuildPnu(); // 기존 방식
+            GridDataSource = DBService.ListLandMoveHistory(CurrentPnu);
+            GridCategoryDataSource = DBService.ListLandMoveCategory(CurrentPnu);
         }
 
         private void UpdateFlowXml()
@@ -344,7 +334,7 @@ namespace LMFS.ViewModels.Pages
             ////Vit.G//TEST// 3th argu //
             if (filteredList.Count > 0)
             {                
-                XDocument rtnXml = converter.Run(filteredList, this, categoryList, _currentPnu);
+                XDocument rtnXml = converter.Run(filteredList, this, categoryList, CurrentPnu);
 
                 // ... 이하 xml 스트림 처리
                 string str = rtnXml.ToString();

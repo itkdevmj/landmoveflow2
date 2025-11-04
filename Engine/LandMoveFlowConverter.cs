@@ -46,12 +46,17 @@ public class LandMoveFlowConverter
     #region 변수 선언 (Fields)
 
     // -----------------------------------------------------------
-    // 코드 조회 결과 저장용
+    // 코드 조회 결과 저장용 (내부)
     // -----------------------------------------------------------
     //private Dictionary<string, string> _listLawd = new();
     private List<SidoCode> _listLawd = new();
     private Dictionary<string, string> _listJimok = new();
-    private Dictionary<string, string> _listMovrsn = new();
+    private Dictionary<string, string> _listMovRsn = new();
+
+    // -----------------------------------------------------------
+    // 코드 조회 결과 저장용 (외부)
+    // -----------------------------------------------------------
+    public Dictionary<string, string> ListMovRsn => _listMovRsn;
 
     // -----------------------------------------------------------
     // DataFrame 대신 사용할 DataTable
@@ -146,6 +151,10 @@ public class LandMoveFlowConverter
         _settings = settings;
         //필요한 데이터는 _settings에서 가져옴
     }
+
+    public LandMoveFlowConverter()
+    {
+    }
     #endregion 생성자  ----------------------------------------
 
 
@@ -157,7 +166,7 @@ public class LandMoveFlowConverter
     {
         _listLawd = GlobalDataManager.Instance.sidoCodeList;
         _listJimok = GlobalDataManager.Instance.JimokCode;
-        _listMovrsn = GlobalDataManager.Instance.ReasonCode;
+        _listMovRsn = GlobalDataManager.Instance.ReasonCode;
     }
 
     private string GetCodeValue(int opt, string find)
@@ -166,7 +175,7 @@ public class LandMoveFlowConverter
         {
             //1 => _listLawd.GetValueOrDefault(find, ""), // LAWD
             2 => _listJimok.GetValueOrDefault(find, ""), // JIMOK
-            3 => _listMovrsn.GetValueOrDefault(find, ""), // LAND_MOV_RSN
+            3 => _listMovRsn.GetValueOrDefault(find, ""), // LAND_MOV_RSN
             _ => ""
         };
     }
@@ -217,11 +226,6 @@ public class LandMoveFlowConverter
         // 각종 변수 초기화
         InitializeForNewGroup();
 
-        //_isJimokChg = vm.JimokChg;
-        //_isPortrait = vm.Portrait;
-        //_isOwnName = vm.IsOwnName;
-        //_isJimok = vm.IsJimok;
-        //_isArea = vm.IsArea;
         //LandMoveFlowViewModel에서 가져온 값을 설정
         SetExternalVariables(vm);
 

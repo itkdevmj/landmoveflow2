@@ -13,7 +13,7 @@
       xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
       xmlns:xtraEditors="clr-namespace:DevExpress.XtraEditors;assembly=DevExpress.XtraEditors.v23.2"
       mc:Ignorable="d" 
-      d:DesignHeight="320" d:DesignWidth="800"
+      d:DesignHeight="350" d:DesignWidth="800"
       Title="[토지이동정리현황"
       Loaded="CsvUploaderPage_OnLoaded"
       SizeChanged="CsvUploaderPage_OnSizeChanged">
@@ -23,7 +23,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="80"/>
+                <RowDefinition Height="110"/>
             </Grid.RowDefinitions>
 
             <!-- Row 0 -->
@@ -82,19 +82,47 @@
             </dxg:GridControl>
 
             <!-- Row 2 -->
-            <Border Grid.Row="2" Grid.Column="0" BorderBrush="#A3C6C4" Background="#FFE0E7E9" BorderThickness="1" CornerRadius="5" Height="65">
+            <Border Grid.Row="2" Grid.Column="0" BorderBrush="#A3C6C4" Background="#FFE0E7E9" BorderThickness="1" CornerRadius="5" Height="95">
                 <Grid Margin="5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <!-- Row 0 -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                        <Button Content="DB 업로드" Command="{Binding UploadCommand}" IsEnabled="{Binding IsUploading, Converter={StaticResource InverseBoolConverter}}" Grid.Row="0" Width="120" Height="25" HorizontalAlignment="Left" Margin="0,0,0,8" Background="#FFE65604" Foreground="White"/>
-                                        <!-- TextBlock으로 알림 표시 -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left">
+                        <!--<Button Content="DB 업로드" Command="{Binding UploadCommand}" IsEnabled="{Binding IsUploading, Converter={StaticResource InverseBoolConverter}}" Width="120" Height="25" HorizontalAlignment="Left" Margin="0,0,0,8" Background="#FFE65604" Foreground="White"/>-->
+                        <!-- DB 업로드 버튼 - IsUploadReady True일 때만 표시 -->
+                        <Button Content="DB 업로드" 
+                                Command="{Binding UploadCommand}" 
+                                IsEnabled="{Binding IsUploading, Converter={StaticResource InverseBoolConverter}}" 
+                                Width="120" 
+                                Height="25" 
+                                HorizontalAlignment="Left" 
+                                Margin="0,0,0,8" 
+                                Background="#FFE65604" 
+                                Foreground="White">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <!-- IsUploadReady가 True이고 IsCommitCompleted가 False일 때 표시 -->
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding IsUploadReady}" Value="True"/>
+                                                <Condition Binding="{Binding IsCommitCompleted}" Value="False"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <!-- TextBlock으로 알림 표시 -->
                         <TextBlock x:Name="txtUploadReady"
                                    Text="✓ 파일 로드 완료! 업로드 가능합니다."
-                                   Foreground="#28a745"
+                                   Height="25" 
+                                   Foreground="#FFE65604"
                                    FontSize="14"
                                    FontWeight="SemiBold"
                                    VerticalAlignment="Center"
@@ -114,9 +142,42 @@
                     <!-- Row 1 -->
                     <StackPanel Grid.Row="1" Orientation="Horizontal"
                                 Visibility="{Binding IsUploading, Converter={StaticResource BoolToVisibilityConverter}}" >                        
-                        <TextBlock Text="{Binding ProgressText}" FontWeight="SemiBold" Width="160" Height="18" Margin="8,0,0,0" TextAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding ProgressText}" FontWeight="SemiBold" Width="120" Height="18" Margin="8,0,0,0" TextAlignment="Center" VerticalAlignment="Center"/>
                         <ProgressBar Value="{Binding ProgressValue}" Maximum="{Binding ProgressMax}" Width="600" Height="25"/>
                     </StackPanel>
+                    <!-- Row 2 -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Height="33" VerticalAlignment="Bottom">
+                        <!-- 임시 텍스트로 상태 확인 -->
+                        <TextBlock Text="{Binding IsUploadCompleted, StringFormat='Upload: {0}'}" Margin="5" Foreground="Red"/>
+                        <TextBlock Text="{Binding IsCommitCompleted, StringFormat='Commit: {0}'}" Margin="5" Foreground="Blue"/>
+                        <!--<Button Content="DB 최종 적용" Command="{Binding CommitCommand}" IsEnabled="{Binding IsCommiting, Converter={StaticResource InverseBoolConverter}}" Width="120" Height="25" HorizontalAlignment="Left" Margin="0,0,0,8" Background="#FF66B821" Foreground="White"/>-->
+                        <!-- DB 최종 적용 버튼 - 업로드 완료 후 표시, 적용 완료 후 숨김 -->
+                        <Button Content="DB 최종 적용" 
+                                Command="{Binding CommitCommand}" 
+                                IsEnabled="{Binding IsCommiting, Converter={StaticResource InverseBoolConverter}}" 
+                                Width="120" 
+                                Height="25" 
+                                HorizontalAlignment="Left" 
+                                Margin="0,0,0,8" 
+                                Background="#FF66B821" 
+                                Foreground="White">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <!-- IsUploadCompleted가 True이고 IsCommitCompleted가 False일 때 표시 -->
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding IsUploadCompleted}" Value="True"/>
+                                                <Condition Binding="{Binding IsCommitCompleted}" Value="False"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </StackPanel>     
                 </Grid>
             </Border>
         </Grid>

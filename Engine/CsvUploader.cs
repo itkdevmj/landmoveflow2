@@ -56,15 +56,6 @@ public class CsvUploader
 
     #region 변수 선언 (Fields)
 
-    // -----------------------------------------------------------
-    // 코드 조회 결과 저장용
-    // -----------------------------------------------------------
-    //private Dictionary<string, string> _listLawd = new();
-    private List<SidoCode> _listLawd = new();
-    private Dictionary<string, string> _listJimok = new();
-    private Dictionary<string, string> _listMovrsn = new();
-
-
     // CSV 원본 → List<LandMoveCsv> records
     public static List<LandMoveInfo> RecordsMove;  // DF_MOVE 역할 (MVVM에서는 ObservableProperty로 뺄 수도 있음)
     public static ObservableCollection<LandMovePnuList> PnuListAll;
@@ -79,13 +70,6 @@ public class CsvUploader
     // DBMS 조회 데이터 및 그룹 정보
     // -----------------------------------------------------------
     public static int _groupSeqno = 0;
-
-    // -----------------------------------------------------------
-    // DBMS 조회 데이터 및 그룹 정보
-    // -----------------------------------------------------------
-    //private List<int> _groupList = new();
-    //private int _currentGroupNo;
-    //private List<string> _dbLines = new();
 
 
     // -----------------------------------------------------------
@@ -568,14 +552,12 @@ public class CsvUploader
             return;
 
 
-
-
-        // [디버깅용]
-        bool exists = PnuList.Any(item => item.pnu == "4420010100101910010");
-        if(exists)
-        {
-            int a = 1;
-        }
+        //// [디버깅용]
+        //bool exists = PnuList.Any(item => item.pnu == "4420010200101830018");
+        //if(exists)
+        //{
+        //    int a = 1;
+        //}
 
         
 
@@ -618,57 +600,108 @@ public class CsvUploader
         // (신규) 최종 레코드
         if (resultData.Count > 0)
         {
-            // (1) 중복제거: 예시로, PNU, 정리일자, MoveType로 중복 제거
-            resultData = DropDuplicatesInfo(resultData);
-
-            // (2) 필요없는 컬럼 제거(예시: LandOwnerAddress)
-            // -> 클래스 정의에서 제외하면 됨 (혹은 csv 저장 시 제외)
-
-            // (3) 정렬
-            resultData = resultData
-                .OrderBy(x => x.regDt)
-                .ThenBy(x => x.rsn)
-                .ThenBy(x => x.bfPnu)
-                .ThenBy(x => x.afPnu)
-                .ToList();
-
-            // (4) GROUP_SEQNO 부여 (전역 static int 사용)
-            _groupSeqno += 1;
-
-            // (5) DB에서 기존 그룹 데이터 가져와서 병합
-            // 예시:
-            var dbFlowList = SqlQueryFlowList(); // List<LandMoveInfo>
-            if (dbFlowList.Count > 0)
+            try
             {
-                // 'SEQ' 컬럼 제거는 클래스에서 속성 제외
-                resultData.AddRange(dbFlowList);
-                // 다시 중복 제거
+                //------------------------------------------
+                // (1) 중복제거: 예시로, PNU, 정리일자, MoveType로 중복 제거
+                //------------------------------------------
                 resultData = DropDuplicatesInfo(resultData);
-            }
 
+                //------------------------------------------
+                // (2) 필요없는 컬럼 제거(예시: LandOwnerAddress)
+                // -> 클래스 정의에서 제외하면 됨 (혹은 csv 저장 시 제외)
+                //------------------------------------------
 
-            // (6) 그룹번호 재부여
-            foreach (var item in resultData) item.gSeq = _groupSeqno;
+                var converter = new LandMoveFlowConverter();
+                //resultData = resultData
+                //    .OrderBy(x => x.regDt)
+                //    .ThenBy(x => converter.ListMovRsn.ContainsKey(x.rsn) ? converter.ListMovRsn[x.rsn] : "00")
+                //    .ThenBy(x => x.bfPnu)
+                //    .ThenBy(x => x.afPnu)
+                //    .ToList();
 
-            // (7) PNU_SEQ 그룹순번 부여 (예를 들어, AfPnu 기준 그룹화)
-            var grouped = resultData.GroupBy(x => x.afPnu).ToList();
-            int groupSeq = 0;
-            foreach (var group in grouped)
-            {
-                foreach (var row in group)
+                //------------------------------------------
+                // (2) DB에서 기존 그룹 데이터 가져와서 병합
+                //------------------------------------------
+                var dbFlowList = SqlQueryFlowList(); // List<LandMoveInfo>
+                if (dbFlowList.Count > 0)
                 {
-                    row.pSeq = groupSeq;
+                    // 'SEQ' 컬럼 제거는 클래스에서 속성 제외
+                    resultData.AddRange(dbFlowList);
+                    // 다시 중복 제거
+                    resultData = DropDuplicatesInfo(resultData);
+
+                    // 정렬
+                    resultData = resultData
+                        .OrderBy(x => x.regDt)
+                        //.ThenBy(x => converter.ListMovRsn.ContainsKey(x.rsn) ? converter.ListMovRsn[x.rsn] : "00")
+                        .ThenBy(x =>
+                        {
+                            if (x.rsn != null && converter.ListMovRsn.TryGetValue(x.rsn, out var val))
+                                return val;
+                            return "00"; // 키가 없거나 x.rsn이 null인 경우 기본값
+                        })
+                        .ThenBy(x => x.bfPnu)
+                        .ThenBy(x => x.afPnu)
+                        .ToList();
                 }
-                groupSeq++;
+
+                //------------------------------------------
+                // (3) GROUP_SEQNO 증가 (전역 static int 사용)
+                //------------------------------------------
+                _groupSeqno += 1;
+
+                //------------------------------------------
+                // (4) 그룹번호 재부여
+                //------------------------------------------
+                foreach (var item in resultData) item.gSeq = _groupSeqno;
+
+                //Not Used//
+                // (7) PNU_SEQ 그룹순번 부여 (예를 들어, AfPnu 기준 그룹화)
+                //var grouped = resultData.GroupBy(x => x.afPnu).ToList();
+                //int groupSeq = 0;
+                //foreach (var group in grouped)
+                //{
+                //    foreach (var row in group)
+                //    {
+                //        row.pSeq = groupSeq;
+                //    }
+                //    groupSeq++;
+                //}
+
+                //------------------------------------------
+                // (5) 최종 정렬
+                //------------------------------------------
+                resultData = resultData
+                    .OrderBy(x => x.regDt)
+                    //.ThenBy(x => converter.ListMovRsn.ContainsKey(x.rsn) ? converter.ListMovRsn[x.rsn] : "00")
+                    .ThenBy(x =>
+                    {
+                        if (x.rsn != null && converter.ListMovRsn.TryGetValue(x.rsn, out var val))
+                            return val;
+                        return "00"; // 키가 없거나 x.rsn이 null인 경우 기본값
+                    })
+                    .ThenBy(x => x.rsn == "합병" ? x.afPnu : x.bfPnu)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"업로드 중 오류 발생: {ex.Message} {landcd}");
+            }
+            finally
+            {
+                //------------------------------------------
+                // (6) DB 에 <기존+신규 레코드> Insert
+                //------------------------------------------
+                DBService.InsertLandMoveUpload(resultData);
             }
 
-            // (8) DB 에 <기존+신규 레코드> Insert
-            DBService.InsertLandMoveUpload(resultData);
 
-
+            //------------------------------------------
             // [디버깅용] 최종 CSV 저장 등
             //string pathcsv = Path.Combine(_tempDir, $"ResultMove_{_groupSeqno}.csv");
             //SaveRecordMoveToCsv(resultData, pathcsv);
+            //------------------------------------------
             // [디버깅용] 
             foreach (var item in PnuList)
             {
@@ -678,7 +711,6 @@ public class CsvUploader
             {
                 RecordsMoveDebug.Add(item);
             }
-
         }
         //----------------------------------------
 
@@ -709,7 +741,7 @@ public class CsvUploader
 
         // 실제 처리 로직...
         // 중간중간 진행률 업데이트
-        onProgress?.Invoke(processedCount, totalCount, $"처리 중... {processedCount}/{totalCount}");
+        onProgress?.Invoke(processedCount, totalCount, $"{ConvertNumberFormat(processedCount.ToString())} / {ConvertNumberFormat(totalCount.ToString())}");
 
         // 전체 PNU 기준
         for (int idx = 0; idx < PnuListAll.Count; idx++)
@@ -727,6 +759,15 @@ public class CsvUploader
             //------------------------------------
             GetLandMovePartial(pnu);
 
+
+            //// [디버깅용]
+            //bool exists = PnuList.Any(item => item.pnu == "4420010200101830018");
+            //if (exists)
+            //{
+            //    int a = 1;
+            //}
+
+
             // 처리된 필지로 반영
             foreach (var checkedPnu in PnuList.Where(x => x.bChecked))
                 PnuListAll.Where(x => x.pnu == checkedPnu.pnu).ToList().ForEach(x => x.bChecked = true);
@@ -736,10 +777,12 @@ public class CsvUploader
 
             // 실제 처리 로직...
             // 중간중간 진행률 업데이트
-            processedCount = totalCount - RecordsMove.Count;
-            if (processedCount % 100 == 0 || processedCount == totalCount)
-                onProgress?.Invoke(processedCount, totalCount, $"처리 중... {ConvertNumberFormat(processedCount.ToString())}/{ConvertNumberFormat(totalCount.ToString())}");
-
+            if (processedCount != totalCount - RecordsMove.Count)
+            {
+                processedCount = totalCount - RecordsMove.Count;
+                if (processedCount % 200 == 0 || processedCount == totalCount)
+                    onProgress?.Invoke(processedCount, totalCount, $"{ConvertNumberFormat(processedCount.ToString())} / {ConvertNumberFormat(totalCount.ToString())}");
+            }
         }
 
 
@@ -781,6 +824,7 @@ public class CsvUploader
         List<int> listGrp = DBService.QueryGroupListFromDB(list);// 그룹목록 조회
         if (listGrp.Count > 0)
         {
+            //List<LandMoveInfo> 
             listOldDBResult = DBService.QueryFlowListFromDB(listGrp);//그룹목록에 해당하는 레코드 조회
 
             if (listOldDBResult.Count > 0)

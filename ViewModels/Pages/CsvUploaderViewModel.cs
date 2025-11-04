@@ -35,9 +35,24 @@ namespace LMFS.ViewModels.Pages
         [ObservableProperty] private int _progressMax = 100;
         [ObservableProperty] private string _progressText = "대기 중";
         [ObservableProperty] private bool _isUploading = false;
+        [ObservableProperty] private bool _isCommiting = false;
+        [ObservableProperty] private bool isUploadReady = false;
+        [ObservableProperty] private bool _isUploadCompleted = false;
+        [ObservableProperty] private bool _isCommitCompleted = false;
 
-        [ObservableProperty]
-        private bool isUploadReady = false;
+
+        //[ObservableProperty] 특성을 사용하면 자동으로 프로퍼티가 생성되므로 수동으로 프로퍼티를 만들면 충돌이 발생합니다.
+        //해결 방법: partial void 메서드를 사용
+        //[ObservableProperty] 를 그대로 두고, OnProgressValueChanged partial 메서드를 추가하세요:
+        // ProgressValue가 변경될 때 자동 호출되는 메서드
+        partial void OnProgressValueChanged(int value)
+        {
+            // Progress가 Max에 도달하면 자동으로 완료 처리
+            if (value >= ProgressMax && ProgressMax > 0)
+            {
+                _isUploadCompleted = true;
+            }
+        }
 
 
         //public ICommand OpenFolderCommand { get; }
@@ -93,7 +108,7 @@ namespace LMFS.ViewModels.Pages
                             );
 
 
-                                    // 파일 로드 완료 후 알림 표시
+                    // 파일 로드 완료 후 알림 표시
                     if (GridFileList.Count > 0)
                     {
                         ShowUploadReadyNotification();
@@ -104,8 +119,9 @@ namespace LMFS.ViewModels.Pages
 
 
         [RelayCommand]
-        //Diagram Color 설정화면으로 이동//
-        private async void OnUpload()
+        //[DB 업로드]//
+        //async void 메서드는 예외 처리와 테스트에 문제가 있어서, [RelayCommand] 특성이 붙은 메서드에서는 async Task 타입을 반환하도록 변경하는 것이 바람직합니다.
+        private async Task OnUpload()
         {
             if (string.IsNullOrEmpty(FolderPath))
             {
@@ -116,7 +132,7 @@ namespace LMFS.ViewModels.Pages
                     // 업로드 시작 시 준비 완료 메시지 숨김
             IsUploadReady = false;
 
-            IsUploading = true;
+            IsUploading = true;//표시 설정
             ProgressValue = 0;
             ProgressText = "업로드 준비 중...";
 
@@ -128,12 +144,43 @@ namespace LMFS.ViewModels.Pages
                     {
                         ProgressMax = total;
                         ProgressValue = current;
-                    ProgressText = $"{message}";
+                        ProgressText = $"{message}";
                     });
                 });
             });
 
-            IsUploading = false;
+            // 업로드 완료 시 (ProgressValue == ProgressMax)
+            IsUploadCompleted = true; 
+            IsUploading = false;//표시 해제
+        }
+
+
+        [RelayCommand]
+        //[DB 최종 업로드]//
+        //async void 메서드는 예외 처리와 테스트에 문제가 있어서, [RelayCommand] 특성이 붙은 메서드에서는 async Task 타입을 반환하도록 변경하는 것이 바람직합니다.
+        private async Task OnCommit()
+        {
+            IsCommiting = true;
+            
+            var message = $"최종 DB에 적용하시겠습니까?\n\n[업데이트 후 원복 불가]";
+            var result = MessageBox.Show(message, "알림", MessageBoxButton.YesNo, MessageBoxImage.Information);
+            if (result == MessageBoxResult.Yes)
+            {
+                await Task.Run(() =>
+                {
+                    int uploadCount = DBService.CommitLandMoveInfoOrg();
+                    
+                    //[TODO] 업로드 완료됐다는 확인을 어떤 항목으로 할지 정해야 함                    
+                    if(uploadCount > 0)
+                    {
+                        MessageBox.Show("최종 DB에 업로드 완료했습니다!");
+                    }
+                });
+            }
+
+            // 커밋 완료 시
+            IsCommitCompleted = true;
+            IsCommiting = false;
         }
 
 
