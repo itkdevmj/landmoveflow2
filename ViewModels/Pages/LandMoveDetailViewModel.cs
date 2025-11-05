@@ -28,10 +28,10 @@ namespace LMFS.ViewModels.Pages
         [ObservableProperty] private ObservableCollection<GridDetailItem> _gridDetailDataSource;
         [ObservableProperty] private string _regDt;
         [ObservableProperty] private string _rsn;
-
-
         // 저장 버튼 표시 여부 (처음에는 false)
         [ObservableProperty] private bool _isSaveButtonVisible = false;
+        [ObservableProperty] private bool _isTracking = false;
+        
 
 
         public Action CloseAction { get; set; }
@@ -57,6 +57,11 @@ namespace LMFS.ViewModels.Pages
             CloseAction?.Invoke();
         }
 
+        // GridDetailItem.cs - PropertyChanged 추적 활성화//새 행 추가 시 변경 추적 활성화
+        public void EnableTracking()
+        {
+            IsTracking = true;
+        }
 
         public void FilterDetail(List<LandMoveInfo> sourceList, string regDt, string rsn)
         {
@@ -75,11 +80,31 @@ namespace LMFS.ViewModels.Pages
             GridDetailDataSource = new ObservableCollection<GridDetailItem>(
                 filtered.Select(GridDetailItem.FromLandMoveInfo)
             );
+
+
+            // 기존 데이터는 추적 비활성화 (저장 버튼 표시 안 함)
+            foreach (var item in GridDetailDataSource)
+            {
+                item.PropertyChanged += OnItemPropertyChanged;
+            }
+
+            // 저장 버튼 초기 숨김
+            IsSaveButtonVisible = false;
         }
 
         private void OnRowDoubleClick(MouseButtonEventArgs e)
         {
             // 기존 더블클릭 로직
+        }
+
+        // 항목 변경 감지
+        private void OnItemPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(GridDetailItem.IsNewRow) &&
+                e.PropertyName != nameof(GridDetailItem.IsModified))
+            {
+                IsSaveButtonVisible = true;
+            }
         }
 
         //그리드 우클릭 [필지 추가] 선택
@@ -97,8 +122,12 @@ namespace LMFS.ViewModels.Pages
                 AfArea = 0.0,
                 OwnName = ""
             };
-
+            
+            newItem.PropertyChanged += OnItemPropertyChanged;
             GridDetailDataSource.Add(newItem);
+            newItem.EnableTracking(); // 추적 활성화
+
+            IsSaveButtonVisible = true;
 
             // 필지 추가 시 저장 버튼 표시
             IsSaveButtonVisible = true;

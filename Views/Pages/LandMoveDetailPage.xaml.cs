@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using DevExpress.Xpf.Core.Native;
+using DevExpress.Xpf.Grid;
 using LMFS.Messages;
 using LMFS.Models;
 using LMFS.ViewModels.Pages;
@@ -35,7 +36,7 @@ namespace LMFS.Views.Pages
 
             if (calculatedMaxHeight > 0)
             {
-                GridDetail.MaxHeight = calculatedMaxHeight;
+                GridControl.MaxHeight = calculatedMaxHeight; // GridDetail → gridControl로 수정
             }
         }
 
@@ -47,7 +48,26 @@ namespace LMFS.Views.Pages
         private void LandMoveDetailPage_OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
             UpdateDataGridMaxHeight();
-        }        
-     
+        }
+
+        // TableView_ShowingEditor 이벤트 핸들러 추가
+        private void TableView_ShowingEditor(object sender, ShowingEditorEventArgs e)
+        {
+            // '추가' 버튼 컬럼은 편집 불가
+            if (e.Column?.FieldName == "AddButton")
+            {
+                e.Cancel = true;
+                return;
+            }
+
+            // 필요시 특정 조건에서만 편집 허용
+            // 예: 새로운 행만 편집 가능하도록
+            var item = e.Row as LMFS.Engine.GridDetailItem;
+            if (item != null && !item.IsNewRow)
+            {
+                // 기존 행은 편집 제한 (필요에 따라 조정)
+                // e.Cancel = true;
+            }
+        }
     }
 }

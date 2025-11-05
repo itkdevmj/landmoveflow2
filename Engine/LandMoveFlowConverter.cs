@@ -248,7 +248,7 @@ public class LandMoveFlowConverter
     
 
     #region 데이터 분석 및 처리
-    private void InitializeForNewGroup()
+    public void InitializeForNewGroup()//private => public
     {
         _pnuList.Clear();
         _jibunList.Clear();

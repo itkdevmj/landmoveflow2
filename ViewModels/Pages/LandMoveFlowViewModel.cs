@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DevExpress.Data.Browsing;
+using DevExpress.Dialogs.Core.View;
 using DevExpress.Mvvm.Native;
 using DevExpress.Xpf.Grid;
 using LMFS.Db;
@@ -54,6 +55,11 @@ namespace LMFS.ViewModels.Pages
             if (GridDataSource == null || !GridDataSource.Any())
             {
                 ShowNoDataPopup();
+
+                // 다이어그램 초기화 (null이 가장 안전)
+                //XAML에 바인딩 되어 있으므로 XML 다이어그램 화면도 초기화됨//
+                LandMoveFlowData = null;
+
                 return; // 데이터가 없으면 이후 처리 중단
             }
 

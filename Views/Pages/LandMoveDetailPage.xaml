@@ -63,7 +63,7 @@
             </StackPanel>
 
             <dxg:GridControl Grid.Row="1" 
-                             x:Name="gridControl"
+                             x:Name="GridControl"
                              ItemsSource="{Binding GridDetailDataSource}">
                 <dxg:GridControl.View>
                     <dxg:TableView AllowEditing="True" 

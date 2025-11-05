@@ -1,4 +1,25 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿/*
+ 📊 초기 로드 (DB 데이터)
+└─> FromLandMoveInfo() 
+    └─> DisableTracking() 
+        └─> 저장 버튼 숨김 ✓
+
+➕ 사용자가 행 추가
+└─> OnAddRow()
+    └─> EnableTracking()
+        └─> 사용자가 값 입력
+            └─> PropertyChanged 이벤트 발생
+                └─> IsModified = true
+                    └─> 저장 버튼 표시 ✓
+
+💾 저장 완료
+└─> OnSave()
+    └─> IsNewRow = false, IsModified = false
+        └─> IsSaveButtonVisible = false
+            └─> 저장 버튼 숨김 ✓
+ */
+
+using CommunityToolkit.Mvvm.ComponentModel;
 using CsvHelper;
 using CsvHelper.Configuration;
 using DevExpress.Diagram.Core.Native;
@@ -46,8 +67,7 @@ public partial class GridDetailItem : ObservableObject  // ← partial + Observa
     [ObservableProperty] private string _afJimok;
     [ObservableProperty] private double _afArea;
     [ObservableProperty] private string _ownName;
-
-    private bool _isTracking = false; // 추적 활성화 플래그
+    [ObservableProperty] private bool _isTracking = false; // 추적 활성화 플래그
 
     #endregion
 
@@ -74,16 +94,35 @@ public partial class GridDetailItem : ObservableObject  // ← partial + Observa
     #endregion
 
     #region Methods
+        /// <summary>
+    /// 변경 추적 활성화 (새 행 추가 시 사용)
+    /// </summary>
+    public void EnableTracking()
+    {
+        IsTracking = true;
+        _logger.Debug("GridDetailItem 변경 추적 활성화");
+    }
+
+    /// <summary>
+    /// 변경 추적 비활성화 (DB에서 로드된 기존 데이터)//DB 로드 시 추적 비활성화 (불필요한 저장 버튼 표시 방지)
+    /// </summary>
+    public void DisableTracking()
+    {
+        IsTracking = false;
+        _logger.Debug("GridDetailItem 변경 추적 비활성화");
+    }
+
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
     {
         // IsNewRow나 IsModified 자체의 변경은 무시
         if (e.PropertyName == nameof(IsNewRow) ||
             e.PropertyName == nameof(IsModified) ||
-            !_isTracking)
+            !IsTracking)
             return;
 
         // 다른 속성이 변경되면 IsModified = true
         IsModified = true;
+        _logger.Debug($"GridDetailItem 속성 변경 감지: {e.PropertyName}");
     }
 
 
@@ -113,9 +152,10 @@ public partial class GridDetailItem : ObservableObject  // ← partial + Observa
         return true;
     }
 
+    //자동으로 DisableTracking() 호출 - 기존 데이터는 추적 안 함
     public static GridDetailItem FromLandMoveInfo(LandMoveInfo info)
     {
-        return new GridDetailItem
+        var item = new GridDetailItem
         {
             IsNewRow = false, // DB에서 온 데이터는 기존 행
             IsModified = false,
@@ -127,6 +167,11 @@ public partial class GridDetailItem : ObservableObject  // ← partial + Observa
             AfArea = info.afArea,
             OwnName = info.ownName ?? ""
         };
+
+        // DB에서 로드된 데이터는 추적 비활성화 (초기 로드 시 저장 버튼 표시 안 함)
+        item.DisableTracking();
+
+        return item;
     }
 
     // 반대 변환도 필요하면
