@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using DevExpress.Data.Browsing;
 using DevExpress.Dialogs.Core.View;
+using DevExpress.Mvvm;
 using DevExpress.Mvvm.Native;
 using DevExpress.Xpf.Grid;
 using LMFS.Db;
@@ -42,6 +43,16 @@ namespace LMFS.ViewModels.Pages
         [ObservableProperty] private List<LandMoveInfo> _gridDataSource;
         [ObservableProperty] private List<LandMoveInfoCategory> _gridCategoryDataSource;
         [ObservableProperty] private MemoryStream _landMoveFlowData;
+
+
+
+        public LandMoveFlowViewModel()
+        {
+            GetSidoCodeList();
+            GetJimokCodeDictionary();
+            GetReasonCodeDictionary();
+
+        }
 
 
         [RelayCommand]
@@ -188,12 +199,6 @@ namespace LMFS.ViewModels.Pages
             SelectedRi = RiList.FirstOrDefault()!;
         }
 
-        public LandMoveFlowViewModel()
-        {
-            GetSidoCodeList();
-            GetJimokCodeDictionary();
-            GetReasonCodeDictionary();
-        }
 
         private void GetSidoCodeList()
         {

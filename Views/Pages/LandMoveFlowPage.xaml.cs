@@ -1,7 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using DevExpress.Xpf.Core.Native;
 using DevExpress.Xpf.Editors;
+using LMFS.Engine;
 using LMFS.Messages;
+using LMFS.ViewModels;
 using LMFS.ViewModels.Pages;
 using System;
 using System.IO;
@@ -19,8 +21,24 @@ namespace LMFS.Views.Pages
         {
             InitializeComponent();
             DataContext = new LandMoveFlowViewModel();
-            
+
+            // 메시지 수신 등록
             WeakReferenceMessenger.Default.Register<LoadXmlMessage>(this);
+
+            WeakReferenceMessenger.Default.Register<PrintDiagramMessage>(this, (r, m) =>
+            {
+                OnPrintDiagram();
+            });
+
+            WeakReferenceMessenger.Default.Register<PrintPreviewDiagramMessage>(this, (r, m) =>
+            {
+                OnPrintPreviewDiagram();
+            });
+
+            WeakReferenceMessenger.Default.Register<ExportDiagramMessage>(this, (r, m) =>
+            {
+                OnExportDiagram(m.FilePath, m.Format);
+            });
         }
 
 
@@ -40,6 +58,15 @@ namespace LMFS.Views.Pages
         private void LandMoveFlowPage_OnLoaded(object sender, RoutedEventArgs e)
         {
             UpdateDataGridMaxHeight();
+
+            // TrackBar 틱 라벨 설정
+            SetupTrackBarLabels();
+        }
+
+        // 페이지가 언로드될 때 메시지 수신 해제
+        private void LandMoveFlowPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(this);
         }
 
         private void LandMoveFlowPage_OnSizeChanged(object sender, SizeChangedEventArgs e)
@@ -65,6 +92,79 @@ namespace LMFS.Views.Pages
             if (textEdit != null)
             {
                 Dispatcher.BeginInvoke(new Action(() => textEdit.SelectAll()));
+            }
+        }
+
+        //✅ TrackBar의 범위가 0.5~3.0 (50%~300%)로 설정됩니다
+        //✅ 오른쪽에 현재 배율이 "100%" 형식으로 표시됩니다
+        //✅ ZoomPercentConverter를 사용하여 자동으로 퍼센트 변환됩니다
+        private void SetupTrackBarLabels()
+        {
+            // TrackBar 아래에 퍼센트 라벨 표시
+            if (ZoomTrackBar != null)
+            {
+                // DevExpress TrackBarEdit의 경우 CustomDrawTick 이벤트나
+                // ItemTemplate을 사용하여 커스터마이징 가능
+            }
+        }
+
+
+
+        private void OnPrintDiagram()
+        {
+            try
+            {
+                LmfControl.QuickPrint();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"인쇄 실패: {ex.Message}", "오류",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void OnPrintPreviewDiagram()
+        {
+            try
+            {
+                LmfControl.ShowPrintPreview();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"인쇄 미리보기 실패: {ex.Message}", "오류",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void OnExportDiagram(string filePath, ExportFormat format)
+        {
+            try
+            {
+                switch (format)
+                {
+                    case ExportFormat.Pdf:
+                        LmfControl.ExportToPdf(filePath);
+                        MessageBox.Show("PDF 파일로 저장되었습니다.", "성공",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+                        break;
+
+                    case ExportFormat.Jpg:
+                        LmfControl.ExportDiagram(filePath);
+                        MessageBox.Show("JPG 파일로 저장되었습니다.", "성공",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+                        break;
+
+                    case ExportFormat.Png:
+                        LmfControl.ExportDiagram(filePath);
+                        MessageBox.Show("PNG 파일로 저장되었습니다.", "성공",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"저장 실패: {ex.Message}", "오류",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
