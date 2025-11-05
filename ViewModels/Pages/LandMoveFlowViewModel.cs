@@ -106,7 +106,7 @@ namespace LMFS.ViewModels.Pages
                     Content = page,
                     Title = "토지이동흐름도 일자/종목별 필지정보(상세)",
                     Width = 800,
-                    Height = 400,
+                    Height = 320,
                     Owner = Application.Current.MainWindow
                 };
                 window.WindowStartupLocation = WindowStartupLocation.CenterScreen;//부모화면의 가운데 표시

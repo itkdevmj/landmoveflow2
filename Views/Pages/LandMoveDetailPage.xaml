@@ -13,10 +13,15 @@
       xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
       xmlns:xtraEditors="clr-namespace:DevExpress.XtraEditors;assembly=DevExpress.XtraEditors.v23.2"
       mc:Ignorable="d" 
-      d:DesignHeight="400" d:DesignWidth="800"
+      d:DesignHeight="320" d:DesignWidth="800"
       Title="토지이동흐름도_(상세)"
       Loaded="LandMoveDetailPage_OnLoaded"
       SizeChanged="LandMoveDetailPage_OnSizeChanged">
+
+    <Page.Resources>
+        <!-- BoolToVisibility Converter 추가 -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </Page.Resources>
 
     <DockPanel>
 
@@ -25,7 +30,6 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="45" />
                 <RowDefinition />
-                <RowDefinition Height="80" />
             </Grid.RowDefinitions>
             <StackPanel Margin="5,0,5,0">
                 <Border Grid.Row="0" Grid.Column="0" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="1" CornerRadius="5" Height="40">
@@ -39,74 +43,61 @@
 
                         <Label Grid.Column="0" Content="{Binding RegDt}" VerticalAlignment="Center" />
                         <Label Grid.Column="1" Content="{Binding Rsn}" VerticalAlignment="Center" />
-                        <Button Grid.Column="4" Content="변경사항 저장" Width="120" Height="25"/>
+
+                        <!-- 저장 버튼 영역 (조건부 표시) -->
+                        <StackPanel Grid.Column="2" 
+                            Orientation="Horizontal" 
+                            HorizontalAlignment="Right"
+                            Margin="10"
+                            Visibility="{Binding IsSaveButtonVisible, 
+                                        Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Button Content="변경사항 저장" 
+                                Command="{Binding SaveChangesCommand}"
+                                Width="120" 
+                                Height="35"
+                                Margin="5"/>
+                        </StackPanel>
                     </Grid>
-                    
+
                 </Border>
             </StackPanel>
-            <dxg:GridControl Grid.Row="1" Name="DetailGrid" 
-                 AutoExpandAllGroups="True" AllowColumnMRUFilterList="False"
-                 ItemsSource="{Binding GridDetailDataSource}" SelectionMode="Row"
-                 dx:ScrollBarExtensions.ScrollBarMode="TouchOverlap" ShowBorder="True"
-                 Margin="4,0,4,4" Cursor="Hand">
 
-                <dxmvvm:Interaction.Behaviors>
-                    <dxmvvm:EventToCommand EventName="MouseDoubleClick" 
-                               Command="{Binding RowDoubleClickCommand}"
-                               PassEventArgsToCommand="True" />
-                    <dxmvvm:EventToCommand EventName="MouseRightButtonUp" 
-                               Command="{Binding ShowContextMenuCommand}"
-                               PassEventArgsToCommand="True" />
-                </dxmvvm:Interaction.Behaviors>
-
-                <!-- 컨텍스트 메뉴 추가 -->
-                <dxg:GridControl.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="필지추가" Command="{Binding AddRowCommand}" />
-                    </ContextMenu>
-                </dxg:GridControl.ContextMenu>
-
+            <dxg:GridControl Grid.Row="1" 
+                             x:Name="gridControl"
+                             ItemsSource="{Binding GridDetailDataSource}">
                 <dxg:GridControl.View>
-                    <dxg:TableView ShowIndicator="False" ShowGroupPanel="False" 
-                       NavigationStyle="Row" AutoWidth="False"
-                       ShowingEditor="TableView_ShowingEditor">
+                    <dxg:TableView AllowEditing="True" 
+                                   ShowingEditor="TableView_ShowingEditor">
+
                     </dxg:TableView>
                 </dxg:GridControl.View>
-
                 <dxg:GridControl.Columns>
-                    <dxg:GridColumn FieldName="bfPnu" Header="이동전" Width="0.8*" 
-                        UnboundDataType="{x:Type sys:String}"
+                    <dxg:GridColumn FieldName="BfPnu" Header="이동전" Width="0.8*" 
                         HorizontalHeaderContentAlignment="Center" />
-                    <dxg:GridColumn FieldName="afPnu" Header="이동후" Width="0.8*" 
-                        UnboundDataType="{x:Type sys:String}"
+                    <dxg:GridColumn FieldName="AfPnu" Header="이동후" Width="0.8*" 
                         HorizontalHeaderContentAlignment="Center" />
-                    <dxg:GridColumn FieldName="bfJimok" Header="이동전_지목" Width="0.7*" 
-                        UnboundDataType="{x:Type sys:String}"
+                    <dxg:GridColumn FieldName="BfJimok" Header="이동전_지목" Width="0.7*" 
                         HorizontalHeaderContentAlignment="Center" />
-                    <dxg:GridColumn FieldName="bfArea" Header="이동전_면적" Width="0.8*" 
-                        UnboundDataType="{x:Type sys:String}"
+                    <dxg:GridColumn FieldName="BfArea" Header="이동전_면적" Width="0.8*" 
                         HorizontalHeaderContentAlignment="Center" />
-                    <dxg:GridColumn FieldName="afJimok" Header="이동후_지목" Width="0.7*" 
-                        UnboundDataType="{x:Type sys:String}"
+                    <dxg:GridColumn FieldName="AfJimok" Header="이동후_지목" Width="0.7*" 
                         HorizontalHeaderContentAlignment="Center" />
-                    <dxg:GridColumn FieldName="afArea" Header="이동후_면적" Width="0.8*" 
-                        UnboundDataType="{x:Type sys:String}"
+                    <dxg:GridColumn FieldName="AfArea" Header="이동후_면적" Width="0.8*" 
                         HorizontalHeaderContentAlignment="Center" />
-                    <dxg:GridColumn FieldName="ownName" Header="소유자명" Width="2*" 
-                        UnboundDataType="{x:Type sys:String}"
+                    <dxg:GridColumn FieldName="OwnName" Header="소유자명" Width="2*" 
                         HorizontalHeaderContentAlignment="Center" />
 
                     <!-- 동적 버튼 컬럼 -->
                     <dxg:GridColumn FieldName="ActionButton" Header="" Width="80" 
-                        UnboundDataType="{x:Type sys:String}"
-                        HorizontalHeaderContentAlignment="Center">
+                        HorizontalHeaderContentAlignment="Center"
+                        AllowEditing="False">
                         <dxg:GridColumn.CellTemplate>
                             <DataTemplate>
                                 <Button Content="추가" 
-                            Visibility="{Binding IsNewRow, Converter={StaticResource BoolToVisibilityConverter}}"
-                            Command="{Binding DataContext.ConfirmAddCommand, RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
-                            CommandParameter="{Binding}"
-                            Margin="2" Padding="5,2" />
+                                    Visibility="{Binding IsNewRow, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    Command="{Binding DataContext.ConfirmAddCommand, RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                    CommandParameter="{Binding}"
+                                    Margin="2" Padding="5,2" />
                             </DataTemplate>
                         </dxg:GridColumn.CellTemplate>
                     </dxg:GridColumn>
@@ -115,10 +106,4 @@
         </Grid>
     </DockPanel>
 
-<!-- [참고]텍스트 중앙 정렬
-HorizontalContentAlignment="Center"
-VerticalContentAlignment="Center"
-Text="중앙 정렬 텍스트"
--->
- 
 </Page>

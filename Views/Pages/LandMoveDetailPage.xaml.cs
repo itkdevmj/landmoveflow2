@@ -35,7 +35,7 @@ namespace LMFS.Views.Pages
 
             if (calculatedMaxHeight > 0)
             {
-                DetailGrid.MaxHeight = calculatedMaxHeight;
+                GridDetail.MaxHeight = calculatedMaxHeight;
             }
         }
 
