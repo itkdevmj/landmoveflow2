@@ -5,8 +5,7 @@ using DevExpress.Data.Browsing;
 using DevExpress.Dialogs.Core.View;
 using DevExpress.Mvvm;
 using DevExpress.Mvvm.Native;
-using DevExpress.Xpf.Grid;
-using DevExpress.XtraGrid;
+using DevExpress.Xpf.Grid;// WPF용만 유지
 using LMFS.Db;
 using LMFS.Engine;
 using LMFS.Messages;
