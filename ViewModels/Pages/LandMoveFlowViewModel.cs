@@ -1,15 +1,19 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using DevExpress.Data.Browsing;
 using DevExpress.Dialogs.Core.View;
 using DevExpress.Mvvm;
 using DevExpress.Mvvm.Native;
 using DevExpress.Xpf.Grid;
+using DevExpress.XtraGrid;
 using LMFS.Db;
 using LMFS.Engine;
+using LMFS.Messages;
 using LMFS.Models;
 using LMFS.Services;
 using LMFS.Views.Pages;
+using Microsoft.Win32;// SaveFileDialog를 위해 필요
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -19,9 +23,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Xml.Linq;
-using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.Win32;
-using LMFS.Messages;
 
 namespace LMFS.ViewModels.Pages
 {
@@ -388,7 +389,7 @@ namespace LMFS.ViewModels.Pages
         //Messenger 패턴 사용 (MVVM 유지, 권장)
 
         [RelayCommand] //[RelayCommand] 속성이 존재해야 Command가 생성됩니다. On 접두사 필수!!!
-        private void OnPrintCommand()
+        private void OnPrint()
         {
             //try
             //{
@@ -405,7 +406,7 @@ namespace LMFS.ViewModels.Pages
         }
 
         [RelayCommand]
-        private void OnPrintPreviewCommand()
+        private void OnPrintPreview()
         {
             //try
             //{
@@ -422,7 +423,7 @@ namespace LMFS.ViewModels.Pages
         }
 
         [RelayCommand]
-        private void OnExportPdfCommand()
+        private void OnExportPdf()
         {
             SaveFileDialog saveDialog = new SaveFileDialog
             {
@@ -455,7 +456,7 @@ namespace LMFS.ViewModels.Pages
         }
 
         [RelayCommand]
-        private void OnExportJpgCommand()
+        private void OnExportJpg()
         {
             SaveFileDialog saveDialog = new SaveFileDialog
             {
@@ -488,7 +489,7 @@ namespace LMFS.ViewModels.Pages
         }
 
         [RelayCommand]
-        private void OnExportPngCommand()
+        private void OnExportPng()
         {
             SaveFileDialog saveDialog = new SaveFileDialog
             {
@@ -521,9 +522,25 @@ namespace LMFS.ViewModels.Pages
         }
 
         [RelayCommand]
-        private void OnExportGridCommand()
+        private void OnExportGrid()
         {
-            //
+            //SaveFileDialog saveDialog = new SaveFileDialog();
+            //saveDialog.Filter = "Excel (2010) (.xlsx)|*.xlsx|Excel (2003)(.xls)|*.xls";
+            //saveDialog.FileName = "Export_" + DateTime.Now.ToString("yyyy-MM-dd");
+            //if (saveDialog.ShowDialog() != DialogResult.Cancel)
+            //{
+            //    string path = saveDialog.FileName;
+            //    string ext = new FileInfo(path).Extension;
+            //    switch (ext)
+            //    {
+            //        case ".xls":
+            //            GridDataSource.ExportToXls(path);
+            //            break;
+            //        case ".xlsx":
+            //            GridDataSource.ExportToXlsx(path);
+            //            break;
+            //    }
+            //}
         }
 
         /*
