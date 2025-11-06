@@ -39,6 +39,16 @@ namespace LMFS.Views.Pages
             {
                 OnExportDiagram(m.FilePath, m.Format);
             });
+
+            WeakReferenceMessenger.Default.Register<ExportDiagramMessage>(this, (r, m) =>
+            {
+                OnExportDiagram(m.FilePath, m.Format);
+            });
+
+            WeakReferenceMessenger.Default.Register<ExportDiagramMessage>(this, (r, m) =>
+            {
+                OnExportDiagram(m.FilePath, m.Format);
+            });
         }
 
 

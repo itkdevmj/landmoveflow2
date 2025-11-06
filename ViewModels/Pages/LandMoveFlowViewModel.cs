@@ -55,6 +55,15 @@ namespace LMFS.ViewModels.Pages
             GetJimokCodeDictionary();
             GetReasonCodeDictionary();
 
+            // 기존 등록이 있다면 먼저 해제
+            WeakReferenceMessenger.Default.UnregisterAll(this);
+
+            // 메시지 수신 등록
+            WeakReferenceMessenger.Default.Register<PrintDiagramMessage>(this, (r, m) => OnPrint());
+            WeakReferenceMessenger.Default.Register<PrintPreviewDiagramMessage>(this, (r, m) => OnPrintPreview());
+            WeakReferenceMessenger.Default.Register<ExportPdfDiagramMessage>(this, (r, m) => OnExportPdf());
+            WeakReferenceMessenger.Default.Register<ExportJpgDiagramMessage>(this, (r, m) => OnExportJpg());
+            WeakReferenceMessenger.Default.Register<ExportPngDiagramMessage>(this, (r, m) => OnExportPng());
         }
 
 
@@ -390,37 +399,22 @@ namespace LMFS.ViewModels.Pages
         [RelayCommand] //[RelayCommand] 속성이 존재해야 Command가 생성됩니다. On 접두사 필수!!!
         private void OnPrint()
         {
-            //try
-            //{
-            //    var page = new LandMoveFlowPage();
-            //    page.LmfControl.QuickPrint();
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show($"인쇄 실패: {ex.Message}", "오류",
-            //        MessageBoxButton.OK, MessageBoxImage.Error);
-            //}
-
             WeakReferenceMessenger.Default.Send(new PrintDiagramMessage());
         }
 
         [RelayCommand]
         private void OnPrintPreview()
         {
-            //try
-            //{
-            //    var page = new LandMoveFlowPage();
-            //    page.LmfControl.ShowPrintPreview();
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show($"인쇄 미리보기 실패: {ex.Message}", "오류",
-            //        MessageBoxButton.OK, MessageBoxImage.Error);
-            //}
-
             WeakReferenceMessenger.Default.Send(new PrintPreviewDiagramMessage());
         }
 
+
+        //[오류발생-무한루프]
+        //1. MainWindow 버튼 클릭 → MainWindowViewModel.ExportPdf() 실행
+        //2. MainWindowViewModel에서 ExportPdfDiagramMessage 전송
+        //3. LandMoveFlowViewModel의 OnExportPdf() 실행(메시지 수신)
+        //4. OnExportPdf()에서 또다시 ExportPdfDiagramMessage 전송 ❌
+        //5. 3번으로 다시 돌아감 → 무한 루프!
         [RelayCommand]
         private void OnExportPdf()
         {
@@ -433,19 +427,6 @@ namespace LMFS.ViewModels.Pages
 
             if (saveDialog.ShowDialog() == true)
             {
-                //try
-                //{
-                //    var page = new LandMoveFlowPage();
-                //    page.LmfControl.ExportToPdf(saveDialog.FileName);
-                //    MessageBox.Show("PDF 파일로 저장되었습니다.", "성공",
-                //        MessageBoxButton.OK, MessageBoxImage.Information);
-                //}
-                //catch (Exception ex)
-                //{
-                //    MessageBox.Show($"저장 실패: {ex.Message}", "오류",
-                //        MessageBoxButton.OK, MessageBoxImage.Error);
-                //}
-
                 WeakReferenceMessenger.Default.Send(new ExportDiagramMessage
                 {
                     FilePath = saveDialog.FileName,
@@ -466,19 +447,6 @@ namespace LMFS.ViewModels.Pages
 
             if (saveDialog.ShowDialog() == true)
             {
-                //try
-                //{
-                //    var page = new LandMoveFlowPage();
-                //    page.LmfControl.ExportDiagram(saveDialog.FileName);
-                //    MessageBox.Show("JPG 파일로 저장되었습니다.", "성공",
-                //        MessageBoxButton.OK, MessageBoxImage.Information);
-                //}
-                //catch (Exception ex)
-                //{
-                //    MessageBox.Show($"저장 실패: {ex.Message}", "오류",
-                //        MessageBoxButton.OK, MessageBoxImage.Error);
-                //}
-
                 WeakReferenceMessenger.Default.Send(new ExportDiagramMessage
                 {
                     FilePath = saveDialog.FileName,
@@ -499,19 +467,6 @@ namespace LMFS.ViewModels.Pages
 
             if (saveDialog.ShowDialog() == true)
             {
-                //try
-                //{
-                //    var page = new LandMoveFlowPage();
-                //    page.LmfControl.ExportDiagram(saveDialog.FileName);
-                //    MessageBox.Show("PNG 파일로 저장되었습니다.", "성공",
-                //        MessageBoxButton.OK, MessageBoxImage.Information);
-                //}
-                //catch (Exception ex)
-                //{
-                //    MessageBox.Show($"저장 실패: {ex.Message}", "오류",
-                //        MessageBoxButton.OK, MessageBoxImage.Error);
-                //}
-
                 WeakReferenceMessenger.Default.Send(new ExportDiagramMessage
                 {
                     FilePath = saveDialog.FileName,
