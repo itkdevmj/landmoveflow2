@@ -1,4 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using DevExpress.Diagram.Core;// DiagramImageExportFormat
+using DevExpress.Diagram.Core.Native;
 using DevExpress.Xpf.Core.Native;
 using DevExpress.Xpf.Editors;
 using LMFS.Engine;
@@ -6,8 +8,8 @@ using LMFS.Messages;
 using LMFS.ViewModels;
 using LMFS.ViewModels.Pages;
 using System;
-using System.IO;
-using System.Windows;
+using System.IO;// FileStream
+using System.Windows;// Rect
 using System.Windows.Controls;
 
 namespace LMFS.Views.Pages
@@ -120,7 +122,27 @@ namespace LMFS.Views.Pages
         {
             try
             {
-                LmfControl.QuickPrint();
+                // 프린터 확인
+                if (System.Drawing.Printing.PrinterSettings.InstalledPrinters.Count == 0)
+                {
+                    MessageBox.Show("설치된 프린터가 없습니다.", "오류",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // 다이어그램이 비어있는지 확인
+                if (LmfControl.Items.Count == 0)
+                {
+                    MessageBox.Show("인쇄할 내용이 없습니다.", "알림",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // Print 메서드로 Print Dialog 표시 후 인쇄
+                LmfControl.Print();
+
+                // 또는 바로 인쇄
+                // LmfControl.QuickPrint();
             }
             catch (Exception ex)
             {
@@ -133,6 +155,15 @@ namespace LMFS.Views.Pages
         {
             try
             {
+                // 다이어그램이 비어있는지 확인
+                if (LmfControl.Items.Count == 0)
+                {
+                    MessageBox.Show("미리보기할 내용이 없습니다.", "알림",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // 매개변수 없이 호출 (기본 배율)
                 LmfControl.ShowPrintPreview();
             }
             catch (Exception ex)
@@ -155,16 +186,30 @@ namespace LMFS.Views.Pages
                         break;
 
                     case ExportFormat.Jpg:
-                        LmfControl.ExportDiagram(filePath);
+                        // JPG의 경우 - Stream 사용
+                        ExportImageWithSettings(filePath, DiagramImageExportFormat.JPEG);
                         MessageBox.Show("JPG 파일로 저장되었습니다.", "성공",
                             MessageBoxButton.OK, MessageBoxImage.Information);
                         break;
 
                     case ExportFormat.Png:
-                        LmfControl.ExportDiagram(filePath);
+                        // PNG의 경우 - Stream 사용
+                        ExportImageWithSettings(filePath, DiagramImageExportFormat.PNG);
                         MessageBox.Show("PNG 파일로 저장되었습니다.", "성공",
                             MessageBoxButton.OK, MessageBoxImage.Information);
                         break;
+
+                    //case ExportFormat.Jpg:
+                    //    LmfControl.ExportDiagram(filePath);
+                    //    MessageBox.Show("JPG 파일로 저장되었습니다.", "성공",
+                    //        MessageBoxButton.OK, MessageBoxImage.Information);
+                    //    break;
+
+                    //case ExportFormat.Png:
+                    //    LmfControl.ExportDiagram(filePath);
+                    //    MessageBox.Show("PNG 파일로 저장되었습니다.", "성공",
+                    //        MessageBoxButton.OK, MessageBoxImage.Information);
+                    //    break;
                 }
             }
             catch (Exception ex)
@@ -173,6 +218,96 @@ namespace LMFS.Views.Pages
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        private void ExportImageWithSettings(string filePath, DiagramImageExportFormat format)
+        {
+            // DPI 설정 (96 = 기본, 150 = 중간, 300 = 고해상도)
+            double dpi = 300;
+
+            // Scale 설정 (1.0 = 100%, 2.0 = 200%)
+            double scale = 1.0;
+
+            // Export bounds (null이면 전체 다이어그램)
+            System.Windows.Rect? exportBounds = null;
+
+            // Stream을 사용하여 Export
+            using (FileStream stream = new FileStream(filePath, FileMode.Create))
+            {
+                LmfControl.ExportToImage(
+                    stream,           // Stream
+                    format,           // DiagramImageExportFormat
+                    exportBounds,     // Nullable<Rect> - 내보낼 영역 (null = 전체)
+                    dpi,              // Nullable<Double> - 해상도
+                    scale             // Nullable<Double> - 배율
+                );
+            }
+        }
+
+        /*
+         더 나아가 사용자가 설정을 선택할 수 있도록 대화상자를 추가할 수 있습니다:
+
+        csharp
+        private void OnExportDiagramWithSettings(string filePath, ExportFormat format)
+        {
+            try
+            {
+                // 설정 대화상자 표시
+                var settingsDialog = new ImageExportSettingsDialog();
+                if (settingsDialog.ShowDialog() == true)
+                {
+                    double dpi = settingsDialog.SelectedDpi;      // 예: 96, 150, 300
+                    double scale = settingsDialog.SelectedScale;  // 예: 0.5, 1.0, 2.0
+                    int quality = settingsDialog.JpegQuality;     // JPG의 경우 1-100
+
+                    var imageFormat = format == ExportFormat.Jpg 
+                        ? System.Drawing.Imaging.ImageFormat.Jpeg 
+                        : System.Drawing.Imaging.ImageFormat.Png;
+
+                    // ExportToImage는 직접적인 품질 설정이 없으므로
+                    // BitmapEncoder를 사용하여 수동으로 저장
+                    if (format == ExportFormat.Jpg)
+                    {
+                        SaveAsJpegWithQuality(filePath, dpi, scale, quality);
+                    }
+                    else
+                    {
+                        LmfControl.ExportToImage(filePath, imageFormat, dpi, scale, 
+                            new System.Windows.Thickness(10));
+                    }
+
+                    MessageBox.Show("이미지가 저장되었습니다.", "성공",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"저장 실패: {ex.Message}", "오류",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void SaveAsJpegWithQuality(string filePath, double dpi, double scale, int quality)
+        {
+            // RenderTargetBitmap으로 다이어그램 렌더링
+            double width = LmfControl.ActualWidth * scale;
+            double height = LmfControl.ActualHeight * scale;
+    
+            RenderTargetBitmap renderBitmap = new RenderTargetBitmap(
+                (int)width, (int)height, dpi, dpi, PixelFormats.Pbgra32);
+    
+            renderBitmap.Render(LmfControl);
+    
+            // JPEG Encoder로 품질 설정
+            JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+            encoder.QualityLevel = quality; // 1-100
+            encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
+    
+            using (FileStream stream = new FileStream(filePath, FileMode.Create))
+            {
+                encoder.Save(stream);
+            }
+        }
+        */
 
     }
 }

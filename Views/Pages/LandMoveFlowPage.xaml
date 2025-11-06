@@ -249,10 +249,10 @@
                     <RowDefinition Height = "50"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="190" />
+                    <ColumnDefinition Width="195" />
                     <ColumnDefinition Width="*" />
                     <!-- Space -->
-                    <ColumnDefinition Width="360" />
+                    <ColumnDefinition Width="300" />
                 </Grid.ColumnDefinitions>
                 <Border Grid.Row="0" Grid.Column="0" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="2" CornerRadius="5" Height="40" Margin="5 0 0 0">
                     <!-- 내부 Grid는 3컬럼을 하나로 감싸는 역할 -->
@@ -272,6 +272,26 @@
                     </Grid>
                 </Border>
                 <!-- Spacer: Grid.Column="1"는 나머지 영역을 차지해서 오른쪽으로 밀어줍니다 -->
+                <Border Grid.Row="0" Grid.Column="1" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="2" CornerRadius="5" Height="40" Margin="5 0 0 0">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,0">
+                        <!-- 인쇄 버튼 -->
+                        <Button Command="{Binding PrintCommand}" ToolTip="인쇄" Width="42" Height="36" Margin="0,0,0,0" Background="Transparent" BorderThickness="0">
+                            <Image Source="/Resources/Images/printIcon.png" Stretch="Uniform" Width="32" Height="32" Margin="-10,0,-10,0" />
+                        </Button>
+                        <!-- PDF 내보내기 버튼 -->
+                        <Button Command="{Binding ExportPdfCommand}" ToolTip="PDF로 내보내기" Width="42" Height="36" Margin="0,0,0,0" Background="Transparent" BorderThickness="0">
+                            <Image Source="/Resources/Images/pdfIcon.png" Stretch="Uniform" Width="32" Height="32" Margin="-10,0,-10,0" />
+                        </Button>
+                        <!-- PNG 내보내기 버튼 -->
+                        <Button Command="{Binding ExportPngCommand}" ToolTip="PNG로 내보내기" Width="42" Height="36" Margin="0,0,0,0" Background="Transparent" BorderThickness="0">
+                            <Image Source="/Resources/Images/pngIcon.png" Stretch="Uniform" Width="32" Height="32" Margin="-10,0,-10,0" />
+                        </Button>                    
+                        <!-- JPG 내보내기 버튼 -->
+                        <Button Command="{Binding ExportJpgCommand}" ToolTip="JPG로 내보내기" Width="42" Height="36" Margin="0,0,0,0" Background="Transparent" BorderThickness="0">
+                            <Image Source="/Resources/Images/jpgIcon.png" Stretch="Uniform" Width="32" Height="32" Margin="-10,0,-10,0" />
+                        </Button>
+                    </StackPanel>
+                </Border>
                 <Border Grid.Row="0" Grid.Column="2" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="2" CornerRadius="5" Height="40" Margin="5 0 5 0">
                     <!-- 내부 Grid는 3컬럼을 하나로 감싸는 역할 -->
                     <Grid>
@@ -279,9 +299,9 @@
                             <RowDefinition Height = "Auto"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="0.8*" />
-                            <ColumnDefinition Width="2*" />
-                            <ColumnDefinition Width="1.3*" />
+                            <ColumnDefinition Width="0.7*" />
+                            <ColumnDefinition Width="1.5*" />
+                            <ColumnDefinition Width="1.*" />
                         </Grid.ColumnDefinitions>
                         <!--Mode=TwoWay 라는 건 화면에서 변경해도 ViewModel로 반영되고, ViewModel에서 변경해도 화면에 반영된다는 뜻-->
                         <CheckBox Grid.Column="0" IsChecked="{Binding Portrait, Mode=TwoWay}" Content="세로형" Foreground="#6C7A89" FontWeight="Bold" Height="25" Margin="5 10 0 10" />
@@ -308,10 +328,10 @@
                                     VerticalAlignment="Center"
                                     FontWeight="Bold"
                                     FontSize="14"
-                                    Margin="10 0 10 0"
+                                    Margin="0 0 0 0"
                                     Foreground="#21808D"/>
                         </Grid>
-                        <Button Grid.Column="2" Content="색상 설정" Width="100" Height="28" Command="{Binding SettingColorCommand}" Margin="0 0 0 10" BorderBrush="White" Background="#FF66B821" Foreground="White" FontWeight="Bold"/>
+                        <Button Grid.Column="2" Content="색상 설정" Width="80" Height="28" Command="{Binding SettingColorCommand}" Margin="0 0 0 10" BorderBrush="White" Background="#FF66B821" Foreground="White" FontWeight="Bold"/>
                     </Grid>
                 </Border>
             </Grid>
@@ -326,6 +346,9 @@
 
         <Border Background="#A3C6C4" BorderThickness="1" CornerRadius="5" Padding="3">
             <dxdiag:DiagramControl ShowRulers="False" IsReadOnly="True" x:Name="LmfControl" 
+                                   ExportDPI="300"
+                                   ExportScale="1.0"
+                                   ExportMargin="10"
                                    DocumentSource="{Binding LandMoveFlowData}" Opacity="1">
                 <!--<dxmvvm:Interaction.Behaviors>
                     <dxdiag:DiagramDataBindingBehavior
