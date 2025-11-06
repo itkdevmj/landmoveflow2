@@ -249,42 +249,42 @@
                     <RowDefinition Height = "50"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="270" />
+                    <ColumnDefinition Width="190" />
                     <ColumnDefinition Width="*" />
                     <!-- Space -->
-                    <ColumnDefinition Width="390" />
+                    <ColumnDefinition Width="360" />
                 </Grid.ColumnDefinitions>
-                <Border Grid.Row="0" Grid.Column="0" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="2" CornerRadius="5" Height="40" Margin="10 0 0 0">
+                <Border Grid.Row="0" Grid.Column="0" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="2" CornerRadius="5" Height="40" Margin="5 0 0 0">
                     <!-- 내부 Grid는 3컬럼을 하나로 감싸는 역할 -->
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height = "Auto"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="70" />
-                            <ColumnDefinition Width="70" />
+                            <ColumnDefinition Width="80" />
+                            <ColumnDefinition Width="50" />
+                            <ColumnDefinition Width="50" />
                         </Grid.ColumnDefinitions>
                         <!--Mode=TwoWay 라는 건 화면에서 변경해도 ViewModel로 반영되고, ViewModel에서 변경해도 화면에 반영된다는 뜻-->
-                        <CheckBox Grid.Column="0" IsChecked="{Binding IsOwnName, Mode=TwoWay}" Content="소유자명" Height="25" Margin="10 10 0 10"/>
-                        <CheckBox Grid.Column="1" IsChecked="{Binding IsJimok, Mode=TwoWay}" Content="지목" Height="25" Margin="10 10 0 10" />
-                        <CheckBox Grid.Column="2" IsChecked="{Binding IsArea, Mode=TwoWay}" Content="면적" Height="25" Margin="10 10 0 10" />
+                        <CheckBox Grid.Column="0" IsChecked="{Binding IsOwnName, Mode=TwoWay}" Content="소유자명" Height="25" Margin="5 10 0 10"/>
+                        <CheckBox Grid.Column="1" IsChecked="{Binding IsJimok, Mode=TwoWay}" Content="지목" Height="25" Margin="5 10 0 10" />
+                        <CheckBox Grid.Column="2" IsChecked="{Binding IsArea, Mode=TwoWay}" Content="면적" Height="25" Margin="5 10 0 10" />
                     </Grid>
                 </Border>
                 <!-- Spacer: Grid.Column="1"는 나머지 영역을 차지해서 오른쪽으로 밀어줍니다 -->
-                <Border Grid.Row="0" Grid.Column="2" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="2" CornerRadius="5" Height="40" Margin="10 0 10 0">
+                <Border Grid.Row="0" Grid.Column="2" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="2" CornerRadius="5" Height="40" Margin="5 0 5 0">
                     <!-- 내부 Grid는 3컬럼을 하나로 감싸는 역할 -->
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height = "Auto"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="0.8*" />
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="1.3*" />
                         </Grid.ColumnDefinitions>
                         <!--Mode=TwoWay 라는 건 화면에서 변경해도 ViewModel로 반영되고, ViewModel에서 변경해도 화면에 반영된다는 뜻-->
-                        <CheckBox Grid.Column="0" IsChecked="{Binding Portrait, Mode=TwoWay}" Content="세로형 그리기" Foreground="#6C7A89" FontWeight="Bold" Height="25" Margin="10 10 0 10" />
+                        <CheckBox Grid.Column="0" IsChecked="{Binding Portrait, Mode=TwoWay}" Content="세로형" Foreground="#6C7A89" FontWeight="Bold" Height="25" Margin="5 10 0 10" />
                         <Grid Grid.Column="1">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -311,7 +311,7 @@
                                     Margin="10 0 10 0"
                                     Foreground="#21808D"/>
                         </Grid>
-                        <Button Grid.Column="2" Content="색상 설정" Width="100" Height="28" Command="{Binding SettingColorCommand}" Margin="10 0 0 10" BorderBrush="White" Background="#FF66B821" Foreground="White" FontWeight="Bold"/>
+                        <Button Grid.Column="2" Content="색상 설정" Width="100" Height="28" Command="{Binding SettingColorCommand}" Margin="0 0 0 10" BorderBrush="White" Background="#FF66B821" Foreground="White" FontWeight="Bold"/>
                     </Grid>
                 </Border>
             </Grid>

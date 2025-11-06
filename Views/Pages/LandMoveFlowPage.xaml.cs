@@ -22,33 +22,9 @@ namespace LMFS.Views.Pages
             InitializeComponent();
             DataContext = new LandMoveFlowViewModel();
 
-            // 메시지 수신 등록
+            // LoadXmlMessage만 Page에서 처리 (UI 직접 접근 필요한 경우)
+            WeakReferenceMessenger.Default.Unregister<LoadXmlMessage>(this);
             WeakReferenceMessenger.Default.Register<LoadXmlMessage>(this);
-
-            WeakReferenceMessenger.Default.Register<PrintDiagramMessage>(this, (r, m) =>
-            {
-                OnPrintDiagram();
-            });
-
-            WeakReferenceMessenger.Default.Register<PrintPreviewDiagramMessage>(this, (r, m) =>
-            {
-                OnPrintPreviewDiagram();
-            });
-
-            WeakReferenceMessenger.Default.Register<ExportDiagramMessage>(this, (r, m) =>
-            {
-                OnExportDiagram(m.FilePath, m.Format);
-            });
-
-            WeakReferenceMessenger.Default.Register<ExportDiagramMessage>(this, (r, m) =>
-            {
-                OnExportDiagram(m.FilePath, m.Format);
-            });
-
-            WeakReferenceMessenger.Default.Register<ExportDiagramMessage>(this, (r, m) =>
-            {
-                OnExportDiagram(m.FilePath, m.Format);
-            });
         }
 
 
@@ -73,9 +49,10 @@ namespace LMFS.Views.Pages
             SetupTrackBarLabels();
         }
 
-        // 페이지가 언로드될 때 메시지 수신 해제
+        
         private void LandMoveFlowPage_Unloaded(object sender, RoutedEventArgs e)
         {
+            // 페이지가 언로드될 때 메시지 수신 해제
             WeakReferenceMessenger.Default.UnregisterAll(this);
         }
 

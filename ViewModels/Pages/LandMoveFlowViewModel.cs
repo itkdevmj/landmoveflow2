@@ -55,6 +55,11 @@ namespace LMFS.ViewModels.Pages
             GetJimokCodeDictionary();
             GetReasonCodeDictionary();
 
+            RegisterMessages();
+        }
+
+        private void RegisterMessages()
+        {
             // 기존 등록이 있다면 먼저 해제
             WeakReferenceMessenger.Default.UnregisterAll(this);
 
@@ -64,6 +69,11 @@ namespace LMFS.ViewModels.Pages
             WeakReferenceMessenger.Default.Register<ExportPdfDiagramMessage>(this, (r, m) => OnExportPdf());
             WeakReferenceMessenger.Default.Register<ExportJpgDiagramMessage>(this, (r, m) => OnExportJpg());
             WeakReferenceMessenger.Default.Register<ExportPngDiagramMessage>(this, (r, m) => OnExportPng());
+        }
+
+        public void Dispose()
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(this);
         }
 
 
