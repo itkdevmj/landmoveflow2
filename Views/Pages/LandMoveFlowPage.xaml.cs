@@ -28,26 +28,22 @@ namespace LMFS.Views.Pages
             WeakReferenceMessenger.Default.Unregister<LoadXmlMessage>(this);
             WeakReferenceMessenger.Default.Register<LoadXmlMessage>(this);
 
-
-            // Print 메시지 추가 
-            WeakReferenceMessenger.Default.Register<PrintDiagramMessage>(this, (r, m) =>
-            {
-                OnPrintDiagram();
-            });
-
-            // PrintPreview 메시지 추가
-            WeakReferenceMessenger.Default.Register<PrintPreviewDiagramMessage>(this, (r, m) =>
-            {
-                OnPrintPreviewDiagram();
-            });
-
-            // ExportDiagram 메시지 추가 
-            WeakReferenceMessenger.Default.Register<ExportDiagramMessage>(this, (r, m) =>
-            {
-                OnExportDiagram(m.FilePath, m.Format);
-            });
+            RegisterMessages();// 생성자에서 이 함수 한번만!
         }
 
+
+        private void RegisterMessages()
+        {
+            // 기존 등록이 있다면 먼저 해제
+            WeakReferenceMessenger.Default.UnregisterAll(this);
+
+            // 메시지 수신 등록
+            WeakReferenceMessenger.Default.Register<PrintDiagramMessage>(this, (r, m) => OnPrintDiagram());//실제 인쇄 작업만! 다시 Send 호출 금지!
+            WeakReferenceMessenger.Default.Register<PrintPreviewDiagramMessage>(this, (r, m) => OnPrintPreviewDiagram());
+            WeakReferenceMessenger.Default.Register<ExportDiagramMessage>(this, (r, m) => OnExportDiagram(m.FilePath, m.Format));
+            //WeakReferenceMessenger.Default.Register<ExportDiagramMessage>(this, (r, m) => OnExportDiagram(m.FilePath, m.Format));
+            //WeakReferenceMessenger.Default.Register<ExportDiagramMessage>(this, (r, m) => OnExportDiagram(m.FilePath, m.Format));
+        }
 
         private void UpdateDataGridMaxHeight()
         {

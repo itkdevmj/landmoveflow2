@@ -20,6 +20,10 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
     <PackageReference Include="MySqlConnector" Version="2.4.0" />
     <PackageReference Include="NLog.Extensions.Logging" Version="6.0.4" />
+    <Resource Include="Resources/Images/printIcon.png"/>
+    <Resource Include="Resources/Images/pdfIcon.png"/>
+    <Resource Include="Resources/Images/jpgIcon.png"/>
+    <Resource Include="Resources/Images/pngIcon.png"/>
   </ItemGroup>
 
   <ItemGroup>

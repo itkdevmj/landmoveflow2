@@ -54,21 +54,6 @@ namespace LMFS.ViewModels.Pages
             GetSidoCodeList();
             GetJimokCodeDictionary();
             GetReasonCodeDictionary();
-
-            RegisterMessages();
-        }
-
-        private void RegisterMessages()
-        {
-            // 기존 등록이 있다면 먼저 해제
-            WeakReferenceMessenger.Default.UnregisterAll(this);
-
-            // 메시지 수신 등록
-            WeakReferenceMessenger.Default.Register<PrintDiagramMessage>(this, (r, m) => OnPrint());
-            WeakReferenceMessenger.Default.Register<PrintPreviewDiagramMessage>(this, (r, m) => OnPrintPreview());
-            WeakReferenceMessenger.Default.Register<ExportPdfDiagramMessage>(this, (r, m) => OnExportPdf());
-            WeakReferenceMessenger.Default.Register<ExportJpgDiagramMessage>(this, (r, m) => OnExportJpg());
-            WeakReferenceMessenger.Default.Register<ExportPngDiagramMessage>(this, (r, m) => OnExportPng());
         }
 
         public void Dispose()
@@ -406,6 +391,20 @@ namespace LMFS.ViewModels.Pages
 
         //Messenger 패턴 사용 (MVVM 유지, 권장)
 
+
+        //------------------------------------------------------------
+        //해결 원칙: 메시지 전송과 수신 역할 명확히 분리
+        //ViewModel
+        //사용자의 행동(버튼 클릭 → RelayCommand → SaveFileDialog → 메시지 전송)만 담당!
+        //ExportDiagramMessage 등을 "보내기만" 하고, 메시지 "수신(받기)"는 하면 안 됨!
+        //즉, ViewModel은 반드시 Register를 안해야 안전. (절대 Register<ExportDiagramMessage> XX)
+        //Page(LandMoveFlowPage 등)
+        //ExportDiagramMessage 등 메시지를 "수신(Register)"해서 실제 Export 작업만 하면 됨!
+        //수신 시 OnExportDiagram(string filePath, Format format)처럼 파일 저장 코드를 실행
+        //Page는 ViewModel의 Export 메서드를 다시 호출하면 절대 안 되고, 사내에서 Export 작업만 담당
+        //------------------------------------------------------------
+
+        //ViewModel에서는 Message 보내기만 담당
         [RelayCommand] //[RelayCommand] 속성이 존재해야 Command가 생성됩니다. On 접두사 필수!!!
         private void OnPrint()
         {

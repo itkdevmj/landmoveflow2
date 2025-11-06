@@ -85,41 +85,5 @@ namespace LMFS.ViewModels
 
         //[주의사항] 메뉴가 MainWindow.xaml에 존재하는데
         //DiagramControl은 LandMoveFlowPage에 존재해서 함수 정의는 LandMoveFlowViewModel에 존재합니다.
-        //이미 프로젝트에서 Messenger 패턴을 사용 중 (LoadXmlMessage)
-        //ViewModel 간 결합도가 낮음
-        //코드 유지보수가 쉬움
-        //다른 페이지에서도 같은 명령을 쉽게 사용 가능
-        // Command Handler 추가
-        [RelayCommand]
-        private void Print()
-        {
-            // LandMoveFlowViewModel의 OnExportPdf를 실행하도록 메시지 전송
-            WeakReferenceMessenger.Default.Send(new PrintDiagramMessage());
-        }
-
-        [RelayCommand]
-        private void PrintPreview()
-        {
-            WeakReferenceMessenger.Default.Send(new PrintPreviewDiagramMessage());
-        }
-
-        [RelayCommand]
-        private void ExportPdf()
-        {
-            WeakReferenceMessenger.Default.Send(new ExportPdfDiagramMessage());
-        }
-
-        [RelayCommand]
-        private void ExportJpg()
-        {
-            WeakReferenceMessenger.Default.Send(new ExportJpgDiagramMessage());
-        }
-
-        [RelayCommand]
-        private void ExportPng()
-        {
-            WeakReferenceMessenger.Default.Send(new ExportPngDiagramMessage());
-        }
-
     }
 }
