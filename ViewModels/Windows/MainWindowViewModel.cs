@@ -94,7 +94,7 @@ namespace LMFS.ViewModels
         private void Print()
         {
             // LandMoveFlowViewModel의 OnExportPdf를 실행하도록 메시지 전송
-            WeakReferenceMessenger.Default.Send(new ExportPdfDiagramMessage());
+            WeakReferenceMessenger.Default.Send(new PrintDiagramMessage());
         }
 
         [RelayCommand]

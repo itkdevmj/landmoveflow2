@@ -13,7 +13,7 @@ using System.Windows.Controls;
 namespace LMFS.Views.Pages
 {
     /// <summary>
-    /// ProductsPage.xaml에 대한 상호 작용 논리
+    /// LandMoevePage.xaml에 대한 상호 작용 논리
     /// </summary>
     public partial class LandMoveFlowPage : Page, IRecipient<LoadXmlMessage>
     {
@@ -25,6 +25,25 @@ namespace LMFS.Views.Pages
             // LoadXmlMessage만 Page에서 처리 (UI 직접 접근 필요한 경우)
             WeakReferenceMessenger.Default.Unregister<LoadXmlMessage>(this);
             WeakReferenceMessenger.Default.Register<LoadXmlMessage>(this);
+
+
+            // Print 메시지 추가 
+            WeakReferenceMessenger.Default.Register<PrintDiagramMessage>(this, (r, m) =>
+            {
+                OnPrintDiagram();
+            });
+
+            // PrintPreview 메시지 추가
+            WeakReferenceMessenger.Default.Register<PrintPreviewDiagramMessage>(this, (r, m) =>
+            {
+                OnPrintPreviewDiagram();
+            });
+
+            // ExportDiagram 메시지 추가 
+            WeakReferenceMessenger.Default.Register<ExportDiagramMessage>(this, (r, m) =>
+            {
+                OnExportDiagram(m.FilePath, m.Format);
+            });
         }
 
 
@@ -105,7 +124,7 @@ namespace LMFS.Views.Pages
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"인쇄 실패: {ex.Message}", "오류",
+                MessageBox.Show($"인쇄 실패: {ex.Message}\n\n상세 정보: {ex.StackTrace}", "오류",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -118,7 +137,7 @@ namespace LMFS.Views.Pages
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"인쇄 미리보기 실패: {ex.Message}", "오류",
+                MessageBox.Show($"인쇄 미리보기 실패: {ex.Message}\n\n상세 정보: {ex.StackTrace}", "오류",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
