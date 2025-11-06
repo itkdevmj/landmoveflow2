@@ -12,14 +12,23 @@
                 <dxb:BarButtonItem Content="새로 만들기"/>
                 <dxb:BarButtonItem Content="열기" Command="{Binding LoadDataCommand}"/>
                 <dxb:BarItemLinkSeparator />
-                <dxb:BarButtonItem Content="다이어그램 인쇄" Command="{Binding DataContext.PrintCommand, ElementName=MainFrame}"/>
+<!--                <dxb:BarButtonItem Content="다이어그램 인쇄" Command="{Binding DataContext.PrintCommand, ElementName=MainFrame}"/>
                 <dxb:BarButtonItem Content="다이어그램 인쇄 미리보기" Command="{Binding DataContext.PrintPreviewCommand, ElementName=MainFrame}"/>
                 <dxb:BarItemLinkSeparator />
                 <dxb:BarButtonItem Content="다이어그램 내보내기(pdf)" Command="{Binding DataContext.ExportPdfCommand, ElementName=MainFrame}"/>
                 <dxb:BarButtonItem Content="다이어그램 내보내기(jpg)" Command="{Binding DataContext.ExportJpgCommand, ElementName=MainFrame}"/>
                 <dxb:BarButtonItem Content="다이어그램 내보내기(png)" Command="{Binding DataContext.ExportPngCommand, ElementName=MainFrame}"/>
                 <dxb:BarItemLinkSeparator />
-                <dxb:BarButtonItem Content="이동정리목록 내보내기(엑셀)" Command="{Binding DataContext.ExportGridCommand, ElementName=MainFrame}"/>
+                <dxb:BarButtonItem Content="이동정리목록 내보내기(엑셀)" Command="{Binding DataContext.ExportGridCommand, ElementName=MainFrame}"/>-->
+                <dxb:BarItemLinkSeparator />
+                <dxb:BarButtonItem Content="다이어그램 인쇄" Command="{Binding PrintCommand}"/>
+                <dxb:BarButtonItem Content="다이어그램 인쇄 미리보기" Command="{Binding PrintPreviewCommand}"/>
+                <dxb:BarItemLinkSeparator />
+                <dxb:BarButtonItem Content="다이어그램 내보내기(pdf)" Command="{Binding ExportPdfCommand}"/>
+                <dxb:BarButtonItem Content="다이어그램 내보내기(jpg)" Command="{Binding ExportJpgCommand}"/>
+                <dxb:BarButtonItem Content="다이어그램 내보내기(png)" Command="{Binding ExportPngCommand}"/>
+                <dxb:BarItemLinkSeparator />
+                <dxb:BarButtonItem Content="이동정리목록 내보내기(엑셀)" Command="{Binding ExportGridCommand}"/>                
                 <dxb:BarItemLinkSeparator />
                 <dxb:BarButtonItem Content="닫기"/>
             </dxb:BarSubItem>

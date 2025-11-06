@@ -7,6 +7,7 @@ using DevExpress.Xpf.Printing;
 using DevExpress.Xpf.Printing.Native;
 using DevExpress.XtraPrinting;
 using LMFS.Messages;
+using LMFS.ViewModels;    // 혹은 프로젝트에서 MainWindowViewModel이 정의된 네임스페이스
 using LMFS.ViewModels.Pages;
 using LMFS.Views.Pages;
 using Microsoft.Win32;
@@ -15,6 +16,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+
 
 namespace LMFS.ViewModels
 {
