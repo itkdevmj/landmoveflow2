@@ -50,6 +50,8 @@ namespace LMFS.ViewModels.Pages
         [ObservableProperty] private List<LandMoveInfoCategory> _gridCategoryDataSource;
         [ObservableProperty] private MemoryStream _landMoveFlowData;
 
+        [ObservableProperty] private bool _isFlowData = false;
+
         public record RequestExportGridMessage(string ExportPath, string SheetName);
 
 
@@ -76,6 +78,8 @@ namespace LMFS.ViewModels.Pages
             // 3. GridDataSource가 비어있는지 확인
             if (GridDataSource == null || !GridDataSource.Any())
             {
+                IsFlowData = false;//표시 설정 [이동정리목록 내보내기(엑셀), 다이어그램 내보내기(Pdf, Jpg, Png)]
+
                 ShowNoDataPopup();
 
                 // 다이어그램 초기화 (null이 가장 안전)
@@ -355,7 +359,9 @@ namespace LMFS.ViewModels.Pages
 
             ////Vit.G//TEST// 3th argu //
             if (filteredList.Count > 0)
-            {                
+            {
+                IsFlowData = true;//표시 설정 [이동정리목록 내보내기(엑셀), 다이어그램 내보내기(Pdf, Jpg, Png)]
+
                 XDocument rtnXml = converter.Run(filteredList, this, categoryList, CurrentPnu);
                 CurrentPnuNm = converter.GetJibun(CurrentPnu, 2);
 
@@ -373,6 +379,11 @@ namespace LMFS.ViewModels.Pages
                     LandMoveFlowData = stream;
                 }
             }//if (filteredList.Count > 0)
+            else
+            {
+                IsFlowData = false;//표시 설정 [이동정리목록 내보내기(엑셀), 다이어그램 내보내기(Pdf, Jpg, Png)]
+                //MessageBox.Show("데이터가 존재하지 않습니다.");
+            }
         }
 
 

@@ -114,12 +114,14 @@
                     <Button Content="자료(CSV) 추가" Width="142" Command="{Binding LoadCsvFileDataCommand}" Foreground="White" BorderBrush="White" Background="#FFFF7F00" FontWeight="Bold"/>
                 </dxlc:LayoutGroup>
                 <Border BorderBrush="#A3C6C4" Background="#FFE0E7E9" BorderThickness="1" CornerRadius="5" Height="40" Margin="0 0 0 0">
-                    <dxlc:LayoutGroup Orientation="Horizontal" HorizontalAlignment="Left" Height="28" Margin="0 5 0 5">
-                        <CheckBox Content="[지목변경] 표시" IsChecked="{Binding JimokChg, Mode=TwoWay}" Height="28" Width="260" Background="White">
+                    <dxlc:LayoutGroup Orientation="Horizontal" HorizontalAlignment="Left" Height="40" Margin="10 0 0 0">
+                        <CheckBox Content="[지목변경] 표시" IsChecked="{Binding JimokChg, Mode=TwoWay}" Height="16" Width="250" Background="White">
                         </CheckBox>
                         <!-- 이동정리목록 내보내기 버튼 -->
-                        <Button Command="{Binding ExportGridCommand}" ToolTip="이동정리목록 내보내기" HorizontalAlignment="Right" Width="32" Height="32" Margin="0,0,0,0" Background="Transparent" BorderThickness="0">
-                            <Image Source="pack://application:,,,/Resources/Images/pngIcon.png" Stretch="Uniform" Width="32" Height="32" Margin="-10,-4,-10,0" />
+                        <Button Command="{Binding ExportGridCommand}" ToolTip="이동정리목록 내보내기" 
+                                Visibility="{Binding IsFlowData, Converter={StaticResource BoolToVisibilityConverter}}"
+                                HorizontalAlignment="Right" Width="32" Height="32" Margin="0,0,0,4" Background="Transparent" BorderThickness="0">
+                            <Image Source="pack://application:,,,/Resources/Images/excelIcon.png" Stretch="Uniform" Width="32" Height="32" Margin="0,0,0,0" />
                         </Button>
                     </dxlc:LayoutGroup>
                 </Border>
@@ -245,7 +247,7 @@
         </Grid>
 
         <Border Background="WhiteSmoke" 
-                BorderBrush="#A3C6C4"  BorderThickness="1" DockPanel.Dock="Top" Margin="0 0 0 0"
+                BorderBrush="#A3C6C4"  BorderThickness="2" DockPanel.Dock="Top"
                 CornerRadius="5">
             <!-- 5개의 원본 컬럼 정의 -->
             <Grid>
@@ -258,8 +260,8 @@
                     <ColumnDefinition Width="*" /><!-- Space -->
                     <ColumnDefinition Width="290" />
                 </Grid.ColumnDefinitions>
-                <Border Grid.Row="0" Grid.Column="0" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="2" CornerRadius="5" Height="40" Margin="5 0 0 0">
-                    <!-- 내부 Grid는 3컬럼을 하나로 감싸는 역할 -->
+                <Border Grid.Row="0" Grid.Column="0" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="1" CornerRadius="5" Height="40" Margin="5 0 0 0">
+                    <!-- 내부 Grid는 4컬럼을 하나로 감싸는 역할 -->
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height = "Auto"/>
@@ -275,8 +277,9 @@
                         <CheckBox Grid.Column="2" IsChecked="{Binding IsArea, Mode=TwoWay}" Content="면적" Height="25" Margin="5 10 0 10" />
                     </Grid>
                 </Border>
-                <!-- Spacer: Grid.Column="1"는 나머지 영역을 차지해서 오른쪽으로 밀어줍니다 -->
-                <Border Grid.Row="0" Grid.Column="1" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="2" CornerRadius="5" Height="40" Margin="5 0 0 0">
+                <Border Grid.Row="0" Grid.Column="1" 
+                        Visibility="{Binding IsFlowData, Converter={StaticResource BoolToVisibilityConverter}}"
+                        BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="1" CornerRadius="5" Height="40" Margin="5 0 0 0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,0">
                         <!-- 인쇄 버튼 -->
                         <Button Command="{Binding PrintCommand}" ToolTip="인쇄" Width="42" Height="36" Margin="0,0,0,0" Background="Transparent" BorderThickness="0">
@@ -296,8 +299,8 @@
                         </Button>
                     </StackPanel>
                 </Border>
-                <!-- Space Column -->
-                <Border Grid.Row="0" Grid.Column="3" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="2" CornerRadius="5" Height="40" Margin="5 0 5 0">
+                <!-- Spacer: Grid.Column="2"는 나머지 영역을 차지해서 오른쪽으로 밀어줍니다 -->
+                <Border Grid.Row="0" Grid.Column="3" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="1" CornerRadius="5" Height="40" Margin="5 0 5 0">
                     <!-- 내부 Grid는 3컬럼을 하나로 감싸는 역할 -->
                     <Grid>
                         <Grid.RowDefinitions>
@@ -321,11 +324,19 @@
                                     x:Name="ZoomTrackBar"   
                                     Grid.Column="0"
                                     Minimum="0.5" 
-                                    Maximum="3" 
-                                    TickFrequency="0.5" 
+                                    Maximum="3"
                                     Value="{Binding ElementName=LmfControl, Path=ZoomFactor, Mode=TwoWay}"
                                     Margin="10 10 10 10">
                             </dxe:TrackBarEdit>
+                            <!--<dxe:TrackBarEdit 
+                                    x:Name="ZoomTrackBar"   
+                                    Grid.Column="0"
+                                    Minimum="0.5" 
+                                    Maximum="3" 
+                                    TickFrequency="0.5"
+                                    Value="{Binding ElementName=LmfControl, Path=ZoomFactor, Mode=TwoWay}"
+                                    Margin="10 10 10 10">
+                            </dxe:TrackBarEdit>-->
                             <!-- 현재 배율 표시 라벨 -->
                             <TextBlock 
                                     Grid.Column="1"
@@ -349,7 +360,7 @@
             -->
         </Border>
 
-        <Border Background="#A3C6C4" BorderThickness="1" CornerRadius="5" Padding="3">
+        <Border Background="#A3C6C4" BorderThickness="2" CornerRadius="5" Padding="2">
             <dxdiag:DiagramControl ShowRulers="False" IsReadOnly="True" x:Name="LmfControl" 
                                    ExportDPI="300"
                                    ExportScale="1.0"
