@@ -190,7 +190,7 @@ public class LandMoveFlowConverter
 
     //option (1)지역명(동 or 리)
     //       (2)지번만
-    private string GetJibun(string landCd, int option)
+    public string GetJibun(string landCd, int option)//251106//private => public
     {
         if (landCd.Length < 19) return landCd;
 
@@ -203,8 +203,18 @@ public class LandMoveFlowConverter
             {
                 if (item.umdCd + item.riCd == lawdCd)
                 {
-                    //lawdNm = item.umdNm + " " + item.riNm;
                     lawdNm = item.riCd == "00" ? item.umdNm + " " : item.riNm + " ";//Vit.G//[add]'동지역'
+                    break;
+                }
+            }
+        }
+        else if (option == 2)//지역명(동 or 읍면동 + 리))
+        {
+            foreach (var item in _listLawd)
+            {
+                if (item.umdCd + item.riCd == lawdCd)
+                {
+                    lawdNm = item.riCd == "00" ? item.umdNm + " " : item.umdNm + " " + item.riNm + " ";//Vit.G//[add]'동지역'
                     break;
                 }
             }
@@ -295,8 +305,8 @@ public class LandMoveFlowConverter
             //CEO.REQ//
             //row.bfJibun = GetJibun(row.bfPnu, 1);//'읍면' 명칭 포함
             //row.afJibun = GetJibun(row.afPnu, 1);//'읍면' 명칭 포함
-            row.bfPnu = GetJibun(row.bfPnu, 2);//'읍면' 명칭 제거
-            row.afPnu = GetJibun(row.afPnu, 2);//'읍면' 명칭 제거               
+            row.bfPnu = GetJibun(row.bfPnu, 3);//'읍면' 명칭 제거
+            row.afPnu = GetJibun(row.afPnu, 3);//'읍면' 명칭 제거               
 
             row.bfJimok = GetCodeValue(2, row.bfJimok);//지목 코드 => 명칭
             row.afJimok = GetCodeValue(2, row.afJimok);//지목 코드 => 명칭
@@ -495,7 +505,9 @@ public class LandMoveFlowConverter
         }//foreach (var row in flowList)
 
         //XML 내용 => CSV 저장하기
-        String pathcsv = Path.Combine(_tempDir, $"DF_XML_{_currentGroupNo}.csv");
+        string pnuNm = GetJibun(_pnu, 2);
+        //String pathcsv = Path.Combine(_tempDir, $"DF_XML_{_currentGroupNo}.csv");
+        String pathcsv = Path.Combine(_tempDir, $"DF_XML_{pnuNm}_{_currentGroupNo}.csv");
         SaveDfXmlToCsv(_dfXml, pathcsv);
 
         //XML 구성하기
@@ -539,7 +551,7 @@ public class LandMoveFlowConverter
         bool focus = false;//Vit.G//251014 : 조회 필지 => BackgroundId 속성 추가
 
         //Vit.G//251014 : 조회 필지코드 => 지번명으로 변경
-        _pnu = GetJibun(_pnu, 2);//CEO.REQ//_pnu = GetJibun(_pnu, 1);
+        _pnu = GetJibun(_pnu, 3);//CEO.REQ//_pnu = GetJibun(_pnu, 1);
 
         //
         try

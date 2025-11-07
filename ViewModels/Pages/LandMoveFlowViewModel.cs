@@ -6,6 +6,7 @@ using DevExpress.Dialogs.Core.View;
 using DevExpress.Mvvm;
 using DevExpress.Mvvm.Native;
 using DevExpress.Xpf.Grid;// WPF용만 유지
+using DevExpress.XtraPrinting;
 using LMFS.Db;
 using LMFS.Engine;
 using LMFS.Messages;
@@ -18,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.IO.Packaging;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -40,6 +42,7 @@ namespace LMFS.ViewModels.Pages
         [ObservableProperty] private bool _jimokChg;//vm.JimokChg
         [ObservableProperty] private bool _portrait;//vm.Portrait
         [ObservableProperty] private string _currentPnu;
+        [ObservableProperty] private string _currentPnuNm;//for Saving Files
         [ObservableProperty] private bool _isOwnName;
         [ObservableProperty] private bool _isJimok;
         [ObservableProperty] private bool _isArea;
@@ -47,6 +50,7 @@ namespace LMFS.ViewModels.Pages
         [ObservableProperty] private List<LandMoveInfoCategory> _gridCategoryDataSource;
         [ObservableProperty] private MemoryStream _landMoveFlowData;
 
+        public record RequestExportGridMessage(string ExportPath, string SheetName);
 
 
         public LandMoveFlowViewModel()
@@ -353,6 +357,7 @@ namespace LMFS.ViewModels.Pages
             if (filteredList.Count > 0)
             {                
                 XDocument rtnXml = converter.Run(filteredList, this, categoryList, CurrentPnu);
+                CurrentPnuNm = converter.GetJibun(CurrentPnu, 2);
 
                 // ... 이하 xml 스트림 처리
                 string str = rtnXml.ToString();
@@ -431,7 +436,7 @@ namespace LMFS.ViewModels.Pages
             {
                 Filter = "PDF 파일|*.pdf",
                 Title = "PDF로 저장",
-                FileName = "diagram.pdf"
+                FileName = $"다이어그램(Pdf)_{CurrentPnuNm}_{DateTime.Now.ToString("yyyy-MM-dd")}.pdf"
             };
 
             if (saveDialog.ShowDialog() == true)
@@ -439,7 +444,7 @@ namespace LMFS.ViewModels.Pages
                 WeakReferenceMessenger.Default.Send(new ExportDiagramMessage
                 {
                     FilePath = saveDialog.FileName,
-                    Format = ExportFormat.Pdf
+                    Format = ExportDiagramFormat.Pdf
                 });
             }
         }
@@ -451,7 +456,7 @@ namespace LMFS.ViewModels.Pages
             {
                 Filter = "JPG 파일|*.jpg",
                 Title = "JPG로 저장",
-                FileName = "diagram.jpg"
+                FileName = $"다이어그램(Jpg)_{CurrentPnuNm}_{DateTime.Now.ToString("yyyy-MM-dd")}.jpg"
             };
 
             if (saveDialog.ShowDialog() == true)
@@ -459,7 +464,7 @@ namespace LMFS.ViewModels.Pages
                 WeakReferenceMessenger.Default.Send(new ExportDiagramMessage
                 {
                     FilePath = saveDialog.FileName,
-                    Format = ExportFormat.Jpg
+                    Format = ExportDiagramFormat.Jpg
                 });
             }
         }
@@ -471,7 +476,7 @@ namespace LMFS.ViewModels.Pages
             {
                 Filter = "PNG 파일|*.png",
                 Title = "PNG로 저장",
-                FileName = "diagram.png"
+                FileName = $"다이어그램(Png)_{CurrentPnuNm}_{DateTime.Now.ToString("yyyy-MM-dd")}.png"
             };
 
             if (saveDialog.ShowDialog() == true)
@@ -479,31 +484,52 @@ namespace LMFS.ViewModels.Pages
                 WeakReferenceMessenger.Default.Send(new ExportDiagramMessage
                 {
                     FilePath = saveDialog.FileName,
-                    Format = ExportFormat.Png
+                    Format = ExportDiagramFormat.Png
                 });
             }
         }
 
+
+        //[주의사항] 테두리 설정이 어렵다. (데이터 행까지만 하고 싶었음)
+        //DevExpress WPF GridControl의 Export 기능만으로는 "UsedRange(데이터가 있는 범위까지만)"에만 테두리를 설정하는 기능이 직접적으로 제공되지 않습니다.
+        //1. NuGet에서 ClosedXML 설치
+        //  Install-Package ClosedXML
+        //2. 코드 가이드(DevExpress Export → ClosedXML 후처리)
+        /*
+using ClosedXML.Excel;
+using System.IO;
+
+// --- 1) DevExpress TableView Export ---
+string exportPath = "저장할경로\\file.xlsx";
+var options = new DevExpress.XtraPrinting.XlsxExportOptionsEx() { SheetName = "Sheet1" };
+((DevExpress.Xpf.Grid.TableView)FlowDataGrid.View).ExportToXlsx(exportPath, options);
+
+// --- 2) ClosedXML로 UsedRange 까지만 테두리 ---
+using (var wb = new XLWorkbook(exportPath))
+{
+    var ws = wb.Worksheet(1);
+    int lastRow = ws.LastRowUsed().RowNumber();
+    int lastCol = ws.LastColumnUsed().ColumnNumber();
+
+    // UsedRange에만 테두리(Outside + Inside)
+    var range = ws.Range(1, 1, lastRow, lastCol);
+    range.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+    range.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+    wb.Save();
+}*/
         [RelayCommand]
         private void OnExportGrid()
         {
-            //SaveFileDialog saveDialog = new SaveFileDialog();
-            //saveDialog.Filter = "Excel (2010) (.xlsx)|*.xlsx|Excel (2003)(.xls)|*.xls";
-            //saveDialog.FileName = "Export_" + DateTime.Now.ToString("yyyy-MM-dd");
-            //if (saveDialog.ShowDialog() != DialogResult.Cancel)
-            //{
-            //    string path = saveDialog.FileName;
-            //    string ext = new FileInfo(path).Extension;
-            //    switch (ext)
-            //    {
-            //        case ".xls":
-            //            GridDataSource.ExportToXls(path);
-            //            break;
-            //        case ".xlsx":
-            //            GridDataSource.ExportToXlsx(path);
-            //            break;
-            //    }
-            //}
+            SaveFileDialog saveDialog = new SaveFileDialog();
+            saveDialog.Filter = "Excel (2010) (.xlsx)|*.xlsx|Excel (2003)(.xls)|*.xls";
+            saveDialog.FileName = $"이동정리목록(엑셀)_{CurrentPnuNm}_{DateTime.Now.ToString("yyyy-MM-dd")}";
+            if (saveDialog.ShowDialog() == true)
+            {
+                string path = saveDialog.FileName;
+                // 파일 경로 등 정보 선택 후
+                Messenger.Default.Send(new RequestExportGridMessage(path, CurrentPnuNm));
+            }
         }
 
         /*

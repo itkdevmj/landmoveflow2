@@ -59,7 +59,7 @@
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="130" />
-                <RowDefinition Height="85" />
+                <RowDefinition Height="90" />
                 <RowDefinition />
             </Grid.RowDefinitions>
 
@@ -113,10 +113,14 @@
                                   Margin="10 5 10 5">
                     <Button Content="자료(CSV) 추가" Width="142" Command="{Binding LoadCsvFileDataCommand}" Foreground="White" BorderBrush="White" Background="#FFFF7F00" FontWeight="Bold"/>
                 </dxlc:LayoutGroup>
-                <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="#A3C6C4" Background="#FFE0E7E9" BorderThickness="1" CornerRadius="5" Height="30" Margin="0 5 0 0">
-                    <dxlc:LayoutGroup Orientation="Horizontal" HorizontalAlignment="Right" Height="28" Margin="0 5 0 5">
-                        <CheckBox Content="[지목변경] 표시" IsChecked="{Binding JimokChg, Mode=TwoWay}" Height="28" Width="300" Background="White">
+                <Border BorderBrush="#A3C6C4" Background="#FFE0E7E9" BorderThickness="1" CornerRadius="5" Height="40" Margin="0 0 0 0">
+                    <dxlc:LayoutGroup Orientation="Horizontal" HorizontalAlignment="Left" Height="28" Margin="0 5 0 5">
+                        <CheckBox Content="[지목변경] 표시" IsChecked="{Binding JimokChg, Mode=TwoWay}" Height="28" Width="260" Background="White">
                         </CheckBox>
+                        <!-- 이동정리목록 내보내기 버튼 -->
+                        <Button Command="{Binding ExportGridCommand}" ToolTip="이동정리목록 내보내기" HorizontalAlignment="Right" Width="32" Height="32" Margin="0,0,0,0" Background="Transparent" BorderThickness="0">
+                            <Image Source="pack://application:,,,/Resources/Images/pngIcon.png" Stretch="Uniform" Width="32" Height="32" Margin="-10,-4,-10,0" />
+                        </Button>
                     </dxlc:LayoutGroup>
                 </Border>
             </StackPanel>
@@ -216,17 +220,17 @@
                     </dxg:TableView>
                 </dxg:GridControl.View>
                 <dxg:GridControl.Columns>
-                    <dxg:GridColumn FieldName="bfPnu" Header="이동전" Width="1*" UnboundDataType="{x:Type sys:String}"
+                    <dxg:GridColumn FieldName="bfPnu" Header="이동전" Width="100" UnboundDataType="{x:Type sys:String}"
                                     ReadOnly="True" HorizontalHeaderContentAlignment="Center" />
-                    <dxg:GridColumn FieldName="afPnu" Header="이동후" Width="1*" UnboundDataType="{x:Type sys:String}"
+                    <dxg:GridColumn FieldName="afPnu" Header="이동후" Width="100" UnboundDataType="{x:Type sys:String}"
                                     ReadOnly="True" HorizontalHeaderContentAlignment="Center" />
-                    <dxg:GridColumn FieldName="regDt" Header="정리일" Width="1*" HorizontalHeaderContentAlignment="Center"
+                    <dxg:GridColumn FieldName="regDt" Header="정리일" Width="100" HorizontalHeaderContentAlignment="Center"
                                     ReadOnly="True">
                         <dxg:GridColumn.EditSettings>
                             <dxe:DateEditSettings DisplayFormat="yyyyMMdd" ShowPopupIfReadOnly="False" HorizontalContentAlignment="Center" />
                         </dxg:GridColumn.EditSettings>
                     </dxg:GridColumn>
-                    <dxg:GridColumn FieldName="rsn" Header="종목" Width="1.2*" MinWidth="120" HorizontalHeaderContentAlignment="Center" 
+                    <dxg:GridColumn FieldName="rsn" Header="종목" Width="120" MinWidth="120" HorizontalHeaderContentAlignment="Center" 
                                     ReadOnly="True">
                         <dxg:GridColumn.EditSettings>
                             <dxe:TextEditSettings HorizontalContentAlignment="Center" />
@@ -250,9 +254,9 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="195" />
-                    <ColumnDefinition Width="*" />
-                    <!-- Space -->
-                    <ColumnDefinition Width="300" />
+                    <ColumnDefinition Width="180" />
+                    <ColumnDefinition Width="*" /><!-- Space -->
+                    <ColumnDefinition Width="290" />
                 </Grid.ColumnDefinitions>
                 <Border Grid.Row="0" Grid.Column="0" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="2" CornerRadius="5" Height="40" Margin="5 0 0 0">
                     <!-- 내부 Grid는 3컬럼을 하나로 감싸는 역할 -->
@@ -282,17 +286,18 @@
                         <Button Command="{Binding ExportPdfCommand}" ToolTip="PDF로 내보내기" Width="42" Height="36" Margin="0,0,0,0" Background="Transparent" BorderThickness="0">
                             <Image Source="pack://application:,,,/Resources/Images/pdfIcon.png" Stretch="Uniform" Width="32" Height="32" Margin="-10,0,-10,0" />
                         </Button>
-                        <!-- PNG 내보내기 버튼 -->
-                        <Button Command="{Binding ExportPngCommand}" ToolTip="PNG로 내보내기" Width="42" Height="36" Margin="0,0,0,0" Background="Transparent" BorderThickness="0">
-                            <Image Source="pack://application:,,,/Resources/Images/pngIcon.png" Stretch="Uniform" Width="32" Height="32" Margin="-10,0,-10,0" />
-                        </Button>                    
                         <!-- JPG 내보내기 버튼 -->
                         <Button Command="{Binding ExportJpgCommand}" ToolTip="JPG로 내보내기" Width="42" Height="36" Margin="0,0,0,0" Background="Transparent" BorderThickness="0">
                             <Image Source="pack://application:,,,/Resources/Images/jpgIcon.png" Stretch="Uniform" Width="32" Height="32" Margin="-10,0,-10,0" />
                         </Button>
+                        <!-- PNG 내보내기 버튼 -->
+                        <Button Command="{Binding ExportPngCommand}" ToolTip="PNG로 내보내기" Width="42" Height="36" Margin="0,0,0,0" Background="Transparent" BorderThickness="0">
+                            <Image Source="pack://application:,,,/Resources/Images/pngIcon.png" Stretch="Uniform" Width="32" Height="32" Margin="-10,0,-10,0" />
+                        </Button>
                     </StackPanel>
                 </Border>
-                <Border Grid.Row="0" Grid.Column="2" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="2" CornerRadius="5" Height="40" Margin="5 0 5 0">
+                <!-- Space Column -->
+                <Border Grid.Row="0" Grid.Column="3" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="2" CornerRadius="5" Height="40" Margin="5 0 5 0">
                     <!-- 내부 Grid는 3컬럼을 하나로 감싸는 역할 -->
                     <Grid>
                         <Grid.RowDefinitions>

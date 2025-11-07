@@ -1,8 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using DevExpress.Diagram.Core;// DiagramImageExportFormat
 using DevExpress.Diagram.Core.Native;
+using DevExpress.Mvvm;
 using DevExpress.Xpf.Core.Native;
 using DevExpress.Xpf.Editors;
+using DevExpress.Xpf.Grid;// WPF용
+using DevExpress.XtraPrinting;
 using LMFS.Engine;
 using LMFS.Messages;
 using LMFS.ViewModels;
@@ -11,13 +14,15 @@ using System;
 using System.IO;// FileStream
 using System.Windows;// Rect
 using System.Windows.Controls;
+using System.Windows.Shapes;
+using static LMFS.ViewModels.Pages.LandMoveFlowViewModel;
 
 namespace LMFS.Views.Pages
 {
     /// <summary>
     /// LandMoevePage.xaml에 대한 상호 작용 논리
     /// </summary>
-    public partial class LandMoveFlowPage : Page, IRecipient<LoadXmlMessage>
+    public partial class LandMoveFlowPage : System.Windows.Controls.Page, IRecipient<LoadXmlMessage>
     {
         public LandMoveFlowPage()
         {
@@ -43,6 +48,24 @@ namespace LMFS.Views.Pages
             WeakReferenceMessenger.Default.Register<ExportDiagramMessage>(this, (r, m) => OnExportDiagram(m.FilePath, m.Format));
             //WeakReferenceMessenger.Default.Register<ExportDiagramMessage>(this, (r, m) => OnExportDiagram(m.FilePath, m.Format));
             //WeakReferenceMessenger.Default.Register<ExportDiagramMessage>(this, (r, m) => OnExportDiagram(m.FilePath, m.Format));
+
+            Messenger.Default.Register<RequestExportGridMessage>(this, (msg) =>
+            {
+                string ext = System.IO.Path.GetExtension(msg.ExportPath); // 예: ".xls", ".xlsx"                
+
+                if (ext == ".xls")
+                {
+                    var options = new XlsExportOptionsEx() { SheetName = msg.SheetName };
+                    ((TableView)FlowDataGrid.View).ExportToXls(msg.ExportPath, options);
+                }
+                else
+                {
+                    var options = new XlsxExportOptionsEx() { SheetName = msg.SheetName };
+                    ((TableView)FlowDataGrid.View).ExportToXlsx(msg.ExportPath, options);
+                }
+                MessageBox.Show("엑셀 파일로 저장되었습니다.", "성공",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+            });
         }
 
         private void UpdateDataGridMaxHeight()
@@ -169,43 +192,31 @@ namespace LMFS.Views.Pages
             }
         }
 
-        private void OnExportDiagram(string filePath, ExportFormat format)
+        private void OnExportDiagram(string filePath, ExportDiagramFormat format)
         {
             try
             {
                 switch (format)
                 {
-                    case ExportFormat.Pdf:
+                    case ExportDiagramFormat.Pdf:
                         LmfControl.ExportToPdf(filePath);
                         MessageBox.Show("PDF 파일로 저장되었습니다.", "성공",
                             MessageBoxButton.OK, MessageBoxImage.Information);
                         break;
 
-                    case ExportFormat.Jpg:
+                    case ExportDiagramFormat.Jpg:
                         // JPG의 경우 - Stream 사용
                         ExportImageWithSettings(filePath, DiagramImageExportFormat.JPEG);
                         MessageBox.Show("JPG 파일로 저장되었습니다.", "성공",
                             MessageBoxButton.OK, MessageBoxImage.Information);
                         break;
 
-                    case ExportFormat.Png:
+                    case ExportDiagramFormat.Png:
                         // PNG의 경우 - Stream 사용
                         ExportImageWithSettings(filePath, DiagramImageExportFormat.PNG);
                         MessageBox.Show("PNG 파일로 저장되었습니다.", "성공",
                             MessageBoxButton.OK, MessageBoxImage.Information);
                         break;
-
-                    //case ExportFormat.Jpg:
-                    //    LmfControl.ExportDiagram(filePath);
-                    //    MessageBox.Show("JPG 파일로 저장되었습니다.", "성공",
-                    //        MessageBoxButton.OK, MessageBoxImage.Information);
-                    //    break;
-
-                    //case ExportFormat.Png:
-                    //    LmfControl.ExportDiagram(filePath);
-                    //    MessageBox.Show("PNG 파일로 저장되었습니다.", "성공",
-                    //        MessageBoxButton.OK, MessageBoxImage.Information);
-                    //    break;
                 }
             }
             catch (Exception ex)
@@ -243,7 +254,7 @@ namespace LMFS.Views.Pages
          더 나아가 사용자가 설정을 선택할 수 있도록 대화상자를 추가할 수 있습니다:
 
         csharp
-        private void OnExportDiagramWithSettings(string filePath, ExportFormat format)
+        private void OnExportDiagramWithSettings(string filePath, ExportDiagramFormat format)
         {
             try
             {

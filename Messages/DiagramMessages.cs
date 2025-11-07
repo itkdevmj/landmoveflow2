@@ -21,14 +21,15 @@ namespace LMFS.Messages
     public class ExportDiagramMessage
     {
         public string FilePath { get; set; }
-        public ExportFormat Format { get; set; }
+        public ExportDiagramFormat Format { get; set; }
     }
 
     // Export 형식
-    public enum ExportFormat
+    public enum ExportDiagramFormat
     {
         Pdf,
         Jpg,
         Png
     }
+
 }
