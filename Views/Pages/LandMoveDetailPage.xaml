@@ -65,10 +65,16 @@
             <dxg:GridControl Grid.Row="1" 
                              x:Name="GridControl"
                              ItemsSource="{Binding GridDetailDataSource}">
+                <!-- 우클릭 팝업메뉴 -->
+                <dxg:GridControl.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="필지 추가" Command="{Binding AddRowCommand}" />
+                    </ContextMenu>
+                </dxg:GridControl.ContextMenu>
+                
                 <dxg:GridControl.View>
                     <dxg:TableView AllowEditing="True" 
                                    ShowingEditor="TableView_ShowingEditor">
-
                     </dxg:TableView>
                 </dxg:GridControl.View>
                 <dxg:GridControl.Columns>
@@ -88,16 +94,17 @@
                         HorizontalHeaderContentAlignment="Center" />
 
                     <!-- 동적 버튼 컬럼 -->
-                    <dxg:GridColumn FieldName="ActionButton" Header="" Width="80" 
-                        HorizontalHeaderContentAlignment="Center"
-                        AllowEditing="False">
+                    <dxg:GridColumn FieldName="ActionButton" AllowEditing="False" Header="" Width="80" HorizontalHeaderContentAlignment="Center">
                         <dxg:GridColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Content="추가" 
-                                    Visibility="{Binding IsNewRow, Converter={StaticResource BoolToVisibilityConverter}}"
-                                    Command="{Binding DataContext.ConfirmAddCommand, RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
-                                    CommandParameter="{Binding}"
-                                    Margin="2" Padding="5,2" />
+                                <!-- IsNewRow일 때만 버튼 노출, 아니면 빈 패널만 -->
+                                <StackPanel>
+                                    <Button Content="추가" 
+                                        Visibility="{Binding IsNewRow, Converter={StaticResource BoolToVisibilityConverter}}"
+                                        Command="{Binding ConfirmAddCommand, RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                        CommandParameter="{Binding}"
+                                        Margin="2" Padding="5,2" />
+                                </StackPanel>
                             </DataTemplate>
                         </dxg:GridColumn.CellTemplate>
                     </dxg:GridColumn>

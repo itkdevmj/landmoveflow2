@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using DevExpress.Xpf.Core.Native;
 using DevExpress.Xpf.Grid;
+using LMFS.Engine;
 using LMFS.Messages;
 using LMFS.Models;
 using LMFS.ViewModels.Pages;
@@ -53,20 +54,21 @@ namespace LMFS.Views.Pages
         // TableView_ShowingEditor 이벤트 핸들러 추가
         private void TableView_ShowingEditor(object sender, ShowingEditorEventArgs e)
         {
-            // '추가' 버튼 컬럼은 편집 불가
-            if (e.Column?.FieldName == "AddButton")
-            {
-                e.Cancel = true;
-                return;
-            }
+            //// '추가' 버튼 컬럼은 편집 불가
+            //if (e.Column?.FieldName == "AddButton")
+            //{
+            //    e.Cancel = true;
+            //    return;
+            //}
 
+            //기존행(AllowEditing == false)인 경우 편집을 막기
             // 필요시 특정 조건에서만 편집 허용
             // 예: 새로운 행만 편집 가능하도록
             var item = e.Row as LMFS.Engine.GridDetailItem;
-            if (item != null && !item.IsNewRow)
+            if (item != null && !item.IsNewRow /*&& !item.AllowEditing*/)
             {
                 // 기존 행은 편집 제한 (필요에 따라 조정)
-                // e.Cancel = true;
+                e.Cancel = true;
             }
         }
     }

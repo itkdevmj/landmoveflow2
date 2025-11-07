@@ -60,6 +60,7 @@ public partial class GridDetailItem : ObservableObject  // ← partial + Observa
 
     [ObservableProperty] private bool _isNewRow;//[필지 추가]용 새로운 행
     [ObservableProperty] private bool _isModified;//새로운 행이 표시될 경우에만 [변경사항 저장] 버튼 표시하기 위함
+    [ObservableProperty] private bool _allowEditing;
     [ObservableProperty] private string _bfPnu;
     [ObservableProperty] private string _afPnu;
     [ObservableProperty] private string _bfJimok;
@@ -76,7 +77,8 @@ public partial class GridDetailItem : ObservableObject  // ← partial + Observa
     public GridDetailItem()
     {
         _isNewRow = false;
-        IsModified = false;
+        _isModified = false;
+        _allowEditing = false;
         _bfPnu = string.Empty;
         _afPnu = string.Empty;
         _bfJimok = string.Empty;
@@ -159,6 +161,7 @@ public partial class GridDetailItem : ObservableObject  // ← partial + Observa
         {
             IsNewRow = false, // DB에서 온 데이터는 기존 행
             IsModified = false,
+            AllowEditing = false,
             BfPnu = info.bfPnu ?? "",
             AfPnu = info.afPnu ?? "",
             BfJimok = info.bfJimok ?? "",
