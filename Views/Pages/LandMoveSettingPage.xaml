@@ -75,10 +75,10 @@
                      EditValueChanged 이벤트로 DiagramControl 혹은 DiagramItem의 Background, StrokeId, ThemeColorId를 즉시 변경 가능.-->
                 <Label Grid.Row="2" Grid.Column="0" Content="지번" HorizontalContentAlignment="Center" VerticalAlignment="Center" />
                 <dxe:PopupColorEdit Grid.Row="2" Grid.Column="1" Name="colorEdit1_1_1" Margin="3" ShowMoreColorsButton="True" DefaultColor="#FFA5A5A5" EditValue="{Binding Color1_1_1}" EditValueChanged="OnDiagramColorChanged"/>
-                <dxe:PopupColorEdit Grid.Row="2" Grid.Column="2" Name="colorEdit1_1_2" Margin="3" ShowMoreColorsButton="True" DefaultColor="#FFC8C8C8" EditValue="{Binding Color1_1_2}" EditValueChanged="OnDiagramColorChanged"/>
+                <dxe:PopupColorEdit Grid.Row="2" Grid.Column="2" Name="colorEdit1_1_2" Margin="3" ShowMoreColorsButton="True" DefaultColor="#FFA5A5A5" EditValue="{Binding Color1_1_2}" EditValueChanged="OnDiagramColorChanged"/>
                 <dxe:PopupColorEdit Grid.Row="2" Grid.Column="3" Name="colorEdit1_1_3" Margin="3" ShowMoreColorsButton="True" DefaultColor="#FFFFFFFF" EditValue="{Binding Color1_1_3}" EditValueChanged="OnDiagramColorChanged"/>
                 <dxe:PopupColorEdit Grid.Row="2" Grid.Column="4" Name="colorEdit1_2_1" Margin="3" ShowMoreColorsButton="True" DefaultColor="#FFED7D31" EditValue="{Binding Color1_2_1}" EditValueChanged="OnDiagramColorChanged"/>
-                <dxe:PopupColorEdit Grid.Row="2" Grid.Column="5" Name="colorEdit1_2_2" Margin="3" ShowMoreColorsButton="True" DefaultColor="#FFC8C8C8" EditValue="{Binding Color1_2_2}" EditValueChanged="OnDiagramColorChanged"/>
+                <dxe:PopupColorEdit Grid.Row="2" Grid.Column="5" Name="colorEdit1_2_2" Margin="3" ShowMoreColorsButton="True" DefaultColor="#FFA5A5A5" EditValue="{Binding Color1_2_2}" EditValueChanged="OnDiagramColorChanged"/>
                 <dxe:PopupColorEdit Grid.Row="2" Grid.Column="6" Name="colorEdit1_2_3" Margin="3" ShowMoreColorsButton="True" DefaultColor="#FFFFFFFF" EditValue="{Binding Color1_2_3}" EditValueChanged="OnDiagramColorChanged"/>
                 <Label Grid.Row="3" Grid.Column="0" Content="일자/종목" HorizontalContentAlignment="Center" VerticalAlignment="Center" />
                 <dxe:PopupColorEdit Grid.Row="3" Grid.Column="1" Name="colorEdit2_1_1" Margin="3" ShowMoreColorsButton="True" DefaultColor="#FFFFFFFF" EditValue="{Binding Color2_1_1}" EditValueChanged="OnDiagramColorChanged"/>

@@ -69,7 +69,7 @@ namespace LMFS.ViewModels.Pages
 
 
         [RelayCommand]
-        private void OnSearch()
+        public void OnSearch()//251110//private => public
         {
             // 1. PNU 구성
             // 2. 그리드 데이터 조회
@@ -132,10 +132,18 @@ namespace LMFS.ViewModels.Pages
         {
             if (cate != null)
             {
-                var page = new LandMoveDetailPage(GridDataSource.ToList(), cate.regDt, cate.rsn);//생성자에 값 전달
+                LandMoveFlowPage flowPage = new LandMoveFlowPage();
+                var flowVM = flowPage.DataContext as LandMoveFlowViewModel;
+                if (flowVM == null)
+                {
+                    // 에러 처리 (경고 메시지/로그)
+                    return;
+                }
+
+                var detailPage = new LandMoveDetailPage(flowVM, GridDataSource.ToList(), cate.regDt, cate.rsn);//생성자에 값 전달
                 Window window = new Window
                 {
-                    Content = page,
+                    Content = detailPage,
                     Title = "토지이동흐름도 일자/종목별 필지정보(상세)",
                     Width = 800,
                     Height = 320,
@@ -542,65 +550,7 @@ using (var wb = new XLWorkbook(exportPath))
                 Messenger.Default.Send(new RequestExportGridMessage(path, CurrentPnuNm));
             }
         }
-
-        /*
-        // 내보내기 대화상자 (사용자가 형식 선택)
-        private void ExportDialog_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                // DevExpress의 내장 Export 대화상자 표시
-                diagramControl.ExportDiagram();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"내보내기 실패: {ex.Message}", "오류", 
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }         
-         */
-
-        /*
-        // 고급 Export 옵션 설정 (선택사항)
-        //Export 품질과 설정을 조정하려면 다음 속성을 사용하세요:​
-        // Export 설정 예제
-        private void ExportWithCustomSettings_Click(object sender, RoutedEventArgs e)
-        {
-            SaveFileDialog saveDialog = new SaveFileDialog
-            {
-                Filter = "PNG 파일|*.png",
-                FileName = "diagram_high_quality.png"
-            };
-
-            if (saveDialog.ShowDialog() == true)
-            {
-                // 고해상도 설정
-                diagramControl.ExportToImage(
-                    saveDialog.FileName,
-                    DiagramImageExportFormat.PNG,
-                    exportBounds: null,  // 전체 다이어그램
-                    dpi: 300,            // 고해상도 (기본값 96)
-                    scale: 1.0           // 스케일
-                );
-            }
-        } 
-        // PDF 다중 페이지 Export
-        private void ExportMultiPagePdf_Click(object sender, RoutedEventArgs e)
-        {
-            SaveFileDialog saveDialog = new SaveFileDialog
-            {
-                Filter = "PDF 파일|*.pdf",
-                FileName = "diagram_multipage.pdf"
-            };
-
-            if (saveDialog.ShowDialog() == true)
-            {
-                diagramControl.PrintToPdf(saveDialog.FileName);
-            }
-        }        
-         */
         #endregion
-
 
     }
 }

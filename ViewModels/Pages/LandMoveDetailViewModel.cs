@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using DevExpress.Data.Browsing;
 using DevExpress.Mvvm;
+using DevExpress.Utils.About;
 using DevExpress.Xpf.Grid;
 using LMFS.Db;
 using LMFS.Engine;
@@ -22,6 +23,9 @@ namespace LMFS.ViewModels.Pages
 {
     public partial class LandMoveDetailViewModel : ObservableObject
     {
+        public static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+
         #region 기능설명 가이드        
         /*
         1. 기존 행들은 편집 불가, 마지막 컬럼엔 '추가'버튼은 숨기고 빈 컬럼만 표시        
@@ -63,11 +67,22 @@ namespace LMFS.ViewModels.Pages
         [ObservableProperty] private ObservableCollection<GridDetailItem> _gridDetailDataSource;
         [ObservableProperty] private string _regDt;
         [ObservableProperty] private string _rsn;
+        [ObservableProperty] private string _bfPnu;
+        [ObservableProperty] private string _afPnu;
         // 저장 버튼 표시 여부 (처음에는 false)
         [ObservableProperty] private bool _isSaveButtonVisible = false;
         [ObservableProperty] private bool _isTracking = false;
-        
 
+        //[필지 추가 관련]
+        [ObservableProperty] private SidoCode _selectedUmd;
+        [ObservableProperty] private SidoCode _selectedRi;
+        [ObservableProperty] private bool _isSan;
+        [ObservableProperty] private string _bobn;
+        [ObservableProperty] private string _bubn;
+        [ObservableProperty] private List<LandMoveInfo> _gridDataSource;
+
+
+        public LandMoveFlowViewModel ParentVM { get; }
 
         public Action CloseAction { get; set; }
         public ICommand CloseCommand { get; }
@@ -79,9 +94,16 @@ namespace LMFS.ViewModels.Pages
         public ICommand SaveChangesCommand { get; private set; }
 
 
-
-        public LandMoveDetailViewModel()
+        // 1. 생성자에 상위 VM을 파라미터로 받음
+        public LandMoveDetailViewModel(LandMoveFlowViewModel parent)
         {
+            ParentVM = parent;
+            // 필요시 바로 복사
+            this.SelectedUmd = parent.SelectedUmd;
+            this.SelectedRi = parent.SelectedRi;
+            // ... 등등
+
+
             CloseCommand = new RelayCommand(ExecuteClose);
             RowDoubleClickCommand = new DelegateCommand<MouseButtonEventArgs>(OnRowDoubleClick);
             AddRowCommand = new DelegateCommand(OnAddRow);
@@ -116,16 +138,33 @@ namespace LMFS.ViewModels.Pages
 
             //기존
             //GridDetailDataSource = filtered;
-            // GridDetailItem으로 변환하여 할당
+            //GridDetailItem으로 변환하여 할당
+            //selector는 TSource만 받아야 하지, 추가 인수(regDt, rsn)는 받을 수 없습니다.
+            //람다를 사용해서 필요한 인수를 바인딩하세요.
             GridDetailDataSource = new ObservableCollection<GridDetailItem>(
-                filtered.Select(GridDetailItem.FromLandMoveInfo)
+                filtered.Select(item => GridDetailItem.FromLandMoveInfo(item, RegDt, Rsn))
             );
 
 
             // 기존 데이터는 추적 비활성화 (저장 버튼 표시 안 함)
+            int index = 0;
             foreach (var item in GridDetailDataSource)
             {
                 item.PropertyChanged += OnItemPropertyChanged;
+
+                if (index == 0)
+                {
+                    if (Rsn == "이동종목 : 합병")
+                    {
+                        AfPnu = item.AfPnu ?? "";
+                    }
+                    else if(Rsn == "이동종목 : 분할")
+                    {
+                        BfPnu = item.BfPnu ?? "";
+                    }
+                }
+
+                index++;
             }
 
             // 저장 버튼 초기 숨김
@@ -162,7 +201,14 @@ namespace LMFS.ViewModels.Pages
                 AfArea = 0.0,
                 OwnName = ""
             };
-            
+
+            //[데이터 자동채움]
+            if (Rsn == "이동종목 : 합병")
+                newItem.AfPnu = AfPnu;
+            else if (Rsn == "이동종목 : 분할")
+                newItem.BfPnu = BfPnu;
+
+            //
             newItem.PropertyChanged += OnItemPropertyChanged;
             GridDetailDataSource.Add(newItem);
 
@@ -184,20 +230,54 @@ namespace LMFS.ViewModels.Pages
         }
 
         //그리드 마지막 행 - 마지막 컬럼 [추가] 선택
+        //항상 GridDetailDataSource의 마지막 행만 다룬다면
+        //var lastItem = GridDetailDataSource.LastOrDefault();
         private void OnConfirmAdd(GridDetailItem item)
         {
-            //[TODO]
-            //// DB 조회 로직 수행 (예시)
-            //var result = SearchFromDb(item);
-            //if (result == null)
+            // 예) '이동전', '이동후' 등 필수입력 체크
+            if (string.IsNullOrWhiteSpace(item.BfPnu) || string.IsNullOrWhiteSpace(item.AfPnu))
+            {
+                MessageBox.Show("이동전, 이동후 정보를 모두 입력해주세요.", "경고", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;            
+            }
+            // 여러 값 동시에 검사 필요시
+            //if (new[] { item.BfPnu, item.AfPnu, item.BfJimok, item.AfJimok }.Any(string.IsNullOrWhiteSpace))
             //{
-            //    IsSaveButtonVisible = true; // 조회 실패시 저장 버튼 노출
-            //    MessageBox.Show("필지 정보 없음, 변경사항 저장 필요", "안내");
+            //    MessageBox.Show("모든 필수 항목을 입력해주세요.", ...);
+            //    return;
             //}
-            //else
-            //{
-            //    // 값 채워넣고 IsSaveButtonVisible 처리
-            //}
+
+            //[조회할 필지정보]
+            string jibun = string.Empty;
+            if (Rsn == "이동종목 : 합병")
+                jibun = item.BfPnu;
+            else if (Rsn == "이동종목 : 분할")
+                jibun = item.AfPnu;
+
+            // DB 조회 로직 수행
+            SearchLandMoveDetailData(jibun);
+
+            // 3. GridDataSource가 비어있는지 확인
+            if (GridDataSource == null || !GridDataSource.Any())
+            {
+                IsSaveButtonVisible = true; // 조회 실패시 저장 버튼 노출
+                MessageBox.Show("필지 정보 없음, 입력내용 저장 가능", "안내");
+            }
+            else
+            {
+                var result = MessageBox.Show("입력한 필지가 다른 그룹에 존재합니다. \r\n검색화면에서 해당 필지로 조회하시겠습니까? (현재 화면 종료됨)", "알림");
+                if (result == MessageBoxResult.Yes)
+                {
+                    // 검색 로직 실행
+                    ParentVM.IsSan = IsSan;
+                    ParentVM.Bobn = Bobn;
+                    ParentVM.Bubn = Bubn;
+                    ParentVM.OnSearch();
+
+                    //상세화면 창(자기자신) 닫기
+                    this.CloseAction();
+                }
+            }
         }
 
 
@@ -268,6 +348,64 @@ namespace LMFS.ViewModels.Pages
             // TODO: DB Update 코드 구현
             // 예: _service.UpdateLandMoveInfo(landMoveInfo);
         }
+
+
+
+
+
+        #region 상세화면 필지 [추가]
+        private string DetailSearchPnu(string jibun)
+        {
+            string umdCd = SelectedUmd.umdCd;
+            string riCd = SelectedRi == null ? "00" : SelectedRi.riCd;
+            string gbn = "1";
+            IsSan = false;
+            Bobn = string.Empty;
+            Bubn = string.Empty;
+
+            if (jibun.Contains("산"))
+            { 
+                jibun = jibun.Replace("산", "");
+                IsSan = true;
+                gbn = "2";
+            }
+            jibun = jibun.Replace(" ", "");
+            
+            int idx = jibun.IndexOf("-");
+            if(idx >= 0)
+            {
+                Bobn = idx >= 0 ? jibun.Substring(0, idx).PadLeft(4, '0') : jibun.PadLeft(4, '0'); // '-'가 없으면 원본 문자열 전체
+                jibun = jibun.Substring(idx+1, jibun.Length-idx-1);
+                Bubn = jibun != null ? jibun.PadLeft(4, '0') : "0000";
+            }
+            else
+            {
+                Bobn = jibun.PadLeft(4, '0'); // '-'가 없으면 원본 문자열 전체
+                Bubn = "0000";
+            }
+
+            string pnu = SelectedUmd.sidoSggCd + umdCd + riCd + gbn + Bobn + Bubn;
+
+            try
+            {
+                if (pnu.Length != 19)
+                {
+                    _logger.Debug($"지번 오류 {pnu}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Debug($"{pnu} : {ex.Message}");
+            }
+            return pnu;
+        }
+
+        public void SearchLandMoveDetailData(string jibun)
+        {
+            string pnu = DetailSearchPnu(jibun);
+            GridDataSource = DBService.ListLandMoveHistory(pnu);
+        }
+        #endregion
 
     }
 }

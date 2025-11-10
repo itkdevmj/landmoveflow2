@@ -34,6 +34,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -61,6 +62,8 @@ public partial class GridDetailItem : ObservableObject  // ← partial + Observa
     [ObservableProperty] private bool _isNewRow;//[필지 추가]용 새로운 행
     [ObservableProperty] private bool _isModified;//새로운 행이 표시될 경우에만 [변경사항 저장] 버튼 표시하기 위함
     [ObservableProperty] private bool _allowEditing;
+    [ObservableProperty] private string _regDt;//
+    [ObservableProperty] private string _rsn;//
     [ObservableProperty] private string _bfPnu;
     [ObservableProperty] private string _afPnu;
     [ObservableProperty] private string _bfJimok;
@@ -79,6 +82,8 @@ public partial class GridDetailItem : ObservableObject  // ← partial + Observa
         _isNewRow = false;
         _isModified = false;
         _allowEditing = false;
+        _regDt = string.Empty;
+        _rsn = string.Empty;
         _bfPnu = string.Empty;
         _afPnu = string.Empty;
         _bfJimok = string.Empty;
@@ -122,6 +127,14 @@ public partial class GridDetailItem : ObservableObject  // ← partial + Observa
             !IsTracking)
             return;
 
+        //[데이터 자동채움]
+        if (Rsn == "지목변경" && e.PropertyName == nameof(GridDetailItem.BfPnu))
+        {
+            var item = sender as GridDetailItem;
+            item.AfPnu = item.BfPnu;
+        }
+
+
         // 다른 속성이 변경되면 IsModified = true
         IsModified = true;
         _logger.Debug($"GridDetailItem 속성 변경 감지: {e.PropertyName}");
@@ -155,13 +168,15 @@ public partial class GridDetailItem : ObservableObject  // ← partial + Observa
     }
 
     //자동으로 DisableTracking() 호출 - 기존 데이터는 추적 안 함
-    public static GridDetailItem FromLandMoveInfo(LandMoveInfo info)
+    public static GridDetailItem FromLandMoveInfo(LandMoveInfo info, string regDt, string rsn)
     {
         var item = new GridDetailItem
         {
             IsNewRow = false, // DB에서 온 데이터는 기존 행
             IsModified = false,
             AllowEditing = false,
+            RegDt = regDt,
+            Rsn = rsn,
             BfPnu = info.bfPnu ?? "",
             AfPnu = info.afPnu ?? "",
             BfJimok = info.bfJimok ?? "",
@@ -170,10 +185,13 @@ public partial class GridDetailItem : ObservableObject  // ← partial + Observa
             AfArea = info.afArea,
             OwnName = info.ownName ?? ""
         };
+        Debug.WriteLine($"Row: BfPnu={item.BfPnu}, AfPnu={item.AfPnu}, IsNewRow={item.IsNewRow}");
+
 
         // DB에서 로드된 데이터는 추적 비활성화 (초기 로드 시 저장 버튼 표시 안 함)
         item.DisableTracking();
 
+  
         return item;
     }
 

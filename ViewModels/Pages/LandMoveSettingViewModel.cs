@@ -71,10 +71,10 @@ namespace LMFS.ViewModels.Pages
         public void SettingDefaultColor()
         {
             Color1_1_1 = Color.FromArgb(255, 165, 165, 165); // #FFA5A5A5
-            Color1_1_2 = Color.FromArgb(255, 200, 200, 200);
+            Color1_1_2 = Colors.LightGray; //251110//Exception//Color1_1_2 = Color.FromArgb(255, 200, 200, 200);
             Color1_1_3 = Colors.White;
             Color1_2_1 = Color.FromArgb(255, 237, 125, 49);
-            Color1_2_2 = Color.FromArgb(255, 200, 200, 200);
+            Color1_2_2 = Colors.LightGray; //251110//Exception//Color.FromArgb(255, 200, 200, 200);
             Color1_2_3 = Colors.White;
             Color2_1_1 = Colors.White;
             Color2_1_2 = Colors.Black;

@@ -20,12 +20,14 @@ namespace LMFS.Views.Pages
     {
         //regDt : 정리일
         //rsn : 이동종목
-        public LandMoveDetailPage(List<LandMoveInfo> sourceList, string regDt, string rsn)
+        public LandMoveDetailPage(LandMoveFlowViewModel flowVM, List<LandMoveInfo> sourceList, string regDt, string rsn)
         {
             InitializeComponent();
-            var vm = new LandMoveDetailViewModel();
-            this.DataContext = vm;
-            vm.FilterDetail(sourceList, regDt, rsn);
+            // 예시: 상위 화면(MainPage/MainWindow)에서
+            //var flowVM = new LandMoveFlowViewModel(); // 또는 이미 바인딩된 VM
+            var detailVM = new LandMoveDetailViewModel(flowVM);
+            this.DataContext = detailVM;
+            detailVM.FilterDetail(sourceList, regDt, rsn);
         }
 
         private void UpdateDataGridMaxHeight()

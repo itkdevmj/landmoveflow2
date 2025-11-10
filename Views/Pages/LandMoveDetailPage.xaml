@@ -18,10 +18,12 @@
       Loaded="LandMoveDetailPage_OnLoaded"
       SizeChanged="LandMoveDetailPage_OnSizeChanged">
 
-    <Page.Resources>
-        <!-- BoolToVisibility Converter 추가 -->
+    <!-- BoolToVisibility Converter 추가 -->
+    <!--
+    <Page.Resources>        
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </Page.Resources>
+    -->    
 
     <DockPanel>
 
@@ -94,14 +96,20 @@
                         HorizontalHeaderContentAlignment="Center" />
 
                     <!-- 동적 버튼 컬럼 -->
+                    <!-- DevExpress GridControl/Column 사용 시,
+                        셀(CellTemplate) DataContext가 그 행의 "데이터 객체"가 아니라 EditGridCellData라는 내부 프록시일 수 있습니다.
+                        이때 기본 바인딩({Binding IsNewRow})은 "EditGridCellData" 내부에서 IsNewRow를 찾으려고 하며, 당연히 그런 프로퍼티가 없어 에러가 발생합니다. 
+                        - DataContext="{Binding RowData.Row}":
+                        - 셀 템플릿의 DataContext를 진짜 행 데이터(GridDetailItem)로 변경합니다.
+                        - 이후 Button의 Visibility 등도 정상적으로 IsNewRow 바인딩 가능!-->
                     <dxg:GridColumn FieldName="ActionButton" AllowEditing="False" Header="" Width="80" HorizontalHeaderContentAlignment="Center">
                         <dxg:GridColumn.CellTemplate>
                             <DataTemplate>
                                 <!-- IsNewRow일 때만 버튼 노출, 아니면 빈 패널만 -->
-                                <StackPanel>
+                                <StackPanel DataContext="{Binding RowData.Row}">
                                     <Button Content="추가" 
                                         Visibility="{Binding IsNewRow, Converter={StaticResource BoolToVisibilityConverter}}"
-                                        Command="{Binding ConfirmAddCommand, RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                        Command="{Binding DataContext.ConfirmAddCommand, RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
                                         CommandParameter="{Binding}"
                                         Margin="2" Padding="5,2" />
                                 </StackPanel>
@@ -110,6 +118,50 @@
                     </dxg:GridColumn>
                 </dxg:GridControl.Columns>
             </dxg:GridControl>
+
+            <!-- Ghost Grid : '추가' 시 존재하는 필지정보 검색결과 용도 -->
+            <dxg:GridControl Grid.Row="2" Name="FlowDataGrid" Visibility="Collapsed" 
+                             AutoExpandAllGroups="True" AllowColumnMRUFilterList="False"
+                                ItemsSource="{Binding GridDataSource}" SelectionMode="Row"
+                                dx:ScrollBarExtensions.ScrollBarMode="TouchOverlap" ShowBorder="True"
+                                Margin="4,0,4,4" Cursor="Hand">
+
+                <dxmvvm:Interaction.Behaviors>
+                    <dxmvvm:EventToCommand EventName="MouseDoubleClick" 
+                                            Command="{Binding FlowDataDoubleClickCommand}"
+                                            PassEventArgsToCommand="True"
+                                            />
+                </dxmvvm:Interaction.Behaviors>
+
+                <dxg:GridControl.View>
+                    <dxg:TableView ShowIndicator="False" ShowGroupPanel="False" NavigationStyle="Row" AutoWidth="False">
+                    </dxg:TableView>
+                </dxg:GridControl.View>
+                <dxg:GridControl.Columns>
+                    <dxg:GridColumn FieldName="bfPnu" Header="이동전" Width="100" UnboundDataType="{x:Type sys:String}"
+                                    ReadOnly="True" HorizontalHeaderContentAlignment="Center" />
+                    <dxg:GridColumn FieldName="afPnu" Header="이동후" Width="100" UnboundDataType="{x:Type sys:String}"
+                                    ReadOnly="True" HorizontalHeaderContentAlignment="Center" />
+                    <dxg:GridColumn FieldName="regDt" Header="정리일" Width="100" HorizontalHeaderContentAlignment="Center"
+                                    ReadOnly="True">
+                        <dxg:GridColumn.EditSettings>
+                            <dxe:DateEditSettings DisplayFormat="yyyyMMdd" ShowPopupIfReadOnly="False" HorizontalContentAlignment="Center" />
+                        </dxg:GridColumn.EditSettings>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn FieldName="rsn" Header="종목" Width="120" MinWidth="120" HorizontalHeaderContentAlignment="Center" 
+                                    ReadOnly="True">
+                        <dxg:GridColumn.EditSettings>
+                            <dxe:TextEditSettings HorizontalContentAlignment="Center" />
+                        </dxg:GridColumn.EditSettings>
+                    </dxg:GridColumn>
+                </dxg:GridControl.Columns>
+                <!--<dxg:GridControl.TotalSummary>
+                    <dxg:GridSummaryItem SummaryType="Count" Alignment="Right" />
+                    <dxg:GridSummaryItem FieldName="FullName" SummaryType="Count" />
+                </dxg:GridControl.TotalSummary>-->
+            </dxg:GridControl>
+            
+            
         </Grid>
     </DockPanel>
 

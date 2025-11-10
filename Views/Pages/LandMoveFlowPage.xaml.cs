@@ -24,10 +24,16 @@ namespace LMFS.Views.Pages
     /// </summary>
     public partial class LandMoveFlowPage : System.Windows.Controls.Page, IRecipient<LoadXmlMessage>
     {
+        public LandMoveFlowViewModel FlowViewModel { get; set; }
+
+
         public LandMoveFlowPage()
         {
             InitializeComponent();
-            DataContext = new LandMoveFlowViewModel();
+
+            //
+            FlowViewModel = new LandMoveFlowViewModel();
+            this.DataContext = FlowViewModel;
 
             // LoadXmlMessage만 Page에서 처리 (UI 직접 접근 필요한 경우)
             WeakReferenceMessenger.Default.Unregister<LoadXmlMessage>(this);
