@@ -26,16 +26,16 @@ namespace LMFS.Views.Pages
     public partial class LandMoveFlowPage : System.Windows.Controls.Page, IRecipient<LoadXmlMessage>
     {
         public LandMoveFlowViewModel FlowVM { get; set; }
-
+        public LandMoveSettingViewModel SettingVM { get; set; }
 
         public LandMoveFlowPage()
         {
             InitializeComponent();
 
             //
-            var settingVM = new LandMoveSettingViewModel();
-            FlowVM = new LandMoveFlowViewModel(settingVM);
-            settingVM.FlowVM = FlowVM;
+            SettingVM = new LandMoveSettingViewModel();
+            FlowVM = new LandMoveFlowViewModel(SettingVM);
+
 
             this.DataContext = FlowVM;
 

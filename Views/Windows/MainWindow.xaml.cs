@@ -1,5 +1,7 @@
 ﻿using DevExpress.Xpf.Core;
 using LMFS.ViewModels;
+using LMFS.ViewModels.Pages;
+using LMFS.Views.Pages;
 using System.ComponentModel;
 using System.Text;
 using System.Windows;

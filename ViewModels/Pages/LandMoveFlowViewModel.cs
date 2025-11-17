@@ -74,7 +74,7 @@ namespace LMFS.ViewModels.Pages
         public LandMoveFlowViewModel(LandMoveSettingViewModel settingVM)
         {
             SettingVM = settingVM;
-            Converter = new LandMoveFlowConverter(settingVM);
+            //251117//Converter = new LandMoveFlowConverter(settingVM);
 
             // 코드 데이터 가져오기
             GetSidoCodeList();
@@ -398,7 +398,7 @@ namespace LMFS.ViewModels.Pages
         private void UpdateFlowXml()
         {
             //251027//[색상설정 - 사용자정의]
-            Converter = new LandMoveFlowConverter(new LandMoveSettingViewModel());
+            Converter = new LandMoveFlowConverter(SettingVM/*new LandMoveSettingViewModel()*/);
 
             var filteredList = GridDataSource;
             var categoryList = GridCategoryDataSource;
