@@ -33,7 +33,7 @@ namespace LMFS.Engine;
 public class LandMoveFlowConverter
 {
     public static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-    private readonly LandMoveSettingViewModel _settings;//251027//
+    private LandMoveSettingViewModel _settingVM;//251027//
 
 
     // ===========================================================
@@ -145,15 +145,13 @@ public class LandMoveFlowConverter
     #region 생성자     ----------------------------------------
 
     //Page를 직접 접근하지 않고, ViewModel을 통해서 접근하기//
-    public LandMoveFlowConverter(LandMoveSettingViewModel settings)
+    public LandMoveFlowConverter(LandMoveSettingViewModel settingViewModel)
     {
         //기본 색상 (or 사용자 정의 색상) 가져오기
-        //page.SettingDefaultColor();
-        //_settings = page.ViewModel;
-        settings.SettingDefaultColor();
-        settings.GetSettingColor();
+        settingViewModel.SettingDefaultColor();
+        settingViewModel.GetSettingColor();
 
-        _settings = settings;
+        _settingVM = settingViewModel;// 기존 인스턴스만 보관
         //필요한 데이터는 _settings에서 가져옴
     }
 
@@ -701,7 +699,7 @@ public class LandMoveFlowConverter
         }
 
         // 마지막에 라벨 추가 (Bring to Front 효과)
-        var labelCol = _settings.LabelColors;
+        var labelCol = _settingVM.LabelColors;
         foreach (var (x, y, label, bfocus) in _labelTuples)//Vit.G//[add]focus
         {
             var item = new XElement($"Item{_itemList.Count + 1}",
@@ -741,7 +739,7 @@ public class LandMoveFlowConverter
     {
         int x = 0;
         int y = 0;
-        var jibunCol = _settings.JibunColors;
+        var jibunCol = _settingVM.JibunColors;
 
 
         if (_isPortrait)//[세로형 그리기]
@@ -821,7 +819,7 @@ public class LandMoveFlowConverter
         int x2 = 0;
         int y2 = 0;
         int mid = 0;
-        var connCol = _settings.ConnectorColors;
+        var connCol = _settingVM.ConnectorColors;
 
         if (_isPortrait)//[세로형 그리기]
         {
@@ -994,6 +992,13 @@ public class LandMoveFlowConverter
             }
         }
         return index;
+    }
+    #endregion
+
+    #region 색상 설정
+    public void UpdateWithNewSetting(LandMoveSettingViewModel settingVM)
+    {
+        _settingVM = settingVM; // 값이 실제 변경된 새 인스턴스라면 갱신
     }
     #endregion
 

@@ -23,7 +23,7 @@ namespace LMFS.Views.Pages
     public partial class LandMoveSettingPage : Page
     {
         //[ObservableProperty] => ViewModel쪽에서만 사용
-        private readonly LandMoveSettingViewModel _viewModel;
+        private readonly LandMoveSettingViewModel _vm;
         //Setting 후 다시 그리기//
         public LandMoveFlowViewModel flowVM;
 
@@ -32,8 +32,9 @@ namespace LMFS.Views.Pages
             InitializeComponent();
 
             flowVM = flowViewModel;
-            _viewModel = new LandMoveSettingViewModel(flowVM);
-            this.DataContext = _viewModel;
+            _vm = new LandMoveSettingViewModel();
+            this.DataContext = _vm;
+            //flowVM.Converter = flowVM.Converter;//Converter에서도 공유//251117//TEST//
         }
 
         private void UpdateDataGridMaxHeight()
@@ -54,7 +55,8 @@ namespace LMFS.Views.Pages
             UpdateDataGridMaxHeight();
 
             //기본 색상 설정
-            _viewModel.SettingDefaultColor();
+            _vm.SettingDefaultColor();
+            _vm.GetSettingColor();
         }
 
         private void LandMoveSettingPage_OnSizeChanged(object sender, SizeChangedEventArgs e)

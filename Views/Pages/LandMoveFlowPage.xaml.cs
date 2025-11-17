@@ -33,7 +33,10 @@ namespace LMFS.Views.Pages
             InitializeComponent();
 
             //
-            FlowVM = new LandMoveFlowViewModel();
+            var settingVM = new LandMoveSettingViewModel();
+            FlowVM = new LandMoveFlowViewModel(settingVM);
+            settingVM.FlowVM = FlowVM;
+
             this.DataContext = FlowVM;
 
             // LoadXmlMessage만 Page에서 처리 (UI 직접 접근 필요한 경우)

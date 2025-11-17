@@ -57,14 +57,24 @@ namespace LMFS.ViewModels.Pages
 
         [ObservableProperty] private bool _isFlowData = false;
 
-        public LandMoveFlowConverter Converter { get; private set; }
+        //private Engine.LandMoveFlowConverter _converter; 
+        //public Engine.LandMoveFlowConverter Converter
+        //{
+        //    get => _converter;
+        //    set => _converter = value;
+        //}
+
+        public LandMoveFlowConverter Converter { get; set; }
+        public LandMoveSettingViewModel SettingVM { get; } // 읽기전용 속성으로 보관
+
 
         public record RequestExportGridMessage(string ExportPath, string SheetName);
 
 
-        public LandMoveFlowViewModel()
+        public LandMoveFlowViewModel(LandMoveSettingViewModel settingVM)
         {
-            //Converter = new LandMoveFlowConverter();
+            SettingVM = settingVM;
+            Converter = new LandMoveFlowConverter(settingVM);
 
             // 코드 데이터 가져오기
             GetSidoCodeList();
@@ -388,7 +398,7 @@ namespace LMFS.ViewModels.Pages
         private void UpdateFlowXml()
         {
             //251027//[색상설정 - 사용자정의]
-            Converter = new LandMoveFlowConverter(new LandMoveSettingViewModel(this));
+            Converter = new LandMoveFlowConverter(new LandMoveSettingViewModel());
 
             var filteredList = GridDataSource;
             var categoryList = GridCategoryDataSource;
@@ -645,6 +655,15 @@ using (var wb = new XLWorkbook(exportPath))
 
         //    busy.Close();
         //}
+        #endregion
+
+        #region 색상변경
+        public void UpdateColorFromSetting()
+        {
+            // Converter 등이 최신 Setting 값을 참조/반영
+            Converter.UpdateWithNewSetting(this.SettingVM);
+            Converter.MakeXmlData(); // 다이어그램 다시 그림
+        }
         #endregion
 
 
