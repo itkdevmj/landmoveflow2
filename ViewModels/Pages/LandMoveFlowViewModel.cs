@@ -12,6 +12,7 @@ using LMFS.Engine;
 using LMFS.Messages;
 using LMFS.Models;
 using LMFS.Services;
+using LMFS.Views;
 using LMFS.Views.Pages;
 using Microsoft.Win32;// SaveFileDialog를 위해 필요
 using NLog;
@@ -21,6 +22,7 @@ using System.ComponentModel;
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Xml.Linq;
@@ -50,16 +52,25 @@ namespace LMFS.ViewModels.Pages
         [ObservableProperty] private List<LandMoveInfoCategory> _gridCategoryDataSource;
         [ObservableProperty] private MemoryStream _landMoveFlowData;
 
+        [ObservableProperty] private int _currentGSeq;//상세화면에서 insert 시 사용될 예정//
+
+
         [ObservableProperty] private bool _isFlowData = false;
+
+        public LandMoveFlowConverter Converter { get; private set; }
 
         public record RequestExportGridMessage(string ExportPath, string SheetName);
 
 
         public LandMoveFlowViewModel()
         {
+            //Converter = new LandMoveFlowConverter();
+
+            // 코드 데이터 가져오기
             GetSidoCodeList();
             GetJimokCodeDictionary();
             GetReasonCodeDictionary();
+
         }
 
         public void Dispose()
@@ -69,8 +80,15 @@ namespace LMFS.ViewModels.Pages
 
 
         [RelayCommand]
-        public void OnSearch()//251110//private => public
+        public async void OnSearch()//private => public//async 추가
         {
+            if (Bobn == "" && Bubn == "")
+            {
+                ShowNoInputPopup();
+
+                return;// 본번 & 부번 데이터가 없으면 이후 처리 중단
+            }
+
             // 1. PNU 구성
             // 2. 그리드 데이터 조회
             SearchLandMoveData();
@@ -89,8 +107,14 @@ namespace LMFS.ViewModels.Pages
                 return; // 데이터가 없으면 이후 처리 중단
             }
 
+
+            ////대기 팝업 - // 4. 그리드 데이터 처리
+            //await DrawDiagramAsync();//async 추가 필수
+
+
             // 4. 그리드 데이터 처리
             UpdateFlowXml();
+
         }
 
         private void ShowNoDataPopup()
@@ -108,6 +132,20 @@ namespace LMFS.ViewModels.Pages
             // popup.ShowDialog();
         }
 
+        private void ShowNoInputPopup()
+        {
+            // WPF MessageBox 사용
+            MessageBox.Show(
+                "지번정보를 입력해주세요.",
+                "알림",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
+
+            // 또는 커스텀 팝업을 사용하는 경우
+            // var popup = new CustomPopup("조회된 데이터가 없습니다.");
+            // popup.ShowDialog();
+        }
 
         [RelayCommand]
         private void OnEnter()
@@ -132,15 +170,8 @@ namespace LMFS.ViewModels.Pages
         {
             if (cate != null)
             {
-                LandMoveFlowPage flowPage = new LandMoveFlowPage();
-                var flowVM = flowPage.DataContext as LandMoveFlowViewModel;
-                if (flowVM == null)
-                {
-                    // 에러 처리 (경고 메시지/로그)
-                    return;
-                }
-
-                var detailPage = new LandMoveDetailPage(flowVM, GridDataSource.ToList(), cate.regDt, cate.rsn);//생성자에 값 전달
+                // this는 이미 LandMoveFlowViewModel 인스턴스이므로 DataContext 불필요
+                var detailPage = new LandMoveDetailPage(this, GridDataSource.ToList(), cate.regDt, cate.rsn);//생성자에 값 전달
                 Window window = new Window
                 {
                     Content = detailPage,
@@ -158,7 +189,7 @@ namespace LMFS.ViewModels.Pages
         //Diagram Color 설정화면으로 이동//
         private void OnSettingColor()
         {
-            var page = new LandMoveSettingPage();
+            var page = new LandMoveSettingPage(this);
             Window window = new Window
             {
                 Content = page,
@@ -218,6 +249,12 @@ namespace LMFS.ViewModels.Pages
 
         partial void OnSelectedUmdChanged(SidoCode value)
         {
+            if (value == null)
+            {
+                RiList = new List<SidoCode>(); // 빈 리스트 등 초기화
+                SelectedRi = null;
+                return;
+            }
             RiList = GenerateRiList(value!.umdCd);
             SelectedRi = RiList.FirstOrDefault()!;
         }
@@ -351,9 +388,7 @@ namespace LMFS.ViewModels.Pages
         private void UpdateFlowXml()
         {
             //251027//[색상설정 - 사용자정의]
-            var viewModel = new LandMoveSettingViewModel();
-
-            var converter = new LandMoveFlowConverter(viewModel);
+            Converter = new LandMoveFlowConverter(new LandMoveSettingViewModel(this));
 
             var filteredList = GridDataSource;
             var categoryList = GridCategoryDataSource;
@@ -370,8 +405,10 @@ namespace LMFS.ViewModels.Pages
             {
                 IsFlowData = true;//표시 설정 [이동정리목록 내보내기(엑셀), 다이어그램 내보내기(Pdf, Jpg, Png)]
 
-                XDocument rtnXml = converter.Run(filteredList, this, categoryList, CurrentPnu);
-                CurrentPnuNm = converter.GetJibun(CurrentPnu, 2);
+                CurrentGSeq = filteredList[filteredList.Count - 1].gSeq; ;//상세화면에서 insert 시 사용될 예정//
+
+                XDocument rtnXml = Converter.Run(filteredList, this, categoryList, CurrentPnu);
+                CurrentPnuNm = Converter.GetJibun(CurrentPnu, 2);
 
                 // ... 이하 xml 스트림 처리
                 string str = rtnXml.ToString();
@@ -393,9 +430,6 @@ namespace LMFS.ViewModels.Pages
                 //MessageBox.Show("데이터가 존재하지 않습니다.");
             }
         }
-
-
-
 
         #region XML 관련
 
@@ -551,6 +585,68 @@ using (var wb = new XLWorkbook(exportPath))
             }
         }
         #endregion
+
+
+        //251117//NotUsed//
+        #region 읍면동, 리 코드값 처리
+        //private object _editValueUmd;
+        //public object EditValueUmd
+        //{
+        //    get => _editValueUmd;
+        //    set
+        //    {
+        //        if (SetProperty(ref _editValueUmd, value))
+        //        {
+        //            SelectedUmd = null; 
+        //            if (value != null)
+        //            {
+        //                // 코드값과 동일한 umdCd를 가진 항목 검색
+        //                var item = UmdList?.FirstOrDefault(x => x.umdCd.ToString() == value.ToString());
+        //                SelectedUmd = item != null ? item : null/*없으면 선택 해제*/;
+        //            }
+        //        }
+        //    }
+        //}
+        //
+        //private object _editValueRi;
+        //public object EditValueRi
+        //{
+        //    get => _editValueRi;
+        //    set
+        //    {
+        //        if (SetProperty(ref _editValueRi, value))
+        //        {
+        //            SelectedRi = null;
+        //            if (value != null)
+        //            {
+        //                // 코드값과 동일한 umdCd를 가진 항목 검색
+        //                var item = RiList?.FirstOrDefault(x => x.riCd.ToString() == value.ToString());
+        //                SelectedRi = item != null ? item : null/*없으면 선택 해제*/;
+        //            }
+        //        }
+        //    }
+        //}
+        #endregion
+
+
+
+        #region 대기 팝업
+        //private async Task DrawDiagramAsync()
+        //{
+        //    var busy = new BusyWindow();
+        //    busy.Show();
+
+        //    await Task.Run(() => {
+        //        // 긴 다이어그램 생성/처리 작업
+
+        //        // 4. 그리드 데이터 처리
+        //        UpdateFlowXml();
+        //    });
+
+        //    busy.Close();
+        //}
+        #endregion
+
 
     }
 }

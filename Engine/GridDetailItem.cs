@@ -62,15 +62,24 @@ public partial class GridDetailItem : ObservableObject  // ← partial + Observa
     [ObservableProperty] private bool _isNewRow;//[필지 추가]용 새로운 행
     [ObservableProperty] private bool _isModified;//새로운 행이 표시될 경우에만 [변경사항 저장] 버튼 표시하기 위함
     [ObservableProperty] private bool _allowEditing;
+    //DB Data
+    [ObservableProperty] private int _gSeq;//
+    [ObservableProperty] private int _idx;//
     [ObservableProperty] private string _regDt;//
     [ObservableProperty] private string _rsn;//
     [ObservableProperty] private string _bfPnu;
     [ObservableProperty] private string _afPnu;
-    [ObservableProperty] private string _bfJimok;
+    [ObservableProperty] private string _bfJimokCd;
     [ObservableProperty] private double _bfArea;
-    [ObservableProperty] private string _afJimok;
+    [ObservableProperty] private string _afJimokCd;
     [ObservableProperty] private double _afArea;
     [ObservableProperty] private string _ownName;
+    //Input Data
+    [ObservableProperty] private string _bfJibun;
+    [ObservableProperty] private string _afJibun;
+    [ObservableProperty] private string _bfJimok;
+    [ObservableProperty] private string _afJimok;
+
     [ObservableProperty] private bool _isTracking = false; // 추적 활성화 플래그
 
     #endregion
@@ -82,15 +91,23 @@ public partial class GridDetailItem : ObservableObject  // ← partial + Observa
         _isNewRow = false;
         _isModified = false;
         _allowEditing = false;
+
+        //DB Data
         _regDt = string.Empty;
         _rsn = string.Empty;
         _bfPnu = string.Empty;
         _afPnu = string.Empty;
-        _bfJimok = string.Empty;
+        _bfJimokCd = string.Empty;
+        _afJimokCd = string.Empty;
         _bfArea = 0.0;
-        _afJimok = string.Empty;
         _afArea = 0.0;
         _ownName = string.Empty;
+
+        //Input Data
+        _bfJibun = string.Empty;
+        _afJibun = string.Empty;
+        _bfJimok = string.Empty;
+        _afJimok = string.Empty;
 
         _logger.Debug("GridDetailItem 인스턴스 생성");
 
@@ -177,15 +194,15 @@ public partial class GridDetailItem : ObservableObject  // ← partial + Observa
             AllowEditing = false,
             RegDt = regDt,
             Rsn = rsn,
-            BfPnu = info.bfPnu ?? "",
-            AfPnu = info.afPnu ?? "",
+            BfJibun = info.bfPnu ?? "",
+            AfJibun = info.afPnu ?? "",
             BfJimok = info.bfJimok ?? "",
             BfArea = info.bfArea,
             AfJimok = info.afJimok ?? "",
             AfArea = info.afArea,
             OwnName = info.ownName ?? ""
         };
-        Debug.WriteLine($"Row: BfPnu={item.BfPnu}, AfPnu={item.AfPnu}, IsNewRow={item.IsNewRow}");
+        Debug.WriteLine($"Row: BfJibun={item.BfJibun}, AfJibun={item.AfJibun}, IsNewRow={item.IsNewRow}");
 
 
         // DB에서 로드된 데이터는 추적 비활성화 (초기 로드 시 저장 버튼 표시 안 함)
@@ -200,11 +217,15 @@ public partial class GridDetailItem : ObservableObject  // ← partial + Observa
     {
         return new LandMoveInfo
         {
+            gSeq = this.GSeq,
+            idx = this.Idx,
+            regDt = this.RegDt,
+            rsn = this.Rsn,
             bfPnu = this.BfPnu,
             afPnu = this.AfPnu,
-            bfJimok = this.BfJimok,
+            bfJimok = this.BfJimokCd,
             bfArea = this.BfArea,
-            afJimok = this.AfJimok,
+            afJimok = this.AfJimokCd,
             afArea = this.AfArea,
             ownName = this.OwnName
         };

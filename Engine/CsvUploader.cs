@@ -69,6 +69,7 @@ public class CsvUploader
     // -----------------------------------------------------------
     // DBMS 조회 데이터 및 그룹 정보
     // -----------------------------------------------------------
+    public static bool _nonExistData = false;//DB에 기존 데이터가 존재하는지 여부 - 기존 데이터 query하는 행동 하지 않기 위해(false=empty)//
     public static int _groupSeqno = 0;
 
 
@@ -85,6 +86,8 @@ public class CsvUploader
     //Page를 직접 접근하지 않고, ViewModel을 통해서 접근하기//
     public CsvUploader()
     {
+        _nonExistData = false;//초기화//
+
         // 임시 파일 저장할 경로 설정//
         _tempDir = SetTempDir();
     }
@@ -340,14 +343,16 @@ public class CsvUploader
             onProgress?.Invoke(0, totalCount, "기존 자료 백업 중...");
             if (DBService.BackupLandMoveInfoOrg() <= 0)
             {
+                _nonExistData = true;//DB에 기존 데이터가 존재하는지 여부 - 기존 데이터 query하는 행동 하지 않기 위해//
+
                 MessageBox.Show("기존 자료 백업에 문제가 발생했습니다. 사업수행자에게 문의하세요.");
                 return;
             }
             if (DBService.CreateLandMoveInfoUser() <= 0)
             {
-                MessageBox.Show("기존 자료 백업에 문제가 발생했습니다. 사업수행자에게 문의하세요.");
+                MessageBox.Show("업로드용 임시 테이블 생성에 문제가 발생했습니다. 사업수행자에게 문의하세요.");
                 return;
-            }
+            }           
 
 
             //------------------------------------
@@ -623,27 +628,30 @@ public class CsvUploader
                 //------------------------------------------
                 // (2) DB에서 기존 그룹 데이터 가져와서 병합
                 //------------------------------------------
-                var dbFlowList = SqlQueryFlowList(); // List<LandMoveInfo>
-                if (dbFlowList.Count > 0)
+                if (_nonExistData)//DB에 기존 데이터가 존재하는지 여부 - 기존 데이터 query하는 행동 하지 않기 위해(true=데이터 존재)//
                 {
-                    // 'SEQ' 컬럼 제거는 클래스에서 속성 제외
-                    resultData.AddRange(dbFlowList);
-                    // 다시 중복 제거
-                    resultData = DropDuplicatesInfo(resultData);
+                    var dbFlowList = SqlQueryFlowList(); // List<LandMoveInfo>
+                    if (dbFlowList.Count > 0)
+                    {
+                        // 'SEQ' 컬럼 제거는 클래스에서 속성 제외
+                        resultData.AddRange(dbFlowList);
+                        // 다시 중복 제거
+                        resultData = DropDuplicatesInfo(resultData);
 
-                    // 정렬
-                    resultData = resultData
-                        .OrderBy(x => x.regDt)
-                        //.ThenBy(x => converter.ListMovRsn.ContainsKey(x.rsn) ? converter.ListMovRsn[x.rsn] : "00")
-                        .ThenBy(x =>
-                        {
-                            if (x.rsn != null && converter.ListMovRsn.TryGetValue(x.rsn, out var val))
-                                return val;
-                            return "00"; // 키가 없거나 x.rsn이 null인 경우 기본값
-                        })
-                        .ThenBy(x => x.bfPnu)
-                        .ThenBy(x => x.afPnu)
-                        .ToList();
+                        // 정렬
+                        resultData = resultData
+                            .OrderBy(x => x.regDt)
+                            //.ThenBy(x => converter.ListMovRsn.ContainsKey(x.rsn) ? converter.ListMovRsn[x.rsn] : "00")
+                            .ThenBy(x =>
+                            {
+                                if (x.rsn != null && converter.ListMovRsn.TryGetValue(x.rsn, out var val))
+                                    return val;
+                                return "00"; // 키가 없거나 x.rsn이 null인 경우 기본값
+                            })
+                            .ThenBy(x => x.bfPnu)
+                            .ThenBy(x => x.afPnu)
+                            .ToList();
+                    }
                 }
 
                 //------------------------------------------

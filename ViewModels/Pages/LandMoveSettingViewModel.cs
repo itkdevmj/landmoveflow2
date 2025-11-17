@@ -28,6 +28,8 @@ namespace LMFS.ViewModels.Pages
         [ObservableProperty] private Color[,] jibunColors = new Color[2, 3];//basic, query : foreground, background, textcolor        
         [ObservableProperty] private Color[,] labelColors = new Color[2, 3];//basic, query : foreground, background, textcolor
         [ObservableProperty] private Color[,] connectorColors = new Color[2, 1];//basic, query
+        
+        [ObservableProperty] private LandMoveFlowViewModel _flowVM;
 
         public Color Color1_1_1 { get; set; }
         public Color Color1_1_2 { get; set; }
@@ -50,9 +52,10 @@ namespace LMFS.ViewModels.Pages
         public Action CloseAction { get; set; }
         public ICommand CloseCommand { get; }
 
-        public LandMoveSettingViewModel()
+        public LandMoveSettingViewModel(LandMoveFlowViewModel flowViewModel)
         {
             CloseCommand = new RelayCommand(ExecuteClose);
+            FlowVM = flowViewModel;
         }
 
         private void ExecuteClose()
@@ -84,7 +87,10 @@ namespace LMFS.ViewModels.Pages
             Color2_2_3 = Colors.Green;
             Color3_1_1 = Color.FromArgb(255, 91, 155, 213);
             Color3_2_1 = Color.FromArgb(255, 237, 125, 49);
+        }
 
+        public void GetSettingColor()
+        {
             JibunColors = new Color[,]
             { 
                 { Color1_1_1, Color1_1_2, Color1_1_3}, 
@@ -97,7 +103,7 @@ namespace LMFS.ViewModels.Pages
                 { Color2_2_1, Color2_2_2, Color2_2_3}
             };
 
-            connectorColors = new Color[,]
+            ConnectorColors = new Color[,]
             {
                 { Color3_1_1},
                 { Color3_2_1}
@@ -110,9 +116,12 @@ namespace LMFS.ViewModels.Pages
         private void OnSaveColor()
         {
             //색상 저장 로직
-            //...
+            // 개별 Color 프로퍼티들의 값을 색상 배열에 반영
+            GetSettingColor();
+
             //XML 생성 및 저장
-            new LandMoveFlowConverter(this).MakeXmlData();
+            //251117//new LandMoveFlowConverter(this).MakeXmlData();
+            FlowVM.Converter.MakeXmlData();
         }
     }
 }

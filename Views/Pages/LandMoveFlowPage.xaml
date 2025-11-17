@@ -65,7 +65,20 @@
 
             <Border Background="#A3C6C4" BorderThickness="2" CornerRadius="10" Padding="5">
                 <StackPanel Grid.Row="0" Margin="5,5,5,5">
+                    <!-- 코드 직접 입력 기능 추가 //251117//NotUsed// -->
                     <dxlc:LayoutGroup Orientation="Horizontal" Height="28" Margin="4">
+<!--
+                        <dxe:ComboBoxEdit IsTextEditable="True" 
+                                          ItemsSource="{Binding UmdList}"
+                                          ValueMember="umdCd" DisplayMember="umdCdNm"
+                                          EditValue="{Binding EditValueUmd, Mode=TwoWay}"
+                                          SelectedItem="{Binding SelectedUmd, Mode=TwoWay}"/>
+                        <dxe:ComboBoxEdit IsTextEditable="True"
+                                          ItemsSource="{Binding RiList}"
+                                          ValueMember="riCd" DisplayMember="riCdNm"
+                                          EditValue="{Binding EditValueRi, Mode=TwoWay}"
+                                          SelectedItem="{Binding SelectedRi}"/> 
+-->                        
                         <dxe:ComboBoxEdit IsTextEditable="False" 
                                           ItemsSource="{Binding UmdList}"
                                           ValueMember="umdCd" DisplayMember="umdCdNm"

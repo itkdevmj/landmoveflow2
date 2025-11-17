@@ -4,6 +4,7 @@ using DevExpress.Data.Browsing;
 using DevExpress.Mvvm;
 using DevExpress.Utils.About;
 using DevExpress.Xpf.Grid;
+using DevExpress.XtraScheduler.Native;
 using LMFS.Db;
 using LMFS.Engine;
 using LMFS.Models;
@@ -61,14 +62,23 @@ namespace LMFS.ViewModels.Pages
         #endregion
 
 
-        //기존
-        //[ObservableProperty] private List<LandMoveInfo> _gridDetailDataSource;
-        // 변경 (UI 바인딩과 동적 추가/삭제에 최적)
+        // (UI 바인딩과 동적 추가/삭제에 최적)
         [ObservableProperty] private ObservableCollection<GridDetailItem> _gridDetailDataSource;
+        [ObservableProperty] private string _labelRegDt;
+        [ObservableProperty] private string _labelRsn;
+
+        [ObservableProperty] private int _gSeq;
+        [ObservableProperty] private int _idx;
         [ObservableProperty] private string _regDt;
         [ObservableProperty] private string _rsn;
         [ObservableProperty] private string _bfPnu;
         [ObservableProperty] private string _afPnu;
+        [ObservableProperty] private string _ownName;
+
+        [ObservableProperty] private string _bfJibun;
+        [ObservableProperty] private string _afJibun;
+        [ObservableProperty] private string _bfJimok;
+        [ObservableProperty] private string _afJimok;
         // 저장 버튼 표시 여부 (처음에는 false)
         [ObservableProperty] private bool _isSaveButtonVisible = false;
         [ObservableProperty] private bool _isTracking = false;
@@ -81,6 +91,7 @@ namespace LMFS.ViewModels.Pages
         [ObservableProperty] private string _bubn;
         [ObservableProperty] private List<LandMoveInfo> _gridDataSource;
 
+        [ObservableProperty] private LandMoveFlowConverter _converter;
 
         public LandMoveFlowViewModel ParentVM { get; }
 
@@ -98,6 +109,9 @@ namespace LMFS.ViewModels.Pages
         public LandMoveDetailViewModel(LandMoveFlowViewModel parent)
         {
             ParentVM = parent;
+
+            _converter = ParentVM.Converter;
+
             // 필요시 바로 복사
             this.SelectedUmd = parent.SelectedUmd;
             this.SelectedRi = parent.SelectedRi;
@@ -131,10 +145,19 @@ namespace LMFS.ViewModels.Pages
                 .Where(x => x.regDt == regDt && x.rsn == rsn)
                 .ToList();
 
+            if(filtered.Count == 0)
+            {
+                _logger.Debug($"필터 오류 {regDt} {rsn}"); 
+                //[TODO]
+            }
+
+            GSeq = filtered[filtered.Count-1].gSeq;
+            Idx = filtered[filtered.Count - 1].idx + 1;
             DateTime parsedDate = DateTime.ParseExact(regDt, "yyyyMMdd", null);
             RegDt = parsedDate.ToString("yyyy-MM-dd");
-            RegDt = $"정리일자 : {RegDt}";
-            Rsn = $"이동종목 : {rsn}";
+            Rsn = rsn;
+            LabelRegDt = $"정리일자 : {RegDt}";
+            LabelRsn = $"이동종목 : {rsn}";
 
             //기존
             //GridDetailDataSource = filtered;
@@ -154,14 +177,19 @@ namespace LMFS.ViewModels.Pages
 
                 if (index == 0)
                 {
-                    if (Rsn == "이동종목 : 합병")
+                    if (Rsn == "합병")
                     {
-                        AfPnu = item.AfPnu ?? "";
+                        AfJibun = item.AfJibun ?? "";
                     }
-                    else if(Rsn == "이동종목 : 분할")
+                    else if(Rsn == "분할")
                     {
-                        BfPnu = item.BfPnu ?? "";
+                        BfJibun = item.BfJibun ?? "";
                     }
+
+
+                    BfJimok = item.BfJimok;
+                    AfJimok = item.AfJimok;
+                    OwnName = item.OwnName;
                 }
 
                 index++;
@@ -193,20 +221,22 @@ namespace LMFS.ViewModels.Pages
             var newItem = new GridDetailItem
             {
                 IsNewRow = true,
+                //DB Data
+                GSeq = this.GSeq,
+                Idx = this.Idx,
                 BfPnu = "",
                 AfPnu = "",
-                BfJimok = "",
+                BfJimokCd = "",
                 BfArea = 0.0,
-                AfJimok = "",
+                AfJimokCd = "",
                 AfArea = 0.0,
-                OwnName = ""
+                OwnName = this.OwnName,//[데이터 자동채움]
+                //Input Data
+                BfJibun = (Rsn == "분할" ? this.BfJibun : ""),//[데이터 자동채움]
+                AfJibun = (Rsn == "합병" ? this.AfJibun : ""),//[데이터 자동채움]
+                BfJimok = this.BfJimok,//[데이터 자동채움]
+                AfJimok = this.AfJimok//[데이터 자동채움]
             };
-
-            //[데이터 자동채움]
-            if (Rsn == "이동종목 : 합병")
-                newItem.AfPnu = AfPnu;
-            else if (Rsn == "이동종목 : 분할")
-                newItem.BfPnu = BfPnu;
 
             //
             newItem.PropertyChanged += OnItemPropertyChanged;
@@ -223,10 +253,8 @@ namespace LMFS.ViewModels.Pages
 
             newItem.EnableTracking(); // 추적 활성화
 
-            IsSaveButtonVisible = true;
-
             // 필지 추가 시 저장 버튼 표시
-            IsSaveButtonVisible = true;
+            //251111//IsSaveButtonVisible = true;
         }
 
         //그리드 마지막 행 - 마지막 컬럼 [추가] 선택
@@ -235,7 +263,7 @@ namespace LMFS.ViewModels.Pages
         private void OnConfirmAdd(GridDetailItem item)
         {
             // 예) '이동전', '이동후' 등 필수입력 체크
-            if (string.IsNullOrWhiteSpace(item.BfPnu) || string.IsNullOrWhiteSpace(item.AfPnu))
+            if (string.IsNullOrWhiteSpace(item.BfJibun) || string.IsNullOrWhiteSpace(item.AfJibun))
             {
                 MessageBox.Show("이동전, 이동후 정보를 모두 입력해주세요.", "경고", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;            
@@ -247,25 +275,48 @@ namespace LMFS.ViewModels.Pages
             //    return;
             //}
 
-            //[조회할 필지정보]
-            string jibun = string.Empty;
-            if (Rsn == "이동종목 : 합병")
-                jibun = item.BfPnu;
-            else if (Rsn == "이동종목 : 분할")
-                jibun = item.AfPnu;
 
+            //[조회할 필지 정보]
             // DB 조회 로직 수행
+            var jibun = Rsn == "합병" ? item.BfJibun : item.AfJibun;
             SearchLandMoveDetailData(jibun);
 
             // 3. GridDataSource가 비어있는지 확인
             if (GridDataSource == null || !GridDataSource.Any())
             {
-                IsSaveButtonVisible = true; // 조회 실패시 저장 버튼 노출
-                MessageBox.Show("필지 정보 없음, 입력내용 저장 가능", "안내");
+                IsSaveButtonVisible = true; // 조회 결과 부재 시 저장 버튼 노출
+                MessageBox.Show("현재 데이터베이스에 필지 정보 없습니다.\r\n입력 필지는 저장 가능합니다.", "알림");
+
+                //------------------------------------------
+                //[추가할 필지 정보]
+                //------------------------------------------
+                item.RegDt = RegDt;
+                item.Rsn = Rsn;
+                if (Rsn == "합병")
+                {
+                    item.BfPnu = DetailSearchPnu(jibun);
+                    item.AfPnu = DetailSearchPnu(item.AfJibun);
+                }
+                else if (Rsn == "분할")
+                {
+                    item.BfPnu = DetailSearchPnu(item.BfJibun);
+                    item.AfPnu = DetailSearchPnu(jibun);
+                }
+                else
+                {
+                    item.BfPnu = DetailSearchPnu(item.BfJibun);
+                    item.AfPnu = BfPnu;
+                }
+
+                item.BfJimokCd = Converter.GetCodeValue(4, item.BfJimok);
+                item.AfJimokCd = Converter.GetCodeValue(4, item.AfJimok);
             }
             else
             {
-                var result = MessageBox.Show("입력한 필지가 다른 그룹에 존재합니다. \r\n검색화면에서 해당 필지로 조회하시겠습니까? (현재 화면 종료됨)", "알림");
+                IsSaveButtonVisible = false; // 조회 결과 부재 시 저장 버튼 노출
+
+                var message = "입력한 필지는 다른 그룹에 존재합니다. \r\n검색화면에서 해당 필지로 조회하시겠습니까? (예:현재 화면 종료됨)";
+                var result = MessageBox.Show(message, "알림", MessageBoxButton.YesNo, MessageBoxImage.Information);
                 if (result == MessageBoxResult.Yes)
                 {
                     // 검색 로직 실행
@@ -274,8 +325,7 @@ namespace LMFS.ViewModels.Pages
                     ParentVM.Bubn = Bubn;
                     ParentVM.OnSearch();
 
-                    //상세화면 창(자기자신) 닫기
-                    this.CloseAction();
+                    CloseAction?.Invoke(); // Yes일 때만 닫기!
                 }
             }
         }
@@ -287,18 +337,24 @@ namespace LMFS.ViewModels.Pages
             try
             {
                 bool hasChanges = false;
+                int newRow = 0;
 
+                //[TODO] 여러 행 추가 후 '변경사항 저장'을 할 때 필요
                 foreach (var item in GridDetailDataSource)
+                //if (GridDetailDataSource.Count > 0)
                 {
-                    if (!item.Validate())
-                    {
-                        MessageBox.Show("유효성 검사 실패\n필수 항목을 입력해주세요.", "알림",
-                            MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
-                    }
-
+                    //var item = GridDetailDataSource[GridDetailDataSource.Count - 1];
                     if (item.IsNewRow)
                     {
+                        if (!item.Validate())
+                        {
+                            MessageBox.Show("유효성 검사 실패\n필수 항목을 입력해주세요.", "알림",
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
+                            return;
+                        }
+
+                        newRow++;
+                        
                         // 신규 추가
                         SaveToDatabase(item);
                         item.IsNewRow = false; // 저장 후 플래그 변경
@@ -315,8 +371,10 @@ namespace LMFS.ViewModels.Pages
 
                 if (hasChanges)
                 {
-                    MessageBox.Show("저장 완료", "알림",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    var message = "입력한 필지는 그룹처리되어 추가되었습니다.";
+                    if (newRow > 1)
+                        message = "입력한 필지들은 그룹처리되어 추가되었습니다.";
+                    MessageBox.Show(message, "알림", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
 
 
@@ -332,11 +390,15 @@ namespace LMFS.ViewModels.Pages
 
         private void SaveToDatabase(GridDetailItem item)
         {
+            item.RegDt = RegDt.Replace("-","");
+            item.Rsn = Converter.GetCodeValue(5, Rsn);
             // 실제 DB 저장 로직
             var landMoveInfo = item.ToLandMoveInfo();
 
-            // TODO: DB Insert 코드 구현
-            // 예: _service.InsertLandMoveInfo(landMoveInfo);
+            //------------------------------------------
+            // (6) DB 에 <필지추가 레코드> Insert
+            //------------------------------------------
+            DBService.InsertLandMoveInfo(landMoveInfo);
 
         }
 
@@ -400,9 +462,8 @@ namespace LMFS.ViewModels.Pages
             return pnu;
         }
 
-        public void SearchLandMoveDetailData(string jibun)
-        {
-            string pnu = DetailSearchPnu(jibun);
+        public void SearchLandMoveDetailData(string pnu)
+        {            
             GridDataSource = DBService.ListLandMoveHistory(pnu);
         }
         #endregion

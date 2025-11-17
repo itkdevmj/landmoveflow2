@@ -30,34 +30,33 @@
         <Grid DockPanel.Dock="Left" Width="780">
 
             <Grid.RowDefinitions>
-                <RowDefinition Height="45" />
+                <RowDefinition Height="40" />
                 <RowDefinition />
             </Grid.RowDefinitions>
             <StackPanel Margin="5,0,5,0">
                 <Border Grid.Row="0" Grid.Column="0" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="1" CornerRadius="5" Height="40">
                     <Grid Margin="5">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="1*" />
-                            <ColumnDefinition Width="2*" />
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="0.5*" />
+                            <ColumnDefinition Width="0.5*" />
+                            <ColumnDefinition Width="1.5*" />
+                            <ColumnDefinition Width="0.5*" />
                         </Grid.ColumnDefinitions>
 
-                        <Label Grid.Column="0" Content="{Binding RegDt}" VerticalAlignment="Center" />
-                        <Label Grid.Column="1" Content="{Binding Rsn}" VerticalAlignment="Center" />
-
+                        <Label Grid.Column="0" Content="{Binding LabelRegDt}" VerticalAlignment="Center" />
+                        <Label Grid.Column="1" Content="{Binding LabelRsn}" VerticalAlignment="Center" />
+                        <!-- 공백(Blank) 컬럼 -->
                         <!-- 저장 버튼 영역 (조건부 표시) -->
-                        <StackPanel Grid.Column="2" 
+                        <TextBlock Grid.Column="2" Text="목록에서 오른쪽 마우스 클릭하면 [필지추가] 할 수 있습니다." Height="16" FontWeight="Bold" Foreground="#FF7E0500"/>
+                        <StackPanel Grid.Column="3" 
                             Orientation="Horizontal" 
                             HorizontalAlignment="Right"
-                            Margin="10"
                             Visibility="{Binding IsSaveButtonVisible, 
                                         Converter={StaticResource BoolToVisibilityConverter}}">
                             <Button Content="변경사항 저장" 
-                                Command="{Binding SaveChangesCommand}"
-                                Width="120" 
-                                Height="35"
-                                Margin="5"/>
+                                Command="{Binding SaveChangesCommand}" 
+                                    Foreground="White" BorderBrush="White" Background="#FFFF7F00" FontWeight="Bold"
+                                    Width="120" Height="30" />
                         </StackPanel>
                     </Grid>
 
@@ -80,9 +79,9 @@
                     </dxg:TableView>
                 </dxg:GridControl.View>
                 <dxg:GridControl.Columns>
-                    <dxg:GridColumn FieldName="BfPnu" Header="이동전" Width="0.8*" 
+                    <dxg:GridColumn FieldName="BfJibun" Header="이동전" Width="0.8*" 
                         HorizontalHeaderContentAlignment="Center" />
-                    <dxg:GridColumn FieldName="AfPnu" Header="이동후" Width="0.8*" 
+                    <dxg:GridColumn FieldName="AfJibun" Header="이동후" Width="0.8*" 
                         HorizontalHeaderContentAlignment="Center" />
                     <dxg:GridColumn FieldName="BfJimok" Header="이동전_지목" Width="0.7*" 
                         HorizontalHeaderContentAlignment="Center" />
@@ -132,11 +131,12 @@
                                             PassEventArgsToCommand="True"
                                             />
                 </dxmvvm:Interaction.Behaviors>
-
+<!--
                 <dxg:GridControl.View>
-                    <dxg:TableView ShowIndicator="False" ShowGroupPanel="False" NavigationStyle="Row" AutoWidth="False">
+                    <dxg:TableView ShowIndicator="False" ShowGroupPanel="True" NavigationStyle="Row" AutoWidth="False">
                     </dxg:TableView>
                 </dxg:GridControl.View>
+-->    
                 <dxg:GridControl.Columns>
                     <dxg:GridColumn FieldName="bfPnu" Header="이동전" Width="100" UnboundDataType="{x:Type sys:String}"
                                     ReadOnly="True" HorizontalHeaderContentAlignment="Center" />

@@ -12,6 +12,7 @@ using LMFS.ViewModels;
 using LMFS.ViewModels.Pages;
 using System;
 using System.IO;// FileStream
+using System.Threading.Tasks;
 using System.Windows;// Rect
 using System.Windows.Controls;
 using System.Windows.Shapes;
@@ -24,7 +25,7 @@ namespace LMFS.Views.Pages
     /// </summary>
     public partial class LandMoveFlowPage : System.Windows.Controls.Page, IRecipient<LoadXmlMessage>
     {
-        public LandMoveFlowViewModel FlowViewModel { get; set; }
+        public LandMoveFlowViewModel FlowVM { get; set; }
 
 
         public LandMoveFlowPage()
@@ -32,8 +33,8 @@ namespace LMFS.Views.Pages
             InitializeComponent();
 
             //
-            FlowViewModel = new LandMoveFlowViewModel();
-            this.DataContext = FlowViewModel;
+            FlowVM = new LandMoveFlowViewModel();
+            this.DataContext = FlowVM;
 
             // LoadXmlMessage만 Page에서 처리 (UI 직접 접근 필요한 경우)
             WeakReferenceMessenger.Default.Unregister<LoadXmlMessage>(this);

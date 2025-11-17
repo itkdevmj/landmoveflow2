@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
+using DevExpress.Dialogs.Core.View;
 using DevExpress.Xpf.Core.Native;
 using DevExpress.Xpf.Diagram;
 using DevExpress.Xpf.Editors;
@@ -20,13 +22,17 @@ namespace LMFS.Views.Pages
     /// </summary>
     public partial class LandMoveSettingPage : Page
     {
+        //[ObservableProperty] => ViewModel쪽에서만 사용
         private readonly LandMoveSettingViewModel _viewModel;
-        public LandMoveSettingViewModel ViewModel => _viewModel;
-        public LandMoveSettingPage()
+        //Setting 후 다시 그리기//
+        public LandMoveFlowViewModel flowVM;
+
+        public LandMoveSettingPage(LandMoveFlowViewModel flowViewModel)
         {
             InitializeComponent();
 
-            _viewModel = new LandMoveSettingViewModel();
+            flowVM = flowViewModel;
+            _viewModel = new LandMoveSettingViewModel(flowVM);
             this.DataContext = _viewModel;
         }
 
@@ -43,31 +49,12 @@ namespace LMFS.Views.Pages
             }
         }
 
-        public void SettingDefaultColor()
-        {
-            colorEdit1_1_1.EditValue = Color.FromArgb(255, 165, 165, 165); // #FFA5A5A5
-            colorEdit1_1_2.EditValue = Color.FromArgb(255, 200, 200, 200);
-            colorEdit1_1_3.EditValue = Colors.White;
-            colorEdit1_2_1.EditValue = Color.FromArgb(255, 237, 125, 49);
-            colorEdit1_2_2.EditValue = Color.FromArgb(255, 200, 200, 200);
-            colorEdit1_2_3.EditValue = Colors.White;
-            colorEdit2_1_1.EditValue = Colors.White;
-            colorEdit2_1_2.EditValue = Colors.Black;
-            colorEdit2_1_3.EditValue = Colors.Black;
-            colorEdit2_2_1.EditValue = Colors.White;
-            colorEdit2_2_2.EditValue = Colors.Green;
-            colorEdit2_2_3.EditValue = Colors.Green;
-            colorEdit3_1_1.EditValue = Color.FromArgb(255, 91, 155, 213);
-            colorEdit3_2_1.EditValue = Color.FromArgb(255, 237, 125, 49);
-        }
-
-
         private void LandMoveSettingPage_OnLoaded(object sender, RoutedEventArgs e)
         {
             UpdateDataGridMaxHeight();
 
             //기본 색상 설정
-            SettingDefaultColor();
+            _viewModel.SettingDefaultColor();
         }
 
         private void LandMoveSettingPage_OnSizeChanged(object sender, SizeChangedEventArgs e)

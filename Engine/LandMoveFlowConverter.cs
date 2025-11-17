@@ -1,4 +1,5 @@
 ﻿using DevExpress.CodeParser;
+using DevExpress.DataAccess.Native.Data;
 using DevExpress.Diagram.Core.Native;
 using DevExpress.Xpf.CodeView;
 using DevExpress.Xpf.Diagram;
@@ -20,7 +21,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Ink;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Xml.Linq;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrayNotify;
@@ -61,8 +64,8 @@ public class LandMoveFlowConverter
     // -----------------------------------------------------------
     // DataFrame 대신 사용할 DataTable
     // -----------------------------------------------------------
-    private DataTable _dfXml = new();
-    private DataTable _dfPnu = new();
+    private System.Data.DataTable _dfXml = new();
+    private System.Data.DataTable _dfPnu = new();
 
     // -----------------------------------------------------------
     // XML 아이템 노드 구성용 변수
@@ -148,6 +151,8 @@ public class LandMoveFlowConverter
         //page.SettingDefaultColor();
         //_settings = page.ViewModel;
         settings.SettingDefaultColor();
+        settings.GetSettingColor();
+
         _settings = settings;
         //필요한 데이터는 _settings에서 가져옴
     }
@@ -169,19 +174,23 @@ public class LandMoveFlowConverter
         _listMovRsn = GlobalDataManager.Instance.ReasonCode;
     }
 
-    private string GetCodeValue(int opt, string find)
+    public string GetCodeValue(int opt, string find)//private => private
     {
         return opt switch
         {
             //1 => _listLawd.GetValueOrDefault(find, ""), // LAWD
+            //코드(key) => 명칭(value)
             2 => _listJimok.GetValueOrDefault(find, ""), // JIMOK
             3 => _listMovRsn.GetValueOrDefault(find, ""), // LAND_MOV_RSN
+            //명칭(value) => 코드(key)
+            4 => _listJimok.FirstOrDefault(kvp => kvp.Value == find).Key ?? "", // value => key (LINQ)
+            5 => _listMovRsn.FirstOrDefault(kvp => kvp.Value == find).Key ?? "", // value => key (LINQ)
             _ => ""
         };
     }
 
     private void GetCodeValueCategory(List<LandMoveInfoCategory> categoryList)
-    {
+    {        
         foreach (var row in categoryList)
         {
             row.rsn = GetCodeValue(3, row.rsn);//이동종목 코드 => 명칭
@@ -271,10 +280,10 @@ public class LandMoveFlowConverter
         _labelCount = 0;
         _depthCount = 0;
 
-        _dfXml = new DataTable();
+        _dfXml = new System.Data.DataTable();
         _dfXml.Columns.Add("PNU", typeof(string));
 
-        _dfPnu = new DataTable();
+        _dfPnu = new System.Data.DataTable();
         _dfPnu.Columns.Add("PNU", typeof(string));
         _dfPnu.Columns.Add("ITEM_NO", typeof(int));
         _dfPnu.Columns.Add("DEPTH", typeof(int));
@@ -434,10 +443,10 @@ public class LandMoveFlowConverter
 
             var pnu = rsnNew.Equals("합병") ? bfPnu : afPnu;
 
-            //if (pnu.Equals("120-4"))
-            //{
-            //    int x = 0;
-            //}
+            if (pnu.Equals("950-136") || pnu.Equals("685-77") || pnu.Equals("685-78") || pnu.Equals("685-79") || _depthCount == 2)
+            {
+                int x = 0;
+            }
 
             var pnuIdx = _pnuList.IndexOf(pnu);
             if (pnuIdx >= 0)
@@ -459,9 +468,10 @@ public class LandMoveFlowConverter
 
                 bool isExist = true;
                 DataRow existingRow;
-                if (_dfXml.Rows.Count > pnuIdx)
+                var pnuIdx2 = GetIndexDFXML(pnu);//251117//
+                if (pnuIdx2 > -1 && _dfXml.Rows.Count > pnuIdx2)
                 {
-                    existingRow = _dfXml.Rows[pnuIdx];
+                    existingRow = _dfXml.Rows[pnuIdx2];
                 }
                 else
                 {
@@ -909,16 +919,14 @@ public class LandMoveFlowConverter
         return Path.Combine(Path.GetDirectoryName(exePath), "_tempdir");
     }
 
-    private void SaveDfXmlToCsv(DataTable dt, string filePath)
+    private void SaveDfXmlToCsv(System.Data.DataTable dt, string filePath)
     {
         var lines = dt.AsEnumerable()
             .Select(row => string.Join(",", row.ItemArray.Select(field => field.ToString())));
         var csv = string.Join(Environment.NewLine,
-            new[] { string.Join(",", dt.Columns.Cast<DataColumn>().Select(c => c.ColumnName)) }.Concat(lines));
+            new[] { string.Join(",", dt.Columns.Cast<System.Data.DataColumn>().Select(c => c.ColumnName)) }.Concat(lines));
         File.WriteAllText(filePath, csv);
     }
-
-
     #endregion
 
     #region 파일 저장
@@ -969,6 +977,27 @@ public class LandMoveFlowConverter
     }*/
 
     #endregion
+
+
+    #region _dfXml 에서 찾기
+    public int GetIndexDFXML(string findPnu)
+    {
+        // 전체 데이터 중 PNU 컬럼에 searchString이 포함된 첫 번째 행 인덱스 찾기
+        int index = -1;
+        for (int i = 0; i < _dfXml.Rows.Count; i++)
+        {
+            string pnuValue = _dfXml.Rows[i]["PNU"].ToString();
+            if (pnuValue.Contains(findPnu))
+            {
+                index = i;
+                break;
+            }
+        }
+        return index;
+    }
+    #endregion
+
+
 
     // ===========================================================
     // 메인 실행 로직
