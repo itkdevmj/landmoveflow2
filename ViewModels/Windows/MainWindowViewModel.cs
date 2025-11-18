@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using DevExpress.Data.Browsing;
 using DevExpress.Dialogs.Core.View;
 using DevExpress.Xpf.Diagram;
 using DevExpress.Xpf.Printing;
@@ -23,6 +24,8 @@ namespace LMFS.ViewModels
     public partial class MainWindowViewModel : ObservableObject
     {
         private readonly Frame _frame;
+        public LandMoveSettingViewModel SettingVM { get; set; } // 읽기전용 속성으로 보관//251118//
+
 
         [ObservableProperty]
         private string _applicationInfo;
@@ -35,6 +38,10 @@ namespace LMFS.ViewModels
             ApplicationInfo = @$"토지이동흐름도 관리시스템 [{version}]";
 
             _frame = frame;
+
+            // 색상설정 VM 셋팅
+            AssignSettingVM();
+
             // 시작 페이지를 Home으로 설정
             NavigateToHome();
         }
@@ -63,13 +70,13 @@ namespace LMFS.ViewModels
         [RelayCommand]
         private void NavigateToHome()
         {
-            _frame.Navigate(new LandMoveFlowPage());
+            _frame.Navigate(new LandMoveFlowPage(this.SettingVM));
         }
 
         [RelayCommand]
         private void NavigateToLandMoveFlow()
-        {
-            _frame.Navigate(new LandMoveFlowPage());
+        {            
+            _frame.Navigate(new LandMoveFlowPage(this.SettingVM));
         }
 
         [RelayCommand]
@@ -84,6 +91,15 @@ namespace LMFS.ViewModels
             _frame.Navigate(new AboutPage());
         }
 
+        //[색상설정]
+        [RelayCommand]
+        private void AssignSettingVM()
+        {
+            SettingVM = new LandMoveSettingViewModel();
+            //기본 색상 (or 사용자 정의 색상) 가져오기
+            SettingVM.SettingDefaultColor();
+            SettingVM.GetSettingColor();
+        }
 
         //[주의사항] 메뉴가 MainWindow.xaml에 존재하는데
         //DiagramControl은 LandMoveFlowPage에 존재해서 함수 정의는 LandMoveFlowViewModel에 존재합니다.

@@ -145,9 +145,9 @@ public class LandMoveFlowConverter
     #region 생성자     ----------------------------------------
 
     //Page를 직접 접근하지 않고, ViewModel을 통해서 접근하기//
-    public LandMoveFlowConverter(LandMoveSettingViewModel settingViewModel)
+    public LandMoveFlowConverter(LandMoveSettingViewModel settingVM)
     {
-        _settingVM = settingViewModel;// 기존 인스턴스만 보관
+        _settingVM = settingVM;// 기존 인스턴스만 보관
         //필요한 데이터는 _settings에서 가져옴
     }
 
@@ -293,6 +293,7 @@ public class LandMoveFlowConverter
     {
         _itemList.Clear();
         _labelTuples.Clear();
+        _dfPnu.Clear();
 
         _xdoc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
 
@@ -453,7 +454,7 @@ public class LandMoveFlowConverter
 
             var pnu = rsnNew.Equals("합병") ? bfPnu : afPnu;
 
-            //if (pnu.Equals("120") || pnu.Equals("120-4") || pnu.Equals("685-78") || _depthCount == 3)
+            //if (pnu.Equals("120") || pnu.Equals("120-4") || _depthCount == 3)
             //{
             //    int x = 0;
             //}
@@ -997,7 +998,7 @@ public class LandMoveFlowConverter
         for (int i = 0; i < _dfXml.Rows.Count; i++)
         {
             string pnuValue = _dfXml.Rows[i]["PNU"].ToString();
-            if (pnuValue.Contains(findPnu))
+            if (pnuValue == findPnu)
             {
                 index = i;
                 break;
@@ -1014,6 +1015,16 @@ public class LandMoveFlowConverter
     }
     #endregion
 
+    #region 다시 그리기
+    public XDocument RefreshDiagramLandMoveFlow(LandMoveSettingViewModel settingVM)
+    {
+        UpdateWithNewSetting(settingVM);//설정 색상 동기화
+        InitializeXMLForNewGroup();//XML 노드 구성 초기화
+        MakeXmlData(); // 다이어그램 다시 그림
+
+        return _xdoc;
+    }
+    #endregion
 
 
     // ===========================================================

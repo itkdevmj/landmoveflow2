@@ -65,15 +65,15 @@ namespace LMFS.ViewModels.Pages
         //}
 
         public LandMoveFlowConverter Converter { get; set; }
-        public LandMoveSettingViewModel SettingVM { get; set; } // 읽기전용 속성으로 보관
+        public LandMoveSettingViewModel SettingVM { get; }
 
 
         public record RequestExportGridMessage(string ExportPath, string SheetName);
 
 
-        public LandMoveFlowViewModel(/*LandMoveSettingViewModel settingVM*/)
+        public LandMoveFlowViewModel(LandMoveSettingViewModel settingVM)
         {
-            //251117//SettingVM = settingVM;
+            SettingVM = settingVM;
             //251117//Converter = new LandMoveFlowConverter(settingVM);
 
             // 코드 데이터 가져오기
@@ -100,7 +100,7 @@ namespace LMFS.ViewModels.Pages
             }
 
             // 1. PNU 구성
-            // 2. 그리드 데이터 조회
+            // 2. 그리드 데이터 조회(검색)
             SearchLandMoveData();
 
             // 3. GridDataSource가 비어있는지 확인
@@ -118,13 +118,31 @@ namespace LMFS.ViewModels.Pages
             }
 
 
-            ////대기 팝업 - // 4. 그리드 데이터 처리
+            //// 4. 그리드 데이터 처리
+            //UpdateFlowXml();
+
+            //--------------------------------------------------------
+            //팝업 띄우기 (팝업 윈도우 새로 생성) - // 4. 그리드 데이터 처리
             //await DrawDiagramAsync();//async 추가 필수
+            var popup = new BusyWindow();
+            popup.Owner = Application.Current.MainWindow;
+            popup.Show();
 
-
-            // 4. 그리드 데이터 처리
-            UpdateFlowXml();
-
+            try
+            {
+                // XML 구성 등 시간이 오래 걸릴 수 있는 작업은 비동기로 처리
+                await Task.Run(() =>
+                {
+                    // 4. 그리드 데이터 처리
+                    UpdateFlowXml();
+                });
+            }
+            finally 
+            {
+                // 작업 끝나면 Busy 팝업 닫기 (예외 있어도 안전하게 처리)
+                popup.Close();
+            }
+            //--------------------------------------------------------
         }
 
         private void ShowNoDataPopup()
@@ -422,11 +440,12 @@ namespace LMFS.ViewModels.Pages
 
         private void UpdateFlowXml()
         {
-            //251027//[색상설정 - 사용자정의]
-            SettingVM = new LandMoveSettingViewModel();
-            //기본 색상 (or 사용자 정의 색상) 가져오기
-            SettingVM.SettingDefaultColor();
-            SettingVM.GetSettingColor();
+            //251118//
+            ////251027//[색상설정 - 사용자정의]
+            //SettingVM = new LandMoveSettingViewModel();
+            ////기본 색상 (or 사용자 정의 색상) 가져오기
+            //SettingVM.SettingDefaultColor();
+            //SettingVM.GetSettingColor();
 
             Converter = new LandMoveFlowConverter(SettingVM);
 
@@ -445,24 +464,28 @@ namespace LMFS.ViewModels.Pages
             {
                 IsFlowData = true;//표시 설정 [이동정리목록 내보내기(엑셀), 다이어그램 내보내기(Pdf, Jpg, Png)]
 
-                CurrentGSeq = filteredList[filteredList.Count - 1].gSeq; ;//상세화면에서 insert 시 사용될 예정//
+                CurrentGSeq = filteredList[filteredList.Count - 1].gSeq;//상세화면에서 insert 시 사용될 예정//
 
-                XDocument rtnXml = Converter.Run(filteredList, this, categoryList, CurrentPnu);
-                CurrentPnuNm = Converter.GetJibun(CurrentPnu, 2);
+                //251118//TEST//
+                ProcessDiagramLandMoveFlow(Converter.Run(filteredList, this, categoryList, CurrentPnu));
+                //XDocument rtnXml = Converter.Run(filteredList, this, categoryList, CurrentPnu);
+                //CurrentPnuNm = Converter.GetJibun(CurrentPnu, 2);
 
-                // ... 이하 xml 스트림 처리
-                string str = rtnXml.ToString();
+                //// ... 이하 xml 스트림 처리
+                //string str = rtnXml.ToString();
 
-                byte[] xmlBytes;
-                using (var ms = new MemoryStream())
-                {
-                    rtnXml.Save(ms);
-                    xmlBytes = ms.ToArray();
-                }
-                using (var stream = new MemoryStream(xmlBytes))
-                {
-                    LandMoveFlowData = stream;
-                }
+                //byte[] xmlBytes;
+                //using (var ms = new MemoryStream())
+                //{
+                //    rtnXml.Save(ms);
+                //    xmlBytes = ms.ToArray();
+                //}
+                ////251118//[Advice]
+                //LandMoveFlowData = new MemoryStream(xmlBytes);
+                ////using (var stream = new MemoryStream(xmlBytes))
+                ////{
+                ////    LandMoveFlowData = stream;
+                ////}
             }//if (filteredList.Count > 0)
             else
             {
@@ -687,12 +710,21 @@ using (var wb = new XLWorkbook(exportPath))
         //}
         #endregion
 
-        #region 색상변경
-        public void UpdateColorFromSetting()
+
+        #region 다이어그램 다시그리기
+        public void ProcessDiagramLandMoveFlow(XDocument rtnXml)
         {
-            // Converter 등이 최신 Setting 값을 참조/반영
-            Converter.UpdateWithNewSetting(this.SettingVM);
-            Converter.MakeXmlData(); // 다이어그램 다시 그림
+            // ... 이하 xml 스트림 처리
+            string str = rtnXml.ToString();
+
+            byte[] xmlBytes;
+            using (var ms = new MemoryStream())
+            {
+                rtnXml.Save(ms);
+                xmlBytes = ms.ToArray();
+            }
+            //[Advice] no using
+            LandMoveFlowData = new MemoryStream(xmlBytes);
         }
         #endregion
 

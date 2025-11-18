@@ -21,6 +21,7 @@ using System.Windows;// RoutedEventArgs가 여기 포함됨
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Xml.Linq;
 
 namespace LMFS.ViewModels.Pages
 {
@@ -30,7 +31,7 @@ namespace LMFS.ViewModels.Pages
         [ObservableProperty] private Color[,] labelColors = new Color[2, 3];//basic, query : foreground, background, textcolor
         [ObservableProperty] private Color[,] connectorColors = new Color[2, 1];//basic, query
         
-        [ObservableProperty] private LandMoveFlowViewModel _flowVM;
+        [ObservableProperty] private LandMoveFlowViewModel _flowVM;//Page에서 할당 받음//
         [ObservableProperty] private Color color1_1_1;
         [ObservableProperty] private Color color1_1_2;
         [ObservableProperty] private Color color1_1_3;
@@ -51,13 +52,9 @@ namespace LMFS.ViewModels.Pages
         public Action CloseAction { get; set; }
         public ICommand CloseCommand { get; }
 
-        public LandMoveSettingViewModel(/*LandMoveFlowViewModel flowViewModel*/)
+        public LandMoveSettingViewModel()
         {
             CloseCommand = new RelayCommand(ExecuteClose);
-            //FlowVM = flowViewModel;
-
-            //Color 변수 생성
-            //InitSettingColor();
         }
 
 
@@ -125,13 +122,12 @@ namespace LMFS.ViewModels.Pages
             // 개별 Color 프로퍼티들의 값을 색상 배열에 반영
             GetSettingColor();
 
-            //251118//TEST//
-            //// Converter 등이 최신 Setting 값을 참조/반영
-            if (FlowVM.Converter != null)
+            // Converter 등이 최신 Setting 값을 참조/반영
+            if (FlowVM != null)
             {
-                FlowVM.Converter.UpdateWithNewSetting(FlowVM.SettingVM);//설정 색상 동기화
-                FlowVM.Converter.InitializeXMLForNewGroup();//XML 노드 구성 초기화
-                FlowVM.Converter.MakeXmlData(); // 다이어그램 다시 그림
+                // 다이어그램 다시 그리기
+                XDocument rtnXml = FlowVM.Converter.RefreshDiagramLandMoveFlow(FlowVM.SettingVM);
+                FlowVM.ProcessDiagramLandMoveFlow(rtnXml); 
             }
         }
     }
