@@ -43,11 +43,11 @@ namespace LMFS.ViewModels.Pages
 
         [ObservableProperty] private bool _jimokChg;//vm.JimokChg
         [ObservableProperty] private bool _portrait;//vm.Portrait
-        [ObservableProperty] private string _currentPnu;
-        [ObservableProperty] private string _currentPnuNm;//for Saving Files
         [ObservableProperty] private bool _isOwnName;
         [ObservableProperty] private bool _isJimok;
         [ObservableProperty] private bool _isArea;
+        [ObservableProperty] private string _currentPnu;
+        [ObservableProperty] private string _currentPnuNm;//for Saving Files
         [ObservableProperty] private List<LandMoveInfo> _gridDataSource;
         [ObservableProperty] private List<LandMoveInfoCategory> _gridCategoryDataSource;
         [ObservableProperty] private MemoryStream _landMoveFlowData;
@@ -363,6 +363,31 @@ namespace LMFS.ViewModels.Pages
             // 검색 로직 실행
             OnSearch();   // 또는 SearchCommand.Execute(null);
         }
+        partial void OnIsOwnNameChanged(bool value)
+        {
+            //// 체크박스 값이 변경될 때마다 실행
+            //UpdateFlowXml();
+
+            // 검색 로직 실행
+            OnSearch();   // 또는 SearchCommand.Execute(null);
+        }
+
+        partial void OnIsJimokChanged(bool value)
+        {
+            //// 체크박스 값이 변경될 때마다 실행
+            //UpdateFlowXml();
+
+            // 검색 로직 실행
+            OnSearch();   // 또는 SearchCommand.Execute(null);
+        }
+        partial void OnIsAreaChanged(bool value)
+        {
+            //// 체크박스 값이 변경될 때마다 실행
+            //UpdateFlowXml();
+
+            // 검색 로직 실행
+            OnSearch();   // 또는 SearchCommand.Execute(null);
+        }
 
         private string BuildPnu()
         {
@@ -399,6 +424,10 @@ namespace LMFS.ViewModels.Pages
         {
             //251027//[색상설정 - 사용자정의]
             SettingVM = new LandMoveSettingViewModel();
+            //기본 색상 (or 사용자 정의 색상) 가져오기
+            SettingVM.SettingDefaultColor();
+            SettingVM.GetSettingColor();
+
             Converter = new LandMoveFlowConverter(SettingVM);
 
             var filteredList = GridDataSource;

@@ -125,17 +125,14 @@ namespace LMFS.ViewModels.Pages
             // 개별 Color 프로퍼티들의 값을 색상 배열에 반영
             GetSettingColor();
 
+            //251118//TEST//
             //// Converter 등이 최신 Setting 값을 참조/반영
-            FlowVM?.Converter?.UpdateWithNewSetting(FlowVM.SettingVM);
-            FlowVM?.Converter?.MakeXmlData(); // 다이어그램 다시 그림
-
-
-            // FlowVM 등 다른 참조 객체들에 값 변경 알림
-            //FlowVM?.UpdateColorFromSetting(); // 추가 메서드 구현 (아래 예시)
-
-            //XML 생성 및 저장
-            //251117//new LandMoveFlowConverter(this).MakeXmlData();
-            //FlowVM.Converter.MakeXmlData();
+            if (FlowVM.Converter != null)
+            {
+                FlowVM.Converter.UpdateWithNewSetting(FlowVM.SettingVM);//설정 색상 동기화
+                FlowVM.Converter.InitializeXMLForNewGroup();//XML 노드 구성 초기화
+                FlowVM.Converter.MakeXmlData(); // 다이어그램 다시 그림
+            }
         }
     }
 }

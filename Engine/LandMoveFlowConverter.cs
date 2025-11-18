@@ -147,10 +147,6 @@ public class LandMoveFlowConverter
     //Page를 직접 접근하지 않고, ViewModel을 통해서 접근하기//
     public LandMoveFlowConverter(LandMoveSettingViewModel settingViewModel)
     {
-        //기본 색상 (or 사용자 정의 색상) 가져오기
-        settingViewModel.SettingDefaultColor();
-        settingViewModel.GetSettingColor();
-
         _settingVM = settingViewModel;// 기존 인스턴스만 보관
         //필요한 데이터는 _settings에서 가져옴
     }
@@ -262,17 +258,22 @@ public class LandMoveFlowConverter
         _isJimok = vm.IsJimok;
         _isArea = vm.IsArea;
     }
-    
+
 
     #region 데이터 분석 및 처리
     public void InitializeForNewGroup()//private => public
+    {
+        InitializeDataListForNewGroup();//XML구성을 위한 데이터 구조화 작업 관련 초기화
+        InitializeXMLForNewGroup();//XML 노드 구성 초기화
+    }
+
+    //XML구성을 위한 데이터 구조화 작업 관련 초기화
+    public void InitializeDataListForNewGroup()
     {
         _pnuList.Clear();
         _jibunList.Clear();
         _labelList.Clear();
         _depthList.Clear();
-        _itemList.Clear();
-        _labelTuples.Clear();
 
         _shapeCount = 0;
         _labelCount = 0;
@@ -285,7 +286,14 @@ public class LandMoveFlowConverter
         _dfPnu.Columns.Add("PNU", typeof(string));
         _dfPnu.Columns.Add("ITEM_NO", typeof(int));
         _dfPnu.Columns.Add("DEPTH", typeof(int));
-        
+    }
+
+    //XML 노드 구성 초기화
+    public void InitializeXMLForNewGroup()
+    {
+        _itemList.Clear();
+        _labelTuples.Clear();
+
         _xdoc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
 
         // XML 루트 초기화
@@ -388,6 +396,10 @@ public class LandMoveFlowConverter
                 else
                     afAtt = $"[{afArea}]";
             }
+            else if (_isOwnName)//Vit.G//[소유자명] 체크
+            {                
+                afAtt = $"[{ownName}]";
+            }
             newAtt = rsnNew == "분할" ? bfAtt : afAtt;
             //---------------------------------------------
 
@@ -441,10 +453,10 @@ public class LandMoveFlowConverter
 
             var pnu = rsnNew.Equals("합병") ? bfPnu : afPnu;
 
-            if (pnu.Equals("950-136") || pnu.Equals("685-77") || pnu.Equals("685-78") || pnu.Equals("685-79") || _depthCount == 2)
-            {
-                int x = 0;
-            }
+            //if (pnu.Equals("120") || pnu.Equals("120-4") || pnu.Equals("685-78") || _depthCount == 3)
+            //{
+            //    int x = 0;
+            //}
 
             var pnuIdx = _pnuList.IndexOf(pnu);
             if (pnuIdx >= 0)

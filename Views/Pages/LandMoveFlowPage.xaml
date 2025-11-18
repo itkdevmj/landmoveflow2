@@ -186,11 +186,12 @@
                                 Margin="4,0,4,4" Cursor="Hand">
 
                 <dxmvvm:Interaction.Behaviors>
+                    <!-- PassEventArgsToCommand="False" 또는 이 속성 자체를 제거 -->
                     <dxmvvm:EventToCommand EventName="MouseLeftButtonUp" 
                                             Command="{Binding RowClickCommand}"
                                             CommandParameter="{Binding Path=SelectedItem, ElementName=AnotherFlowDataGrid}"
-                                            PassEventArgsToCommand="True"
-                                            />
+                                            PassEventArgsToCommand="False"
+                                            />                    
                 </dxmvvm:Interaction.Behaviors>
 
                 <dxg:GridControl.View>
