@@ -65,15 +65,15 @@ namespace LMFS.ViewModels.Pages
         //}
 
         public LandMoveFlowConverter Converter { get; set; }
-        public LandMoveSettingViewModel SettingVM { get; } // 읽기전용 속성으로 보관
+        public LandMoveSettingViewModel SettingVM { get; set; } // 읽기전용 속성으로 보관
 
 
         public record RequestExportGridMessage(string ExportPath, string SheetName);
 
 
-        public LandMoveFlowViewModel(LandMoveSettingViewModel settingVM)
+        public LandMoveFlowViewModel(/*LandMoveSettingViewModel settingVM*/)
         {
-            SettingVM = settingVM;
+            //251117//SettingVM = settingVM;
             //251117//Converter = new LandMoveFlowConverter(settingVM);
 
             // 코드 데이터 가져오기
@@ -398,7 +398,8 @@ namespace LMFS.ViewModels.Pages
         private void UpdateFlowXml()
         {
             //251027//[색상설정 - 사용자정의]
-            Converter = new LandMoveFlowConverter(SettingVM/*new LandMoveSettingViewModel()*/);
+            SettingVM = new LandMoveSettingViewModel();
+            Converter = new LandMoveFlowConverter(SettingVM);
 
             var filteredList = GridDataSource;
             var categoryList = GridCategoryDataSource;

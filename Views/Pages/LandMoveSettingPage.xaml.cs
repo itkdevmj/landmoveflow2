@@ -32,9 +32,11 @@ namespace LMFS.Views.Pages
             InitializeComponent();
 
             flowVM = flowViewModel;
-            _vm = new LandMoveSettingViewModel();
+            //_vm = new LandMoveSettingViewModel();
+            //_vm.FlowVM = flowVM;
+            //this.DataContext = _vm;
+            _vm = flowVM.SettingVM;
             _vm.FlowVM = flowVM;
-
             this.DataContext = _vm;
             //flowVM.Converter = flowVM.Converter;//Converter에서도 공유//251117//TEST//
         }

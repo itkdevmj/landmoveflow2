@@ -33,7 +33,7 @@ namespace LMFS.Engine;
 public class LandMoveFlowConverter
 {
     public static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-    private LandMoveSettingViewModel _settingVM;//251027//
+    public static LandMoveSettingViewModel _settingVM;//251027//
 
 
     // ===========================================================
