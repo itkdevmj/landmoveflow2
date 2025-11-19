@@ -24,6 +24,7 @@
     <Resource Include="Resources/Images/pdfIcon.png"/>
     <Resource Include="Resources/Images/jpgIcon.png"/>
     <Resource Include="Resources/Images/pngIcon.png"/>
+	<Resource Include="Resources/Images/excelIcon.png"/>
   </ItemGroup>
 
   <ItemGroup>

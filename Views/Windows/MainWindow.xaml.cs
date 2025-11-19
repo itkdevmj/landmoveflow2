@@ -1,4 +1,7 @@
-﻿using DevExpress.Xpf.Core;
+﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using DevExpress.Xpf.Core;
+using LMFS.Messages;
 using LMFS.ViewModels;
 using LMFS.ViewModels.Pages;
 using LMFS.Views.Pages;
@@ -32,6 +35,22 @@ namespace LMFS
         private void MainWindow_OnClosing(object sender, CancelEventArgs e)
         {
             Application.Current.Shutdown();
+        }
+
+        [RelayCommand]
+        private void OnPrint()
+        {
+            WeakReferenceMessenger.Default.Send(new PrintDiagramMessage());
+        }
+        [RelayCommand]
+        private void OnPrintPreview()
+        {
+            WeakReferenceMessenger.Default.Send(new PrintPreviewDiagramMessage());
+        }
+        [RelayCommand]
+        private void OnExportGrid()
+        {
+            int a = 1;
         }
     }
 }

@@ -466,7 +466,7 @@ namespace LMFS.ViewModels.Pages
 
                 CurrentGSeq = filteredList[filteredList.Count - 1].gSeq;//상세화면에서 insert 시 사용될 예정//
 
-                //251118//TEST//
+                //251118//
                 ProcessDiagramLandMoveFlow(Converter.Run(filteredList, this, categoryList, CurrentPnu));
                 //XDocument rtnXml = Converter.Run(filteredList, this, categoryList, CurrentPnu);
                 //CurrentPnuNm = Converter.GetJibun(CurrentPnu, 2);
@@ -725,6 +725,9 @@ using (var wb = new XLWorkbook(exportPath))
             }
             //[Advice] no using
             LandMoveFlowData = new MemoryStream(xmlBytes);
+
+            //필지 주소(for Saving)
+            CurrentPnuNm = Converter.GetJibun(CurrentPnu, 2);
         }
         #endregion
 
