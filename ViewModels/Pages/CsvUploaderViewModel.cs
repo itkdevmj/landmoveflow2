@@ -40,6 +40,7 @@ namespace LMFS.ViewModels.Pages
         [ObservableProperty] private bool _isUploadCompleted = false;
         [ObservableProperty] private bool _isCommitCompleted = false;
 
+        public bool ShowCommitButton => IsUploadCompleted && !IsCommitCompleted;
 
         //[ObservableProperty] 특성을 사용하면 자동으로 프로퍼티가 생성되므로 수동으로 프로퍼티를 만들면 충돌이 발생합니다.
         //해결 방법: partial void 메서드를 사용
@@ -159,6 +160,7 @@ namespace LMFS.ViewModels.Pages
             {
                 // 업로드 완료 시 (ProgressValue == ProgressMax)
                 IsUploadCompleted = true;
+                IsCommitCompleted = false;
                 IsUploading = false;//표시 해제
             }
         }

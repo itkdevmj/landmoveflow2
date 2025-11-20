@@ -149,10 +149,13 @@
                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Height="33" VerticalAlignment="Bottom">
                         <!-- 임시 텍스트로 상태 확인 -->
                         <TextBlock Text="{Binding IsUploadCompleted, StringFormat='Upload: {0}'}" Margin="5" Foreground="Red"/>
-                        <TextBlock Text="{Binding IsCommitCompleted, StringFormat='Commit: {0}'}" Margin="5" Foreground="Blue"/>
+                        <!--<TextBlock Text="{Binding IsCommitCompleted, StringFormat='Commit: {0}'}" Margin="5" Foreground="Blue"/>-->
                         <!--<Button Content="DB 최종 적용" Command="{Binding CommitCommand}" IsEnabled="{Binding IsCommiting, Converter={StaticResource InverseBoolConverter}}" Width="120" Height="25" HorizontalAlignment="Left" Margin="0,0,0,8" Background="#FF66B821" Foreground="White"/>-->
                         <!-- DB 최종 적용 버튼 - 업로드 완료 후 표시, 적용 완료 후 숨김 -->
-                        <Button Content="DB 최종 적용" 
+                        <Button Content="DB 최종 적용"
+                            Visibility="{Binding ShowCommitButton, Converter={StaticResource BoolToVisibilityConverter}}"
+                            Command="{Binding CommitCommand}" />
+<!--                        <Button Content="DB 최종 적용" 
                                 Command="{Binding CommitCommand}" 
                                 IsEnabled="{Binding IsCommiting, Converter={StaticResource InverseBoolConverter}}" 
                                 Width="120" 
@@ -164,8 +167,7 @@
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <!-- IsUploadCompleted가 True이고 IsCommitCompleted가 False일 때 표시 -->
+                                    <Style.Triggers>                                        
                                         <MultiDataTrigger>
                                             <MultiDataTrigger.Conditions>
                                                 <Condition Binding="{Binding IsUploadCompleted}" Value="True"/>
@@ -177,6 +179,7 @@
                                 </Style>
                             </Button.Style>
                         </Button>
+-->            
                     </StackPanel>     
                 </Grid>
             </Border>
