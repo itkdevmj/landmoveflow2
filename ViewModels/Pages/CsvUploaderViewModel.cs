@@ -225,6 +225,15 @@ namespace LMFS.ViewModels.Pages
             //    });
             //});
         }
+
+        partial void OnIsUploadCompletedChanged(bool value)
+        {
+            OnPropertyChanged(nameof(ShowCommitButton));
+        }
+        partial void OnIsCommitCompletedChanged(bool value)
+        {
+            OnPropertyChanged(nameof(ShowCommitButton));
+        }
         #endregion
     }
 }
