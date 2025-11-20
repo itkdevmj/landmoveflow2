@@ -24,7 +24,9 @@ namespace LMFS.ViewModels
     public partial class MainWindowViewModel : ObservableObject
     {
         private readonly Frame _frame;
-        public LandMoveSettingViewModel SettingVM { get; set; } // 읽기전용 속성으로 보관//251118//
+
+        public LandMoveFlowPage FlowPage { get; set; }
+        public LandMoveSettingViewModel SettingVM { get; set; }
 
 
         [ObservableProperty]
@@ -70,13 +72,15 @@ namespace LMFS.ViewModels
         [RelayCommand]
         private void NavigateToHome()
         {
-            _frame.Navigate(new LandMoveFlowPage(this.SettingVM));
+            FlowPage = new LandMoveFlowPage(this.SettingVM);
+            _frame.Navigate(FlowPage);
         }
 
         [RelayCommand]
         private void NavigateToLandMoveFlow()
-        {            
-            _frame.Navigate(new LandMoveFlowPage(this.SettingVM));
+        {
+            FlowPage = new LandMoveFlowPage(this.SettingVM);
+            _frame.Navigate(FlowPage);
         }
 
         [RelayCommand]

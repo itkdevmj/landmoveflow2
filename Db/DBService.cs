@@ -13,7 +13,7 @@ using System.Windows;
 namespace LMFS.Db
 {
     public static class DBService
-    {
+    {        
         #region 코드성 데이터 조회
         // 시도코드 조회
         public static List<SidoCode> ListSidoCode(string sidoSggCd)
@@ -94,13 +94,65 @@ namespace LMFS.Db
                           , af_area     AS afArea
                           , own_name    AS ownName
                           , p_seq       AS pSeq
-                       FROM landmove_info
+                       FROM {GlobalDataManager.Instance.TB_LandMoveInfo}
                       WHERE (bf_pnu = '{pnu}' OR af_pnu = '{pnu}'
                      """;
                 return connection.Query<LandMoveInfo>(query).ToList();
             }
         }
         #endregion
+
+        #region [토지이동] 빈 테이블 복사(기초데이터 작업 무진행 시군구 => 프로그램 내에서 초기자료 업로드)
+        public static int CreateLandMoveInfoFirst()
+        {
+            using (var connection = MariaDBConnection.connectDB())
+            {
+                string query = "";
+                int retValue = 0;
+
+                //--------------------------------
+                // 1. 테이블 구조 복사
+                //--------------------------------
+                query =
+                    $"""
+                    CREATE TABLE IF NOT EXISTS {GlobalDataManager.Instance.TB_LandMoveInfo} LIKE landmove_info_blank;
+                    """;
+                try
+                {
+                    retValue = connection.Execute(query);
+                    // ret == 0이면 정상 실행되었으나 복사된 데이터가 없음
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("[1]DB 신규 테이블 생성 중 오류가 발생했습니다. " + ex.ToString());
+                    // 쿼리 오류 등 비정상 상황
+                    // ex.Message, ex.ToString() 등으로 오류 정보 확인
+                }
+
+                //--------------------------------
+                // 2. Comment 변경
+                //--------------------------------
+                query =
+                    $"""
+                    ALTER TABLE {GlobalDataManager.Instance.TB_LandMoveInfo} COMMENT = '토지이동흐름도({GlobalDataManager.Instance.loginUser.areaCd})';
+                    """;
+                try
+                {
+                    retValue = connection.Execute(query);
+                    // ret == 0이면 정상 실행되었으나 복사된 데이터가 없음
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("[2]DB 신규 테이블 Comment 변경 중 오류가 발생했습니다. " + ex.ToString());
+                    // 쿼리 오류 등 비정상 상황
+                    // ex.Message, ex.ToString() 등으로 오류 정보 확인
+                }
+
+                return retValue;
+            }
+        }
+        #endregion
+
 
         #region [토지이동] 데이터 조회
         // 프로그램 버전정보 조회
@@ -136,9 +188,9 @@ namespace LMFS.Db
                           , af_area     AS afArea
                           , own_name    AS ownName
                           , p_seq       AS pSeq
-                       FROM landmove_info
+                       FROM {GlobalDataManager.Instance.TB_LandMoveInfo}
                       WHERE g_seq = ( SELECT g_seq
-                                        FROM landmove_info
+                                        FROM {GlobalDataManager.Instance.TB_LandMoveInfo}
                                        WHERE af_pnu = '{pnu}' OR af_pnu = '{pnu}'
                                       LIMIT 1
                                     )
@@ -157,9 +209,9 @@ namespace LMFS.Db
                     $"""
                      SELECT distinct rsn
                                    , reg_dt      AS regDt                          
-                       FROM landmove_info
+                       FROM {GlobalDataManager.Instance.TB_LandMoveInfo}
                       WHERE g_seq = ( SELECT g_seq
-                                        FROM landmove_info
+                                        FROM {GlobalDataManager.Instance.TB_LandMoveInfo}
                                        WHERE af_pnu = '{pnu}' OR af_pnu = '{pnu}'
                                       LIMIT 1
                                     )
@@ -178,7 +230,7 @@ namespace LMFS.Db
                 string query = 
                     $"""
                     SELECT max(g_seq) 
-                     FROM landmove_info;
+                     FROM {GlobalDataManager.Instance.TB_LandMoveInfo};
                     """;                    
                 connection.Execute(query);
                 return connection.QuerySingle<int>(query);
@@ -200,7 +252,7 @@ namespace LMFS.Db
                 //--------------------------------
                 query =
                     $"""
-                    DROP TABLE IF EXISTS landmove_info_backup_{today};
+                    DROP TABLE IF EXISTS {GlobalDataManager.Instance.TB_LandMoveInfo}_backup_{today};
                     """;
                 try
                 {
@@ -220,10 +272,10 @@ namespace LMFS.Db
                 //--------------------------------
                 query = 
                     $"""
-                    CREATE TABLE landmove_info_backup_{today}
+                    CREATE TABLE {GlobalDataManager.Instance.TB_LandMoveInfo}_backup_{today}
                     ENGINE=MyISAM 
                     AS 
-                    SELECT * FROM landmove_info;
+                    SELECT * FROM {GlobalDataManager.Instance.TB_LandMoveInfo};
                     """;
                 try
                 {
@@ -255,7 +307,7 @@ namespace LMFS.Db
                 //--------------------------------
                 query =
                     $"""
-                    DROP TABLE IF EXISTS landmove_info_{DbConInfo.id}_{today};
+                    DROP TABLE IF EXISTS {GlobalDataManager.Instance.TB_LandMoveInfo}_{DbConInfo.id}_{today};
                     """;
                 try
                 {
@@ -274,10 +326,10 @@ namespace LMFS.Db
                 //--------------------------------
                 query =
                     $"""
-                    CREATE TABLE landmove_info_{DbConInfo.id}_{today}
+                    CREATE TABLE {GlobalDataManager.Instance.TB_LandMoveInfo}_{DbConInfo.id}_{today}
                     ENGINE=MyISAM 
                     AS
-                    SELECT * FROM landmove_info;
+                    SELECT * FROM {GlobalDataManager.Instance.TB_LandMoveInfo};
                     """;
                 try
                 {
@@ -308,7 +360,7 @@ namespace LMFS.Db
                 //--------------------------------
                 query = 
                     $"""
-                    DROP TABLE landmove_info;
+                    DROP TABLE {GlobalDataManager.Instance.TB_LandMoveInfo};
                     """;
                 try
                 {
@@ -327,10 +379,10 @@ namespace LMFS.Db
                 //--------------------------------
                 query = 
                     $"""
-                    CREATE TABLE landmove_info 
+                    CREATE TABLE {GlobalDataManager.Instance.TB_LandMoveInfo} 
                     ENGINE=MyISAM 
                     AS 
-                    SELECT * FROM landmove_info_{DbConInfo.id}_{today};
+                    SELECT * FROM {GlobalDataManager.Instance.TB_LandMoveInfo}_{DbConInfo.id}_{today};
                     """;
                 try
                 {
@@ -369,7 +421,7 @@ namespace LMFS.Db
                 string query =
                     $"""
                     SELECT DISTINCT {qryColumn} 
-                    FROM landmove_info_{DbConInfo.id}_{today} 
+                    FROM {GlobalDataManager.Instance.TB_LandMoveInfo}_{DbConInfo.id}_{today} 
                     WHERE bf_pnu IN ({pnuParams}) 
                         OR af_pnu IN ({pnuParams}) 
                     GROUP BY {qryColumn}
@@ -428,7 +480,7 @@ namespace LMFS.Db
                 string query =
                     $"""
                     SELECT *
-                    FROM landmove_info_{DbConInfo.id}_{today}  
+                    FROM {GlobalDataManager.Instance.TB_LandMoveInfo}_{DbConInfo.id}_{today}  
                     WHERE {qryColumn} IN ({grpParam})
                     ORDER BY {qryColumn}
                     """;
@@ -503,7 +555,7 @@ namespace LMFS.Db
                 string query =
                     $"""
                     DELETE 
-                    FROM landmove_info_{DbConInfo.id}_{today} 
+                    FROM {GlobalDataManager.Instance.TB_LandMoveInfo}_{DbConInfo.id}_{today} 
                     WHERE {qryColumn} IN ({paramPlaceholders})
                     """;
 
@@ -534,7 +586,7 @@ namespace LMFS.Db
 
                 string query =
                     $"""
-                      INSERT INTO landmove_info_{DbConInfo.id}_{today}
+                      INSERT INTO {GlobalDataManager.Instance.TB_LandMoveInfo}_{DbConInfo.id}_{today}
                       VALUES (@groupseqno, @seq, @bfpnu, @afpnu, @rsn, @creymd, @bfjimok, @bfarea, @afjimok, @afarea, @ownname, @pnuseq, @areacd, @userid, @uploaddt)
                       """;
 
@@ -564,6 +616,64 @@ namespace LMFS.Db
                     idx++;
                 }
 
+            }
+        }
+        #endregion
+
+
+        #region 필지추가(기존DB + 상세화면에서 행 추가)
+        public static void InsertLandMoveInfo(LandMoveInfo info)
+        {
+            using (var connection = MariaDBConnection.connectDB())
+            {
+                string today = DateTime.Today.ToString("yyyyMMdd");
+
+                string query =
+                    $"""
+                    INSERT INTO {GlobalDataManager.Instance.TB_LandMoveInfo}
+                    (g_seq, idx, bf_pnu, af_pnu, rsn, reg_dt, bf_jimok, bf_area, af_jimok, af_area, own_name, p_seq, area_cd, user_id, upload_dt)
+                    VALUES
+                    (@gSeq, @idx, @bfPnu, @afPnu, @rsn, @regDt, @bfJimok, @bfArea, @afJimok, @afArea, @ownName, @pSeq, @areaCd, @userId, @uploadDt)
+                    """;
+
+                using (var cmd = new MySqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@gSeq", info.gSeq);
+                    cmd.Parameters.AddWithValue("@idx", info.idx);
+                    cmd.Parameters.AddWithValue("@bfPnu", info.bfPnu);
+                    cmd.Parameters.AddWithValue("@afPnu", info.afPnu);
+                    cmd.Parameters.AddWithValue("@rsn", info.rsn);
+                    cmd.Parameters.AddWithValue("@regDt", info.regDt);
+                    cmd.Parameters.AddWithValue("@bfJimok", info.bfJimok);
+                    cmd.Parameters.AddWithValue("@bfArea", info.bfArea);
+                    cmd.Parameters.AddWithValue("@afJimok", info.afJimok);
+                    cmd.Parameters.AddWithValue("@afArea", info.afArea);
+                    cmd.Parameters.AddWithValue("@ownName", info.ownName);
+                    cmd.Parameters.AddWithValue("@pSeq", info.pSeq);
+                    cmd.Parameters.AddWithValue("@areaCd", GlobalDataManager.Instance.loginUser.areaCd);
+                    cmd.Parameters.AddWithValue("@userId", DbConInfo.id);
+                    cmd.Parameters.AddWithValue("@uploadDt", today);
+                    //
+                    cmd.ExecuteNonQuery();
+                }
+                //connection.Execute(query, new
+                //{
+                //    info.gSeq,
+                //    info.idx,
+                //    info.bfPnu,
+                //    info.afPnu,
+                //    info.rsn,      // 상단 label에서 값 대입
+                //    info.regDt,    // 상단 label에서 값 대입
+                //    info.bfJimok,
+                //    info.bfArea,
+                //    info.afJimok,
+                //    info.afArea,
+                //    info.ownName,
+                //    info.pSeq,
+                //    GlobalDataManager.Instance.loginUser.areaCd,
+                //    DbConInfo.id,
+                //    today
+                //});
             }
         }
         #endregion

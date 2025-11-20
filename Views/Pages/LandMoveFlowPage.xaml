@@ -90,7 +90,7 @@
                     </dxlc:LayoutGroup>
                     <dxlc:LayoutGroup Orientation="Horizontal" Height="28" Margin="4">
                         <Label Content="" Width="98" Margin="0" HorizontalContentAlignment="Center"/>
-                        <CheckBox Content="산" Name="IsSan" Width="40"/>
+                        <CheckBox Content="산" IsChecked="{Binding IsSan, Mode=TwoWay}" Width="40"/>
                         <!-- 본번 -->
                         <dxe:TextEdit EditValue="{Binding Bobn, UpdateSourceTrigger=PropertyChanged}"
                                       Width="60" MaxLength="4" MaskType="Numeric" Mask="0000" MaskUseAsDisplayFormat="True"

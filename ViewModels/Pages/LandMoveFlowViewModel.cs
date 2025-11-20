@@ -81,6 +81,8 @@ namespace LMFS.ViewModels.Pages
             GetJimokCodeDictionary();
             GetReasonCodeDictionary();
 
+            //메인 테이블명 가져오기
+            GetTableNameLandMoveInfo();
         }
 
         public void Dispose()
@@ -126,6 +128,7 @@ namespace LMFS.ViewModels.Pages
             //await DrawDiagramAsync();//async 추가 필수
             var popup = new BusyWindow();
             popup.Owner = Application.Current.MainWindow;
+            popup.WindowStartupLocation = WindowStartupLocation.CenterOwner; // Owner의 중앙에 뜨게 설정
             popup.Show();
 
             try
@@ -363,6 +366,11 @@ namespace LMFS.ViewModels.Pages
             GlobalDataManager.Instance.ReasonCode = dict;
         }
 
+        private void GetTableNameLandMoveInfo()
+        {
+            GlobalDataManager.Instance.TB_LandMoveInfo = $"landmove_info_{GlobalDataManager.Instance.loginUser.areaCd}";
+        }
+
 
         partial void OnJimokChgChanged(bool value)
         {
@@ -527,13 +535,13 @@ namespace LMFS.ViewModels.Pages
 
         //ViewModel에서는 Message 보내기만 담당
         [RelayCommand] //[RelayCommand] 속성이 존재해야 Command가 생성됩니다. On 접두사 필수!!!
-        private void OnPrint()
+        public void OnPrint()
         {
             WeakReferenceMessenger.Default.Send(new PrintDiagramMessage());
         }
 
         [RelayCommand]
-        private void OnPrintPreview()
+        public void OnPrintPreview()
         {
             WeakReferenceMessenger.Default.Send(new PrintPreviewDiagramMessage());
         }
@@ -546,7 +554,7 @@ namespace LMFS.ViewModels.Pages
         //4. OnExportPdf()에서 또다시 ExportPdfDiagramMessage 전송 ❌
         //5. 3번으로 다시 돌아감 → 무한 루프!
         [RelayCommand]
-        private void OnExportPdf()
+        public void OnExportPdf()
         {
             SaveFileDialog saveDialog = new SaveFileDialog
             {
@@ -566,7 +574,7 @@ namespace LMFS.ViewModels.Pages
         }
 
         [RelayCommand]
-        private void OnExportJpg()
+        public void OnExportJpg()
         {
             SaveFileDialog saveDialog = new SaveFileDialog
             {
@@ -586,7 +594,7 @@ namespace LMFS.ViewModels.Pages
         }
 
         [RelayCommand]
-        private void OnExportPng()
+        public void OnExportPng()
         {
             SaveFileDialog saveDialog = new SaveFileDialog
             {
@@ -635,7 +643,7 @@ using (var wb = new XLWorkbook(exportPath))
     wb.Save();
 }*/
         [RelayCommand]
-        private void OnExportGrid()
+        public void OnExportGrid()
         {
             SaveFileDialog saveDialog = new SaveFileDialog();
             saveDialog.Filter = "Excel (2010) (.xlsx)|*.xlsx|Excel (2003)(.xls)|*.xls";

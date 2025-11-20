@@ -12,6 +12,16 @@
                 <dxb:BarButtonItem Content="새로 만들기"/>
                 <dxb:BarButtonItem Content="열기" Command="{Binding LoadDataCommand}"/>
                 <dxb:BarItemLinkSeparator />
+
+                <dxb:BarButtonItem Content="다이어그램 인쇄" Command="{Binding PrintCommand}" />
+                <dxb:BarButtonItem Content="다이어그램 인쇄 미리보기" Command="{Binding PrintPreviewCommand}" />
+                <dxb:BarItemLinkSeparator />
+                <dxb:BarButtonItem Content="다이어그램 내보내기(pdf)" Command="{Binding ExportPdfCommand}" />
+                <dxb:BarButtonItem Content="다이어그램 내보내기(jpg)" Command="{Binding ExportJpgCommand}" />
+                <dxb:BarButtonItem Content="다이어그램 내보내기(png)" Command="{Binding ExportPngCommand}" />
+                <dxb:BarItemLinkSeparator />
+                <dxb:BarButtonItem Content="이동정리목록 내보내기(엑셀)" Command="{Binding ExportGridCommand}" IsEnabled="{Binding CanExportGridCommand}" />
+                <dxb:BarItemLinkSeparator />
 <!--                
                 <dxb:BarButtonItem Content="다이어그램 인쇄" Command="{Binding DataContext.PrintCommand, ElementName=MainFrame}"/>
                 <dxb:BarButtonItem Content="다이어그램 인쇄 미리보기" Command="{Binding DataContext.PrintPreviewCommand, ElementName=MainFrame}"/>
@@ -20,30 +30,22 @@
                 <dxb:BarButtonItem Content="다이어그램 내보내기(jpg)" Command="{Binding DataContext.ExportJpgCommand, ElementName=MainFrame}"/>
                 <dxb:BarButtonItem Content="다이어그램 내보내기(png)" Command="{Binding DataContext.ExportPngCommand, ElementName=MainFrame}"/>
                 <dxb:BarItemLinkSeparator />
-                <dxb:BarButtonItem Content="이동정리목록 내보내기(엑셀)" Command="{Binding DataContext.ExportGridCommand, ElementName=MainFrame}"/>-->
-                <dxb:BarItemLinkSeparator />
-
-
-                <dxb:BarButtonItem Content="다이어그램 인쇄" IsEnabled="{Binding PrintCommand, Converter={StaticResource BoolToVisibilityConverter}}" />
-                <dxb:BarButtonItem Content="다이어그램 인쇄 미리보기" IsEnabled="{Binding PrintPreviewCommand, Converter={StaticResource BoolToVisibilityConverter}}" />
-                <dxb:BarItemLinkSeparator />
-                <dxb:BarButtonItem Content="다이어그램 내보내기(pdf)" IsEnabled="{Binding ExportPdfCommand, Converter={StaticResource BoolToVisibilityConverter}}" />
-                <dxb:BarButtonItem Content="다이어그램 내보내기(jpg)" IsEnabled="{Binding ExportJpgCommand, Converter={StaticResource BoolToVisibilityConverter}}" />
-                <dxb:BarButtonItem Content="다이어그램 내보내기(png)" IsEnabled="{Binding ExportPngCommand, Converter={StaticResource BoolToVisibilityConverter}}" />
-                <dxb:BarItemLinkSeparator />
-                <dxb:BarButtonItem Content="이동정리목록 내보내기(엑셀)" IsEnabled="{Binding ExportGridCommand, Converter={StaticResource BoolToVisibilityConverter}}" />
-                <dxb:BarItemLinkSeparator />
-<!--
-                <dxb:BarButtonItem Content="다이어그램 인쇄" Command="{Binding PrintCommand}" IsEnabled="{B}" />
-                <dxb:BarButtonItem Content="다이어그램 인쇄 미리보기" Command="{Binding PrintPreviewCommand}"/>
-                <dxb:BarItemLinkSeparator />
-                <dxb:BarButtonItem Content="다이어그램 내보내기(pdf)" Command="{Binding ExportPdfCommand}"/>
-                <dxb:BarButtonItem Content="다이어그램 내보내기(jpg)" Command="{Binding ExportJpgCommand}"/>
-                <dxb:BarButtonItem Content="다이어그램 내보내기(png)" Command="{Binding ExportPngCommand}"/>
-                <dxb:BarItemLinkSeparator />
-                <dxb:BarButtonItem Content="이동정리목록 내보내기(엑셀)" Command="{Binding ExportGridCommand}"/>                
+                <dxb:BarButtonItem Content="이동정리목록 내보내기(엑셀)" Command="{Binding DataContext.ExportGridCommand, ElementName=MainFrame}"/>
                 <dxb:BarItemLinkSeparator />
 -->                
+
+<!--
+                <dxb:BarButtonItem Content="다이어그램 인쇄" Command="{Binding PrintCommand}" IsEnabled="{Binding CanPrintCommand}" />
+                <dxb:BarButtonItem Content="다이어그램 인쇄 미리보기" Command="{Binding PrintPreviewCommand}" IsEnabled="{Binding CanPrintPreviewCommand}" />
+                <dxb:BarItemLinkSeparator />
+                <dxb:BarButtonItem Content="다이어그램 내보내기(pdf)" Command="{Binding ExportPdfCommand}" IsEnabled="{Binding CanExportPdfCommand}" />
+                <dxb:BarButtonItem Content="다이어그램 내보내기(jpg)" Command="{Binding ExportJpgCommand}" IsEnabled="{Binding CanExportJpgCommand}" />
+                <dxb:BarButtonItem Content="다이어그램 내보내기(png)" Command="{Binding ExportPngCommand}" IsEnabled="{Binding CanExportPngCommand}" />
+                <dxb:BarItemLinkSeparator />
+                <dxb:BarButtonItem Content="이동정리목록 내보내기(엑셀)" Command="{Binding ExportGridCommand}" IsEnabled="{Binding CanExportGridCommand}" />
+                <dxb:BarItemLinkSeparator />
+-->
+                
                 <dxb:BarButtonItem Content="닫기"/>
             </dxb:BarSubItem>
 

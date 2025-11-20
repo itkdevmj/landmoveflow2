@@ -136,22 +136,31 @@ namespace LMFS.ViewModels.Pages
             ProgressValue = 0;
             ProgressText = "업로드 준비 중...";
 
-            await Task.Run(() =>
+            try
             {
-                CsvUploader.UploadLandMoveToDB((current, total, message) =>
+                await Task.Run(() =>
                 {
-                    Application.Current.Dispatcher.Invoke(() =>
+                    CsvUploader.UploadLandMoveToDB((current, total, message) =>
                     {
-                        ProgressMax = total;
-                        ProgressValue = current;
-                        ProgressText = $"{message}";
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            ProgressMax = total;
+                            ProgressValue = current;
+                            ProgressText = $"{message}";
+                        });
                     });
                 });
-            });
-
-            // 업로드 완료 시 (ProgressValue == ProgressMax)
-            IsUploadCompleted = true; 
-            IsUploading = false;//표시 해제
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("업로드 중 오류 발생: " + ex.Message);
+            }
+            finally
+            {
+                // 업로드 완료 시 (ProgressValue == ProgressMax)
+                IsUploadCompleted = true;
+                IsUploading = false;//표시 해제
+            }
         }
 
 

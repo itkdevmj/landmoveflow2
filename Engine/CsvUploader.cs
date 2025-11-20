@@ -340,15 +340,26 @@ public class CsvUploader
             //------------------------------------
             // [2] 기존자료 백업 및 작업 테이블 준비
             //------------------------------------
-            onProgress?.Invoke(0, totalCount, "기존 자료 백업 중...");
-            if (DBService.BackupLandMoveInfoOrg() <= 0)
+            int value = -1;
+            onProgress?.Invoke(0, totalCount, "기존 자료 확인중...");
+            //신규 테이블 여부 확인 후 생성//
+            DBService.CreateLandMoveInfoFirst();
+
+            //업로드를 위해 기존 (원본)테이블 백업//
+            value = DBService.BackupLandMoveInfoOrg();
+            if (value == 0)
             {
                 _nonExistData = true;//DB에 기존 데이터가 존재하는지 여부 - 기존 데이터 query하는 행동 하지 않기 위해//
-
+            }
+            else if (value < 0)
+            {
                 MessageBox.Show("기존 자료 백업에 문제가 발생했습니다. 사업수행자에게 문의하세요.");
                 return;
             }
-            if (DBService.CreateLandMoveInfoUser() <= 0)
+
+            //업로드용 사용자 (임시)테이블 생성
+            value = DBService.CreateLandMoveInfoUser();
+            if (value < 0)
             {
                 MessageBox.Show("업로드용 임시 테이블 생성에 문제가 발생했습니다. 사업수행자에게 문의하세요.");
                 return;
@@ -359,7 +370,8 @@ public class CsvUploader
             // [3] 현재 DB g_seq 최대값을 가져온다. (새로 추가할 데이터는 g_seq를 새로 count할 것이므로)
             //------------------------------------
             onProgress?.Invoke(0, totalCount, "그룹 번호 확인 중...");
-            _groupSeqno = DBService.GetMaxGroupSeqno();
+            if ( _nonExistData == false )
+                _groupSeqno = DBService.GetMaxGroupSeqno();
 
 
             //------------------------------------
