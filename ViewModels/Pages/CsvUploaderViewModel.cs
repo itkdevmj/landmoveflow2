@@ -37,16 +37,30 @@ namespace LMFS.ViewModels.Pages
         [ObservableProperty] private bool _isUploading = false;
         [ObservableProperty] private bool _isCommiting = false;
         [ObservableProperty] private bool isUploadReady = false;
-        [ObservableProperty] private bool _isUploadCompleted = false;
-        [ObservableProperty] private bool _isCommitCompleted = false;
+        [ObservableProperty] private bool isUploadCompleted = false;
+        [ObservableProperty] private bool isCommitCompleted = false;
 
         //[DB 업로드] 버튼 : ShowUploadButton에 바인딩
         public bool ShowUploadButton => IsUploadReady && !IsCommitCompleted;
         //[DB 최종 적용] 버튼 : ShowCommitButton에 바인딩
         public bool ShowCommitButton => IsUploadCompleted && !IsCommitCompleted;
 
-        partial void OnIsUploadCompletedChanged(bool value) => OnPropertyChanged(nameof(ShowUploadButton));
-        partial void OnIsCommitCompletedChanged(bool value) => OnPropertyChanged(nameof(ShowCommitButton));
+        partial void OnIsUploadReadyChanged(bool oldValue, bool newValue)
+        {
+            OnPropertyChanged(nameof(ShowUploadButton));
+        }
+
+        partial void OnIsUploadCompletedChanged(bool oldValue, bool newValue)
+        {
+            OnPropertyChanged(nameof(ShowCommitButton));
+        }
+
+        partial void OnIsCommitCompletedChanged(bool oldValue, bool newValue)
+        {
+            OnPropertyChanged(nameof(ShowUploadButton));
+            OnPropertyChanged(nameof(ShowCommitButton));
+        }
+
 
         //[ObservableProperty] 특성을 사용하면 자동으로 프로퍼티가 생성되므로 수동으로 프로퍼티를 만들면 충돌이 발생합니다.
         //해결 방법: partial void 메서드를 사용
@@ -57,7 +71,7 @@ namespace LMFS.ViewModels.Pages
             // Progress가 Max에 도달하면 자동으로 완료 처리
             if (value >= ProgressMax && ProgressMax > 0)
             {
-                _isUploadCompleted = true;
+                isUploadCompleted = true;
             }
         }
 
