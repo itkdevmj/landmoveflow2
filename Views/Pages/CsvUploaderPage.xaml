@@ -93,6 +93,12 @@
                     <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left">
                         <!--<Button Content="DB 업로드" Command="{Binding UploadCommand}" IsEnabled="{Binding IsUploading, Converter={StaticResource InverseBoolConverter}}" Width="120" Height="25" HorizontalAlignment="Left" Margin="0,0,0,8" Background="#FFE65604" Foreground="White"/>-->
                         <!-- DB 업로드 버튼 - IsUploadReady True일 때만 표시 -->
+                        <Button Content="DB 업로드" Command="{Binding UploadCommand}"
+                                Visibility="{Binding ShowUploadButton, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <!-- TextBlock으로 알림 표시 -->
+                        <TextBlock Text="✓ 파일 로드 완료! 업로드 가능합니다."
+                                   Visibility="{Binding ShowUploadButton, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <!--
                         <Button Content="DB 업로드" 
                                 Command="{Binding UploadCommand}" 
                                 IsEnabled="{Binding IsUploading, Converter={StaticResource InverseBoolConverter}}" 
@@ -106,7 +112,7 @@
                                 <Style TargetType="Button">
                                     <Setter Property="Visibility" Value="Collapsed"/>
                                     <Style.Triggers>
-                                        <!-- IsUploadReady가 True이고 IsCommitCompleted가 False일 때 표시 -->
+                                        
                                         <MultiDataTrigger>
                                             <MultiDataTrigger.Conditions>
                                                 <Condition Binding="{Binding IsUploadReady}" Value="True"/>
@@ -118,7 +124,6 @@
                                 </Style>
                             </Button.Style>
                         </Button>
-                        <!-- TextBlock으로 알림 표시 -->
                         <TextBlock x:Name="txtUploadReady"
                                    Text="✓ 파일 로드 완료! 업로드 가능합니다."
                                    Height="25" 
@@ -138,6 +143,7 @@
                                 </Style>
                             </TextBlock.Style>
                         </TextBlock>
+-->
                     </StackPanel>
                     <!-- Row 1 -->
                     <StackPanel Grid.Row="1" Orientation="Horizontal"
@@ -149,12 +155,11 @@
                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Height="33" VerticalAlignment="Bottom">
                         <!-- 임시 텍스트로 상태 확인 -->
                         <TextBlock Text="{Binding IsUploadCompleted, StringFormat='Upload: {0}'}" Margin="5" Foreground="Red"/>
-                        <!--<TextBlock Text="{Binding IsCommitCompleted, StringFormat='Commit: {0}'}" Margin="5" Foreground="Blue"/>-->
+                        <TextBlock Text="{Binding IsCommitCompleted, StringFormat='Commit: {0}'}" Margin="5" Foreground="Blue"/>
                         <!--<Button Content="DB 최종 적용" Command="{Binding CommitCommand}" IsEnabled="{Binding IsCommiting, Converter={StaticResource InverseBoolConverter}}" Width="120" Height="25" HorizontalAlignment="Left" Margin="0,0,0,8" Background="#FF66B821" Foreground="White"/>-->
                         <!-- DB 최종 적용 버튼 - 업로드 완료 후 표시, 적용 완료 후 숨김 -->
-                        <Button Content="DB 최종 적용"
-                            Visibility="{Binding ShowCommitButton, Converter={StaticResource BoolToVisibilityConverter}}"
-                            Command="{Binding CommitCommand}" />
+                        <Button Content="DB 최종 적용" Command="{Binding CommitCommand}"
+                                Visibility="{Binding ShowCommitButton, Converter={StaticResource BoolToVisibilityConverter}}" />
 <!--                        <Button Content="DB 최종 적용" 
                                 Command="{Binding CommitCommand}" 
                                 IsEnabled="{Binding IsCommiting, Converter={StaticResource InverseBoolConverter}}" 
