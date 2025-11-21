@@ -40,11 +40,11 @@ namespace LMFS.ViewModels.Pages
         [ObservableProperty] private bool isUploadCompleted = false;
         [ObservableProperty] private bool isCommitCompleted = false;
 
-        //[DB 업로드] 버튼 : ShowUploadButton에 바인딩
-        public bool ShowUploadButton => IsUploadReady && !IsCommitCompleted;
-        //[DB 최종 적용] 버튼 : ShowCommitButton에 바인딩
-        public bool ShowCommitButton => IsUploadCompleted && !IsCommitCompleted;
+        // 버튼 표시용 프로퍼티
+        public bool ShowUploadButton => IsUploadReady && !IsCommitCompleted;//[DB 업로드] 버튼 : ShowUploadButton에 바인딩
+        public bool ShowCommitButton => IsUploadCompleted && !IsCommitCompleted;//[DB 최종 적용] 버튼 : ShowCommitButton에 바인딩
 
+        // 버튼 표시용 변경 알림
         partial void OnIsUploadReadyChanged(bool oldValue, bool newValue)
         {
             OnPropertyChanged(nameof(ShowUploadButton));
@@ -71,7 +71,7 @@ namespace LMFS.ViewModels.Pages
             // Progress가 Max에 도달하면 자동으로 완료 처리
             if (value >= ProgressMax && ProgressMax > 0)
             {
-                isUploadCompleted = true;
+                IsUploadCompleted = true;
             }
         }
 

@@ -56,13 +56,9 @@ namespace LMFS.ViewModels.Pages
 
 
         [ObservableProperty] private bool _isFlowData = false;
+        //검색결과 많은 경우, 코드=>명칭 변경과 다이어그램 그리는데 시간이 소요되어 그리드가 깔끔하게 갱신되지 안아서 처리//
+        [ObservableProperty] private bool isDiagramReady = false;
 
-        //private Engine.LandMoveFlowConverter _converter; 
-        //public Engine.LandMoveFlowConverter Converter
-        //{
-        //    get => _converter;
-        //    set => _converter = value;
-        //}
 
         public LandMoveFlowConverter Converter { get; set; }
         public LandMoveSettingViewModel SettingVM { get; }
@@ -120,9 +116,9 @@ namespace LMFS.ViewModels.Pages
             }
 
 
-            //// 4. 그리드 데이터 처리
-            //UpdateFlowXml();
-
+            // 4. 그리드 데이터 처리
+            // 데이터 준비 및 명칭 변환 전
+            IsDiagramReady = false;
             //--------------------------------------------------------
             //팝업 띄우기 (팝업 윈도우 새로 생성) - // 4. 그리드 데이터 처리
             //await DrawDiagramAsync();//async 추가 필수
@@ -448,22 +444,19 @@ namespace LMFS.ViewModels.Pages
 
         private void UpdateFlowXml()
         {
-            //251118//
-            ////251027//[색상설정 - 사용자정의]
-            //SettingVM = new LandMoveSettingViewModel();
-            ////기본 색상 (or 사용자 정의 색상) 가져오기
-            //SettingVM.SettingDefaultColor();
-            //SettingVM.GetSettingColor();
-
             Converter = new LandMoveFlowConverter(SettingVM);
 
             var filteredList = GridDataSource;
             var categoryList = GridCategoryDataSource;
+
+            //코드=>명칭 변경 작업이 오래 걸려 AnalyzeData 내부에서 여기로 가져옴//(BusyWindow가 일찍 사라지기에 전처리)
+            GridDataSource = Converter.ChangeCodeToNameBatch(GridDataSource);
+
             if (!JimokChg)
             {
-                filteredList = GridDataSource.Where(item => item.rsn != "40").ToList();
+                filteredList = GridDataSource.Where(item => item.rsn != "지목변경").ToList();
                 GridDataSource = filteredList;
-                categoryList = GridCategoryDataSource.Where(item => item.rsn != "40").ToList();
+                categoryList = GridCategoryDataSource.Where(item => item.rsn != "지목변경").ToList();
                 GridCategoryDataSource = categoryList;
             }
 
@@ -500,6 +493,10 @@ namespace LMFS.ViewModels.Pages
                 IsFlowData = false;//표시 설정 [이동정리목록 내보내기(엑셀), 다이어그램 내보내기(Pdf, Jpg, Png)]
                 //MessageBox.Show("데이터가 존재하지 않습니다.");
             }
+
+
+            // 3. 모든 작업이 끝난 시점에서
+            IsDiagramReady = true;
         }
 
         #region XML 관련

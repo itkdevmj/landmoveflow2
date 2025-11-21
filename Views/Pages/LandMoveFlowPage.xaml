@@ -379,7 +379,8 @@
                                    ExportDPI="300"
                                    ExportScale="1.0"
                                    ExportMargin="10"
-                                   DocumentSource="{Binding LandMoveFlowData}" Opacity="1">
+                                   DocumentSource="{Binding LandMoveFlowData}"
+                                   Visibility="{Binding IsDiagramReady, Converter={StaticResource BoolToVisibilityConverter}}" Opacity="1">
                 <!--<dxmvvm:Interaction.Behaviors>
                     <dxdiag:DiagramDataBindingBehavior
                         ItemsSource="{Binding Path=Nodes}"
