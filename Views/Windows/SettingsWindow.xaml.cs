@@ -10,7 +10,7 @@ namespace LMFS.Views
         {
             InitializeComponent();
             var page = new SettingsPage();
-            RootGrid.Children.Add(page);  // Page를 Window의 컨텐츠로
+            MainFrame.Content = page;  // Page를 Window의 컨텐츠로
         }
     }
 }

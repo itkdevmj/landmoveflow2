@@ -1,14 +1,12 @@
 ﻿<Window x:Class="LMFS.Views.AboutWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="설정"
-        Width="200" Height="100"
-        WindowStartupLocation="CenterScreen"
-        WindowStyle="None"
-        AllowsTransparency="True"
-        Background="Transparent"
+        Title="도움말"
+        Width="450" Height="380"
+        WindowStartupLocation="CenterOwner"
+        Background="#A3C6C4"
         ShowInTaskbar="False"
         Topmost="True"
         ResizeMode="NoResize">
-    <Grid x:Name="RootGrid" />
+    <Frame x:Name="MainFrame"/>
 </Window>

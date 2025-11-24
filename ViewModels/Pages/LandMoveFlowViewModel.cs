@@ -65,6 +65,9 @@ namespace LMFS.ViewModels.Pages
         public LandMoveSettingViewModel SettingVM { get; }
         public BusyWindow BusPopup;
 
+        //[Warning Fixed]이 호출이 대기되지 않으므로 호출이 완료되기 전에 현재 메서드가 계속 실행됩니다. 호출 결과에 'await' 연산자를 적용해 보세요.
+        //public RelayCommand SearchCommand => new(async () => await OnSearch());
+
 
         public record RequestExportGridMessage(string ExportPath, string SheetName);
 
@@ -177,7 +180,7 @@ namespace LMFS.ViewModels.Pages
         [RelayCommand]
         private void OnEnter()
         {
-            this.OnSearch();
+            OnSearch();
         }
 
 

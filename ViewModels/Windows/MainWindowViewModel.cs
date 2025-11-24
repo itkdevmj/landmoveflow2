@@ -99,6 +99,7 @@ namespace LMFS.ViewModels
         {
             //팝업으로 변경//_frame.Navigate(new SettingsPage());
             var settingsWindow = new SettingsWindow();
+            settingsWindow.Owner = Application.Current.MainWindow; // 메인 프로그램(Window)을 owner로 지정
             settingsWindow.ShowDialog();
         }
 
@@ -107,6 +108,7 @@ namespace LMFS.ViewModels
         {
             //팝업으로 변경//_frame.Navigate(new AboutPage());
             var aboutWindow = new AboutWindow();
+            aboutWindow.Owner = Application.Current.MainWindow; // 메인 프로그램(Window)을 owner로 지정
             aboutWindow.ShowDialog();
         }
 

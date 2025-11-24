@@ -149,6 +149,9 @@ public class LandMoveFlowConverter
     {
         _settingVM = settingVM;// 기존 인스턴스만 보관
         //필요한 데이터는 _settings에서 가져옴
+
+        //위치이동 - 프로그램 로딩 시 1회만// 시군구 코드 등 공통 코드 조회
+        ReadCodeTables();
     }
 
     public LandMoveFlowConverter()
@@ -234,6 +237,35 @@ public class LandMoveFlowConverter
         //return $"{jibun}";
     }
 
+    public List<LandMoveInfo> ChangeCodeToNameBatch(List<LandMoveInfo> flowList)
+    {
+        foreach (var row in flowList)
+        {
+            row.bfPnu = GetJibun(row.bfPnu, 3);//'읍면' 명칭 제거
+            row.afPnu = GetJibun(row.afPnu, 3);//'읍면' 명칭 제거               
+
+            row.bfJimok = GetCodeValue(2, row.bfJimok);//지목 코드 => 명칭
+            row.afJimok = GetCodeValue(2, row.afJimok);//지목 코드 => 명칭
+            row.rsn = GetCodeValue(3, row.rsn);//이동종목 코드 => 명칭
+        }
+
+        return flowList;
+    }
+    private List<LandMoveInfo> ChangeCodeToNameBatch2(List<LandMoveInfo> flowList)
+    {
+        foreach (var row in flowList)
+        {
+            row.bfPnu = GetJibun(row.bfPnu, 3);//'읍면' 명칭 제거
+            row.afPnu = GetJibun(row.afPnu, 3);//'읍면' 명칭 제거               
+
+            row.bfJimok = GetCodeValue(2, row.bfJimok);//지목 코드 => 명칭
+            row.afJimok = GetCodeValue(2, row.afJimok);//지목 코드 => 명칭
+            row.rsn = GetCodeValue(3, row.rsn);//이동종목 코드 => 명칭
+        }
+
+        return flowList;
+    }
+
     private void ProcessLandMoveFlow(List<LandMoveInfo> rtnList, LandMoveFlowViewModel vm)
     {
         // 각종 변수 초기화
@@ -316,18 +348,19 @@ public class LandMoveFlowConverter
     //DB레코드 분석 및 파싱(Jibun, Connector, Label)
     private void AnalyzeData(List<LandMoveInfo> flowList)
     {
-        foreach (var row in flowList)
-        {
-            //CEO.REQ//
-            //row.bfJibun = GetJibun(row.bfPnu, 1);//'읍면' 명칭 포함
-            //row.afJibun = GetJibun(row.afPnu, 1);//'읍면' 명칭 포함
-            row.bfPnu = GetJibun(row.bfPnu, 3);//'읍면' 명칭 제거
-            row.afPnu = GetJibun(row.afPnu, 3);//'읍면' 명칭 제거               
+        //ChangeCodeToNameBatch() 에서 처리
+        //foreach (var row in flowList)
+        //{
+        //    //CEO.REQ//
+        //    //row.bfJibun = GetJibun(row.bfPnu, 1);//'읍면' 명칭 포함
+        //    //row.afJibun = GetJibun(row.afPnu, 1);//'읍면' 명칭 포함
+        //    row.bfPnu = GetJibun(row.bfPnu, 3);//'읍면' 명칭 제거
+        //    row.afPnu = GetJibun(row.afPnu, 3);//'읍면' 명칭 제거               
 
-            row.bfJimok = GetCodeValue(2, row.bfJimok);//지목 코드 => 명칭
-            row.afJimok = GetCodeValue(2, row.afJimok);//지목 코드 => 명칭
-            row.rsn = GetCodeValue(3, row.rsn);//이동종목 코드 => 명칭
-        }
+        //    row.bfJimok = GetCodeValue(2, row.bfJimok);//지목 코드 => 명칭
+        //    row.afJimok = GetCodeValue(2, row.afJimok);//지목 코드 => 명칭
+        //    row.rsn = GetCodeValue(3, row.rsn);//이동종목 코드 => 명칭
+        //}
 
         var rsnOld = "";
         var rsnNew = "";
@@ -950,47 +983,47 @@ public class LandMoveFlowConverter
         }
     }*/
 
-    /*private void SaveDbLinesToFile()
-    {
-        var filePath = Path.Combine(ResultPath, DbLinesPath, $"db_lines_{_currentGroupNo}.txt");
-        EnsureDirectoryExists(filePath);
-        File.WriteAllLines(filePath, _dbLines, Encoding.UTF8);
-    }*/
-
-    /*private void SaveDfXmlToCsv()
-    {
-        var filePath = Path.Combine(ResultPath, DfPath, $"DF_XML_{_currentGroupNo}.csv");
-        EnsureDirectoryExists(filePath);
-        
-        var sb = new StringBuilder();
-        var columnNames = _dfXml.Columns.Cast<DataColumn>().Select(c => c.ColumnName);
-        sb.AppendLine(string.Join(",", columnNames));
-
-        foreach (DataRow row in _dfXml.Rows)
+        /*private void SaveDbLinesToFile()
         {
-            var fields = row.ItemArray.Select(field => field?.ToString()?.Replace(",", ";") ?? "");
-            sb.AppendLine(string.Join(",", fields));
-        }
-        
-        File.WriteAllText(filePath, sb.ToString(), Encoding.UTF8);
-    }*/
+            var filePath = Path.Combine(ResultPath, DbLinesPath, $"db_lines_{_currentGroupNo}.txt");
+            EnsureDirectoryExists(filePath);
+            File.WriteAllLines(filePath, _dbLines, Encoding.UTF8);
+        }*/
 
-    /*private void SaveXmlToFile()
-    {
-        if (_root == null) return;
-        
-        var filePath = Path.Combine(ResultPath, XmlPath, $"XML_{_currentGroupNo}.xml");
-        EnsureDirectoryExists(filePath);
-        
-        var xdoc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), _root);
-        xdoc.Save(filePath);
-        //PrintLog($"{filePath} 파일 저장 완료.");
-    }*/
+        /*private void SaveDfXmlToCsv()
+        {
+            var filePath = Path.Combine(ResultPath, DfPath, $"DF_XML_{_currentGroupNo}.csv");
+            EnsureDirectoryExists(filePath);
 
-    #endregion
+            var sb = new StringBuilder();
+            var columnNames = _dfXml.Columns.Cast<DataColumn>().Select(c => c.ColumnName);
+            sb.AppendLine(string.Join(",", columnNames));
+
+            foreach (DataRow row in _dfXml.Rows)
+            {
+                var fields = row.ItemArray.Select(field => field?.ToString()?.Replace(",", ";") ?? "");
+                sb.AppendLine(string.Join(",", fields));
+            }
+
+            File.WriteAllText(filePath, sb.ToString(), Encoding.UTF8);
+        }*/
+
+        /*private void SaveXmlToFile()
+        {
+            if (_root == null) return;
+
+            var filePath = Path.Combine(ResultPath, XmlPath, $"XML_{_currentGroupNo}.xml");
+            EnsureDirectoryExists(filePath);
+
+            var xdoc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), _root);
+            xdoc.Save(filePath);
+            //PrintLog($"{filePath} 파일 저장 완료.");
+        }*/
+
+        #endregion
 
 
-    #region _dfXml 에서 찾기
+        #region _dfXml 에서 찾기
     public int GetIndexDFXML(string findPnu)
     {
         // 전체 데이터 중 PNU 컬럼에 searchString이 포함된 첫 번째 행 인덱스 찾기
@@ -1034,8 +1067,8 @@ public class LandMoveFlowConverter
     {
         try
         {
-            // 시군구 코드 등 공통 코드 조회
-            ReadCodeTables();
+            //위치이동 - 프로그램 로딩 시 1회만// 시군구 코드 등 공통 코드 조회
+            //ReadCodeTables();
 
             // 임시 파일 저장할 경로 설정//
             _tempDir = SetTempDir();

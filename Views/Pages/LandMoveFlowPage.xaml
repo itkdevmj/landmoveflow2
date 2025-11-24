@@ -90,7 +90,7 @@
                     </dxlc:LayoutGroup>
                     <dxlc:LayoutGroup Orientation="Horizontal" Height="28" Margin="4">
                         <Label Content="" Width="98" Margin="0" HorizontalContentAlignment="Center"/>
-                        <CheckBox Content="산" IsChecked="{Binding IsSan, Mode=TwoWay}" Width="40"/>
+                        <CheckBox Content="산" IsChecked="{Binding IsSan, Mode=TwoWay}" Width="40" Height="18"/>
                         <!-- 본번 -->
                         <dxe:TextEdit EditValue="{Binding Bobn, UpdateSourceTrigger=PropertyChanged}"
                                       Width="60" MaxLength="4" MaskType="Numeric" Mask="0000" MaskUseAsDisplayFormat="True"
@@ -122,12 +122,11 @@
                 </StackPanel>
             </Border>
             <StackPanel Grid.Row="1" Margin="5,5,5,5">
-                <dxlc:LayoutGroup Orientation="Horizontal" HorizontalAlignment="Right" Height="28"
-                                  Margin="10 5 10 5">
+                <dxlc:LayoutGroup Orientation="Horizontal" HorizontalAlignment="Right" Height="28" Margin="10 5 10 5">
                     <Button Content="자료(CSV) 추가" Width="142" Command="{Binding LoadCsvFileDataCommand}" Foreground="White" BorderBrush="White" Background="#FFFF7F00" FontWeight="Bold"/>
                 </dxlc:LayoutGroup>
-                <Border BorderBrush="#A3C6C4" Background="#FFE0E7E9" BorderThickness="1" CornerRadius="5" Height="40" Margin="0 0 0 0">
-                    <dxlc:LayoutGroup Orientation="Horizontal" HorizontalAlignment="Left" Height="40" Margin="10 0 0 0">
+                <Border BorderBrush="#A3C6C4" Background="#FFE0E7E9" BorderThickness="1" CornerRadius="5" Height="40">
+                    <dxlc:LayoutGroup Orientation="Horizontal" HorizontalAlignment="Left" Height="40">
                         <CheckBox Content="[지목변경] 표시" IsChecked="{Binding JimokChg, Mode=TwoWay}" Height="16" Width="250" Background="White">
                         </CheckBox>
                         <!-- 이동정리목록 내보내기 버튼 -->
@@ -178,49 +177,51 @@
 -->
 
             <!-- 다이어그램 생성+분석+전처리 모두 끝난 뒤에만 카테고리 그리드가 보임 -->
-            <dxg:GridControl Grid.Row="2" Name="AnotherFlowDataGrid"
-                             AutoExpandAllGroups="True" AllowColumnMRUFilterList="False"
-                                ItemsSource="{Binding GridCategoryDataSource}"
-                                SelectedItem="{Binding SelectedFlowData}" SelectionMode="Row"
-                                Visibility="{Binding IsDiagramReady, Converter={StaticResource BoolToVisibilityConverter}}"
-                                dx:ScrollBarExtensions.ScrollBarMode="TouchOverlap" ShowBorder="True"
-                                Margin="4,0,4,4" Cursor="Hand">
+            <Border Grid.Row="2" Background="Transparent" BorderBrush="#A3C6C4" BorderThickness="1" CornerRadius="5">
+                <dxg:GridControl Name="AnotherFlowDataGrid"
+                                 AutoExpandAllGroups="True" AllowColumnMRUFilterList="False"
+                                    ItemsSource="{Binding GridCategoryDataSource}"
+                                    SelectedItem="{Binding SelectedFlowData}" SelectionMode="Row"
+                                    Visibility="{Binding IsDiagramReady, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    dx:ScrollBarExtensions.ScrollBarMode="TouchOverlap" ShowBorder="True"
+                                    Cursor="Hand">
 
-                <dxmvvm:Interaction.Behaviors>
-                    <!-- PassEventArgsToCommand="False" 또는 이 속성 자체를 제거 -->
-                    <dxmvvm:EventToCommand EventName="MouseLeftButtonUp" 
-                                            Command="{Binding RowClickCommand}"
-                                            CommandParameter="{Binding Path=SelectedItem, ElementName=AnotherFlowDataGrid}"
-                                            PassEventArgsToCommand="False"
-                                            />                    
-                </dxmvvm:Interaction.Behaviors>
+                    <dxmvvm:Interaction.Behaviors>
+                        <!-- PassEventArgsToCommand="False" 또는 이 속성 자체를 제거 -->
+                        <dxmvvm:EventToCommand EventName="MouseLeftButtonUp" 
+                                                Command="{Binding RowClickCommand}"
+                                                CommandParameter="{Binding Path=SelectedItem, ElementName=AnotherFlowDataGrid}"
+                                                PassEventArgsToCommand="False"
+                                                />
+                    </dxmvvm:Interaction.Behaviors>
 
-                <dxg:GridControl.View>
-                    <dxg:TableView ShowIndicator="False" ShowGroupPanel="False" NavigationStyle="Row" AutoWidth="False">
-                    </dxg:TableView>
-                </dxg:GridControl.View>
-                <dxg:GridControl.Columns>
-                    <dxg:GridColumn FieldName="regDt" Header="정리일" Width="1*" HorizontalHeaderContentAlignment="Center"
-                                    ReadOnly="True">
-                        <dxg:GridColumn.EditSettings>
-                            <dxe:DateEditSettings DisplayFormat="yyyyMMdd" ShowPopupIfReadOnly="False" HorizontalContentAlignment="Center" />
-                        </dxg:GridColumn.EditSettings>
-                    </dxg:GridColumn>
-                    <dxg:GridColumn FieldName="rsn" Header="종목" Width="1.2*" MinWidth="120" HorizontalHeaderContentAlignment="Center" 
-                                    ReadOnly="True">
-                        <dxg:GridColumn.EditSettings>
-                            <dxe:TextEditSettings HorizontalContentAlignment="Center" />
-                        </dxg:GridColumn.EditSettings>
-                    </dxg:GridColumn>
-                </dxg:GridControl.Columns>
-                <!--<dxg:GridControl.TotalSummary>
-                    <dxg:GridSummaryItem SummaryType="Count" Alignment="Right" />
-                    <dxg:GridSummaryItem FieldName="FullName" SummaryType="Count" />
-                </dxg:GridControl.TotalSummary>-->
-            </dxg:GridControl>
+                    <dxg:GridControl.View>
+                        <dxg:TableView ShowIndicator="False" ShowGroupPanel="False" NavigationStyle="Row" AutoWidth="False">
+                        </dxg:TableView>
+                    </dxg:GridControl.View>
+                    <dxg:GridControl.Columns>
+                        <dxg:GridColumn FieldName="regDt" Header="정리일" Width="1*" HorizontalHeaderContentAlignment="Center"
+                                        ReadOnly="True">
+                            <dxg:GridColumn.EditSettings>
+                                <dxe:DateEditSettings DisplayFormat="yyyyMMdd" ShowPopupIfReadOnly="False" HorizontalContentAlignment="Center" />
+                            </dxg:GridColumn.EditSettings>
+                        </dxg:GridColumn>
+                        <dxg:GridColumn FieldName="rsn" Header="종목" Width="1.2*" MinWidth="120" HorizontalHeaderContentAlignment="Center" 
+                                        ReadOnly="True">
+                            <dxg:GridColumn.EditSettings>
+                                <dxe:TextEditSettings HorizontalContentAlignment="Center" />
+                            </dxg:GridColumn.EditSettings>
+                        </dxg:GridColumn>
+                    </dxg:GridControl.Columns>
+                    <!--<dxg:GridControl.TotalSummary>
+                        <dxg:GridSummaryItem SummaryType="Count" Alignment="Right" />
+                        <dxg:GridSummaryItem FieldName="FullName" SummaryType="Count" />
+                    </dxg:GridControl.TotalSummary>-->
+                </dxg:GridControl>
+            </Border>
             <!--- Hide : Unvisible(Collapsed) => Real DB Record -->
             <dxg:GridControl Grid.Row="2" Name="FlowDataGrid" Visibility="Collapsed" 
-                             AutoExpandAllGroups="True" AllowColumnMRUFilterList="False"
+                                AutoExpandAllGroups="True" AllowColumnMRUFilterList="False"
                                 ItemsSource="{Binding GridDataSource}" SelectionMode="Row"
                                 dx:ScrollBarExtensions.ScrollBarMode="TouchOverlap" ShowBorder="True"
                                 Margin="4,0,4,4" Cursor="Hand">
@@ -341,7 +342,9 @@
                                     Minimum="0.5" 
                                     Maximum="3"
                                     Value="{Binding ElementName=LmfControl, Path=ZoomFactor, Mode=TwoWay}"
-                                    Margin="10 10 10 10">
+                                    Margin="10 10 10 10"
+                                    Steps="0.05"
+                                    TickFrequency="0.1">
                             </dxe:TrackBarEdit>
                             <!--<dxe:TrackBarEdit 
                                     x:Name="ZoomTrackBar"   
@@ -375,7 +378,8 @@
             -->
         </Border>
 
-        <Border Background="#A3C6C4" BorderThickness="2" CornerRadius="5" Padding="2">
+        <!--<Border Background="#A3C6C4" BorderThickness="2" CornerRadius="5" Padding="2">-->
+        <Border Background="Transparent" BorderBrush="#A3C6C4" BorderThickness="2" CornerRadius="5" Padding="2">
             <!-- 다이어그램 다 그려진 후 BusyWindow.Close 처리 (LmfControl_Loaded) -->
             <dxdiag:DiagramControl ShowRulers="False" IsReadOnly="True" x:Name="LmfControl" 
                                    ExportDPI="300"
@@ -384,15 +388,14 @@
                                    DocumentSource="{Binding LandMoveFlowData}"
                                    Visibility="{Binding IsDiagramReady, Converter={StaticResource BoolToVisibilityConverter}}" Opacity="1"
                                    Loaded="LmfControl_Loaded">
-                <!--<dxmvvm:Interaction.Behaviors>
-                    <dxdiag:DiagramDataBindingBehavior
-                        ItemsSource="{Binding Path=Nodes}"
-                        ConnectorsSource="{Binding Path=Connectors}"
-                        KeyMember="Id"
-                        ConnectorFromMember="Source"
-                        ConnectorToMember="Target"
-                        LayoutKind="Sugiyama" />
-                </dxmvvm:Interaction.Behaviors>-->
+                <!--            <dxdiag:DiagramControl ShowRulers="False" IsReadOnly="True" x:Name="LmfControl" 
+                                   ExportDPI="300"
+                                   ExportScale="1.0"
+                                   ExportMargin="10"
+                                   DocumentSource="{Binding LandMoveFlowData}"
+                                   Visibility="{Binding IsDiagramReady, Converter={StaticResource BoolToVisibilityConverter}}" Opacity="1"
+                                   Loaded="LmfControl_Loaded">
+-->
             </dxdiag:DiagramControl>
         </Border>
     </DockPanel>
