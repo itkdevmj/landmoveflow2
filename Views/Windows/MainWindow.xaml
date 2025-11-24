@@ -49,7 +49,7 @@
                 <dxb:BarButtonItem Content="닫기"/>
             </dxb:BarSubItem>
 
-            <dxb:BarSubItem Content="토지이동 흐름도" Command="{Binding NavigateToLandMoveFlowCommand}"/>
+            <dxb:BarSubItem Content="토지이동 흐름도" Command="{Binding NavigateToLandMoveFlowCommand}" />
             <dxb:BarSubItem Content="설정" Command="{Binding NavigateToSettingsCommand}"/>
             <dxb:BarSubItem Content="도움말" Command="{Binding NavigateToAboutCommand}"/>
 

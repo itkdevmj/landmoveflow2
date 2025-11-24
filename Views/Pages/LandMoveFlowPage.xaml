@@ -177,11 +177,12 @@
             </dxg:GridControl>
 -->
 
-
+            <!-- 다이어그램 생성+분석+전처리 모두 끝난 뒤에만 카테고리 그리드가 보임 -->
             <dxg:GridControl Grid.Row="2" Name="AnotherFlowDataGrid"
                              AutoExpandAllGroups="True" AllowColumnMRUFilterList="False"
                                 ItemsSource="{Binding GridCategoryDataSource}"
                                 SelectedItem="{Binding SelectedFlowData}" SelectionMode="Row"
+                                Visibility="{Binding IsDiagramReady, Converter={StaticResource BoolToVisibilityConverter}}"
                                 dx:ScrollBarExtensions.ScrollBarMode="TouchOverlap" ShowBorder="True"
                                 Margin="4,0,4,4" Cursor="Hand">
 
@@ -375,12 +376,14 @@
         </Border>
 
         <Border Background="#A3C6C4" BorderThickness="2" CornerRadius="5" Padding="2">
+            <!-- 다이어그램 다 그려진 후 BusyWindow.Close 처리 (LmfControl_Loaded) -->
             <dxdiag:DiagramControl ShowRulers="False" IsReadOnly="True" x:Name="LmfControl" 
                                    ExportDPI="300"
                                    ExportScale="1.0"
                                    ExportMargin="10"
                                    DocumentSource="{Binding LandMoveFlowData}"
-                                   Visibility="{Binding IsDiagramReady, Converter={StaticResource BoolToVisibilityConverter}}" Opacity="1">
+                                   Visibility="{Binding IsDiagramReady, Converter={StaticResource BoolToVisibilityConverter}}" Opacity="1"
+                                   Loaded="LmfControl_Loaded">
                 <!--<dxmvvm:Interaction.Behaviors>
                     <dxdiag:DiagramDataBindingBehavior
                         ItemsSource="{Binding Path=Nodes}"

@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DevExpress.Data.Browsing;
 using DevExpress.Dialogs.Core.View;
+using DevExpress.Xpf;
 using DevExpress.Xpf.Diagram;
 using DevExpress.Xpf.Printing;
 using DevExpress.Xpf.Printing.Native;
@@ -10,6 +11,7 @@ using DevExpress.XtraPrinting;
 using LMFS.Messages;
 using LMFS.ViewModels;    // 혹은 프로젝트에서 MainWindowViewModel이 정의된 네임스페이스
 using LMFS.ViewModels.Pages;
+using LMFS.Views;
 using LMFS.Views.Pages;
 using Microsoft.Win32;
 using System;
@@ -17,6 +19,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using AboutWindow = LMFS.Views.AboutWindow;
 
 
 namespace LMFS.ViewModels
@@ -29,8 +32,16 @@ namespace LMFS.ViewModels
         public LandMoveSettingViewModel SettingVM { get; set; }
 
 
-        [ObservableProperty]
-        private string _applicationInfo;
+        [ObservableProperty]private string _applicationInfo;
+
+        //[토지이동흐름도] 메뉴 숨김(Hide)
+        [ObservableProperty] private bool _isLandMoveFlowVisible = false;
+        //public bool IsLandMoveFlowVisible
+        //{
+        //    get => _isLandMoveFlowVisible;
+        //    set => SetProperty(ref _isLandMoveFlowVisible, value);
+        //}
+
 
         #region 생성자
         public MainWindowViewModel(Frame frame)
@@ -86,13 +97,17 @@ namespace LMFS.ViewModels
         [RelayCommand]
         private void NavigateToSettings()
         {
-            _frame.Navigate(new SettingsPage());
+            //팝업으로 변경//_frame.Navigate(new SettingsPage());
+            var settingsWindow = new SettingsWindow();
+            settingsWindow.ShowDialog();
         }
 
         [RelayCommand]
         private void NavigateToAbout()
         {
-            _frame.Navigate(new AboutPage());
+            //팝업으로 변경//_frame.Navigate(new AboutPage());
+            var aboutWindow = new AboutWindow();
+            aboutWindow.ShowDialog();
         }
 
         //[색상설정]

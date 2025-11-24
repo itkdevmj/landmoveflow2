@@ -5,6 +5,7 @@ using DevExpress.Mvvm;
 using DevExpress.Xpf.Core.Native;
 using DevExpress.Xpf.Editors;
 using DevExpress.Xpf.Grid;// WPF용
+using DevExpress.XtraBars;
 using DevExpress.XtraPrinting;
 using LMFS.Engine;
 using LMFS.Messages;
@@ -15,6 +16,7 @@ using System.IO;// FileStream
 using System.Threading.Tasks;
 using System.Windows;// Rect
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Shapes;
 using static LMFS.ViewModels.Pages.LandMoveFlowViewModel;
 
@@ -26,6 +28,9 @@ namespace LMFS.Views.Pages
     public partial class LandMoveFlowPage : System.Windows.Controls.Page, IRecipient<LoadXmlMessage>
     {
         public LandMoveFlowViewModel FlowVM { get; set; }
+
+        private bool _diagramShown = false;
+
 
         public LandMoveFlowPage(LandMoveSettingViewModel settingVM)
         {
@@ -254,6 +259,21 @@ namespace LMFS.Views.Pages
                     scale             // Nullable<Double> - 배율
                 );
             }
+        }
+
+        private void LmfControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            // 작업 끝나면 Busy 팝업 닫기 (예외 있어도 안전하게 처리)
+            if (!FlowVM.IsDiagramReady || _diagramShown)
+                return;
+
+            _diagramShown = true;
+            FlowVM.BusPopup?.Close();
+
+            // 3. 모든 작업이 끝난 시점에서
+            FlowVM.IsDiagramReady = true;
+
+
         }
 
         /*

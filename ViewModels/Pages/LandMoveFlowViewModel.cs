@@ -25,6 +25,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 using System.Xml.Linq;
 
 namespace LMFS.ViewModels.Pages
@@ -62,6 +63,7 @@ namespace LMFS.ViewModels.Pages
 
         public LandMoveFlowConverter Converter { get; set; }
         public LandMoveSettingViewModel SettingVM { get; }
+        public BusyWindow BusPopup;
 
 
         public record RequestExportGridMessage(string ExportPath, string SheetName);
@@ -88,7 +90,7 @@ namespace LMFS.ViewModels.Pages
 
 
         [RelayCommand]
-        public async void OnSearch()//private => public//async 추가
+        public async Task OnSearch()//private => public//async 추가
         {
             if (Bobn == "" && Bubn == "")
             {
@@ -122,25 +124,23 @@ namespace LMFS.ViewModels.Pages
             //--------------------------------------------------------
             //팝업 띄우기 (팝업 윈도우 새로 생성) - // 4. 그리드 데이터 처리
             //await DrawDiagramAsync();//async 추가 필수
-            var popup = new BusyWindow();
-            popup.Owner = Application.Current.MainWindow;
-            popup.WindowStartupLocation = WindowStartupLocation.CenterOwner; // Owner의 중앙에 뜨게 설정
-            popup.Show();
+            BusPopup = new BusyWindow();
+            BusPopup.Owner = Application.Current.MainWindow;
+            BusPopup.WindowStartupLocation = WindowStartupLocation.CenterOwner; // Owner의 중앙에 뜨게 설정
+            BusPopup.Show();
 
-            try
+            // XML 구성 등 시간이 오래 걸릴 수 있는 작업은 비동기로 처리
+            await Task.Run(() =>
             {
-                // XML 구성 등 시간이 오래 걸릴 수 있는 작업은 비동기로 처리
-                await Task.Run(() =>
-                {
-                    // 4. 그리드 데이터 처리
-                    UpdateFlowXml();
-                });
-            }
-            finally 
-            {
-                // 작업 끝나면 Busy 팝업 닫기 (예외 있어도 안전하게 처리)
-                popup.Close();
-            }
+                // 4. 그리드 데이터 처리
+                UpdateFlowXml();
+            });
+
+            // 4. UI 업데이트가 완료될 수 있도록 한 프레임 "더 기다림"
+            await Application.Current.Dispatcher.InvokeAsync(() => {
+                BusPopup.Close();           // BusyWindow**를 여기서** 닫는다!
+                IsDiagramReady = true; // 필요할 경우 UI 표시 활성화(Visibility 등)
+            }, DispatcherPriority.Background);
             //--------------------------------------------------------
         }
 
@@ -493,10 +493,6 @@ namespace LMFS.ViewModels.Pages
                 IsFlowData = false;//표시 설정 [이동정리목록 내보내기(엑셀), 다이어그램 내보내기(Pdf, Jpg, Png)]
                 //MessageBox.Show("데이터가 존재하지 않습니다.");
             }
-
-
-            // 3. 모든 작업이 끝난 시점에서
-            IsDiagramReady = true;
         }
 
         #region XML 관련
