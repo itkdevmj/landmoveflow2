@@ -26,6 +26,7 @@ namespace LMFS.Views.Pages
         public LandMoveQueryPage()
         {
             InitializeComponent();
+            this.DataContext = new LandMoveQueryViewModel();
         }
 
         private void UpdateDataGridMaxHeight()
