@@ -265,7 +265,7 @@ namespace LMFS.ViewModels.Pages
             // 예) '이동전', '이동후' 등 필수입력 체크
             if (string.IsNullOrWhiteSpace(item.BfJibun) || string.IsNullOrWhiteSpace(item.AfJibun))
             {
-                MessageBox.Show("이동전, 이동후 정보를 모두 입력해주세요.", "경고", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(Application.Current.MainWindow, "이동전, 이동후 정보를 모두 입력해주세요.", "경고", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;            
             }
             // 여러 값 동시에 검사 필요시
@@ -285,7 +285,7 @@ namespace LMFS.ViewModels.Pages
             if (GridDataSource == null || !GridDataSource.Any())
             {
                 IsSaveButtonVisible = true; // 조회 결과 부재 시 저장 버튼 노출
-                MessageBox.Show("현재 데이터베이스에 필지 정보 없습니다.\r\n입력 필지는 저장 가능합니다.", "알림");
+                MessageBox.Show(Application.Current.MainWindow, "현재 데이터베이스에 필지 정보 없습니다.\r\n입력 필지는 저장 가능합니다.", "알림");
 
                 //------------------------------------------
                 //[추가할 필지 정보]
@@ -316,7 +316,7 @@ namespace LMFS.ViewModels.Pages
                 IsSaveButtonVisible = false; // 조회 결과 부재 시 저장 버튼 노출
 
                 var message = "입력한 필지는 다른 그룹에 존재합니다. \r\n검색화면에서 해당 필지로 조회하시겠습니까? (예:현재 화면 종료됨)";
-                var result = MessageBox.Show(message, "알림", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                var result = MessageBox.Show(Application.Current.MainWindow, message, "알림", MessageBoxButton.YesNo, MessageBoxImage.Information);
                 if (result == MessageBoxResult.Yes)
                 {
                     // 검색 로직 실행
@@ -348,7 +348,7 @@ namespace LMFS.ViewModels.Pages
                     {
                         if (!item.Validate())
                         {
-                            MessageBox.Show("유효성 검사 실패\n필수 항목을 입력해주세요.", "알림",
+                            MessageBox.Show(Application.Current.MainWindow, "유효성 검사 실패\n필수 항목을 입력해주세요.", "알림",
                                 MessageBoxButton.OK, MessageBoxImage.Warning);
                             return;
                         }
@@ -374,7 +374,7 @@ namespace LMFS.ViewModels.Pages
                     var message = "입력한 필지는 그룹처리되어 추가되었습니다.";
                     if (newRow > 1)
                         message = "입력한 필지들은 그룹처리되어 추가되었습니다.";
-                    MessageBox.Show(message, "알림", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show(Application.Current.MainWindow, message, "알림", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
 
 
@@ -383,7 +383,7 @@ namespace LMFS.ViewModels.Pages
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"저장 실패: {ex.Message}", "오류",
+                MessageBox.Show(Application.Current.MainWindow, $"저장 실패: {ex.Message}", "오류",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

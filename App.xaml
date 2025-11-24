@@ -7,6 +7,7 @@
     <Application.Resources>
         <local:MultiFormatConverter x:Key="MultiFormatConverter" />
         <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <local:BoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
         <local:InverseBoolConverter x:Key="InverseBoolConverter"/>
     </Application.Resources>
 </Application>

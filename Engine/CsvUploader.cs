@@ -301,7 +301,7 @@ public class CsvUploader
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.ToString());
+                        MessageBox.Show(Application.Current.MainWindow, ex.ToString());
                     }
                 }
             }
@@ -322,7 +322,7 @@ public class CsvUploader
 
         if (totalCount == 0)
         {
-            MessageBox.Show("업로드할 데이터가 없습니다!");
+            MessageBox.Show(Application.Current.MainWindow, "업로드할 데이터가 없습니다!");
             return;
         }
 
@@ -353,7 +353,7 @@ public class CsvUploader
             }
             else if (value < 0)
             {
-                MessageBox.Show("기존 자료 백업에 문제가 발생했습니다. 사업수행자에게 문의하세요.");
+                MessageBox.Show(Application.Current.MainWindow, "기존 자료 백업에 문제가 발생했습니다. 사업수행자에게 문의하세요.");
                 return;
             }
 
@@ -361,7 +361,7 @@ public class CsvUploader
             value = DBService.CreateLandMoveInfoUser();
             if (value < 0)
             {
-                MessageBox.Show("업로드용 임시 테이블 생성에 문제가 발생했습니다. 사업수행자에게 문의하세요.");
+                MessageBox.Show(Application.Current.MainWindow, "업로드용 임시 테이블 생성에 문제가 발생했습니다. 사업수행자에게 문의하세요.");
                 return;
             }           
 
@@ -388,12 +388,12 @@ public class CsvUploader
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"업로드 중 오류 발생: {ex.Message}");
+            MessageBox.Show(Application.Current.MainWindow, $"업로드 중 오류 발생: {ex.Message}");
         }
         finally
         {
             onProgress?.Invoke(totalCount, totalCount, "업로드 완료!");
-            MessageBox.Show("업로드가 완료되었습니다!");
+            MessageBox.Show(Application.Current.MainWindow, "업로드가 완료되었습니다!");
         }
     }
     #endregion

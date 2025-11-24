@@ -3,6 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
     xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+    xmlns:local="clr-namespace:LMFS.Views"
     x:Class="LMFS.MainWindow"
     Title="토지이동 흐름도 시스템" Height="800" Width="1000"
     Closing="MainWindow_OnClosing">
@@ -14,6 +15,7 @@
                 <dxb:BarItemLinkSeparator />
 
                 <dxb:BarButtonItem Content="다이어그램 인쇄" Command="{Binding PrintCommand}" />
+                <!--<dxb:BarButtonItem Content="다이어그램 인쇄" Command="{Binding DataContext.PrintCommand, RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}}" />-->
                 <dxb:BarButtonItem Content="다이어그램 인쇄 미리보기" Command="{Binding PrintPreviewCommand}" />
                 <dxb:BarItemLinkSeparator />
                 <dxb:BarButtonItem Content="다이어그램 내보내기(pdf)" Command="{Binding ExportPdfCommand}" />

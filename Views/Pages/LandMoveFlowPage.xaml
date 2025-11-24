@@ -388,7 +388,7 @@
                                    DocumentSource="{Binding LandMoveFlowData}"
                                    Visibility="{Binding IsDiagramReady, Converter={StaticResource BoolToVisibilityConverter}}" Opacity="1"
                                    Loaded="LmfControl_Loaded">
-                <!--            <dxdiag:DiagramControl ShowRulers="False" IsReadOnly="True" x:Name="LmfControl" 
+<!--            <dxdiag:DiagramControl ShowRulers="False" IsReadOnly="True" x:Name="LmfControl" 
                                    ExportDPI="300"
                                    ExportScale="1.0"
                                    ExportMargin="10"

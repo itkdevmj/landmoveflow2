@@ -146,7 +146,7 @@ namespace LMFS.ViewModels.Pages
         {
             if (string.IsNullOrEmpty(FolderPath))
             {
-                MessageBox.Show("먼저 폴더를 선택하세요.");
+                MessageBox.Show(Application.Current.MainWindow, "먼저 폴더를 선택하세요.");
                 return;
             }
 
@@ -174,7 +174,7 @@ namespace LMFS.ViewModels.Pages
             }
             catch (Exception ex)
             {
-                MessageBox.Show("업로드 중 오류 발생: " + ex.Message);
+                MessageBox.Show(Application.Current.MainWindow, "업로드 중 오류 발생: " + ex.Message);
             }
             finally
             {
@@ -194,7 +194,7 @@ namespace LMFS.ViewModels.Pages
             IsCommiting = true;
             
             var message = $"최종 DB에 적용하시겠습니까?\n\n[업데이트 후 원복 불가]";
-            var result = MessageBox.Show(message, "알림", MessageBoxButton.YesNo, MessageBoxImage.Information);
+            var result = MessageBox.Show(Application.Current.MainWindow, message, "알림", MessageBoxButton.YesNo, MessageBoxImage.Information);
             if (result == MessageBoxResult.Yes)
             {
                 await Task.Run(() =>
@@ -204,7 +204,7 @@ namespace LMFS.ViewModels.Pages
                     //[TODO] 업로드 완료됐다는 확인을 어떤 항목으로 할지 정해야 함                    
                     if(uploadCount > 0)
                     {
-                        MessageBox.Show("최종 DB에 업로드 완료했습니다!");
+                        MessageBox.Show(Application.Current.MainWindow, "최종 DB에 업로드 완료했습니다!");
                     }
                 });
             }

@@ -74,7 +74,7 @@ namespace LMFS.Views.Pages
                     var options = new XlsxExportOptionsEx() { SheetName = msg.SheetName };
                     ((TableView)FlowDataGrid.View).ExportToXlsx(msg.ExportPath, options);
                 }
-                MessageBox.Show("엑셀 파일로 저장되었습니다.", "성공",
+                MessageBox.Show(Application.Current.MainWindow, "엑셀 파일로 저장되었습니다.", "성공",
                             MessageBoxButton.OK, MessageBoxImage.Information);
             });
         }
@@ -155,7 +155,7 @@ namespace LMFS.Views.Pages
                 // 프린터 확인
                 if (System.Drawing.Printing.PrinterSettings.InstalledPrinters.Count == 0)
                 {
-                    MessageBox.Show("설치된 프린터가 없습니다.", "오류",
+                    MessageBox.Show(Application.Current.MainWindow, "설치된 프린터가 없습니다.", "오류",
                         MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
@@ -163,7 +163,7 @@ namespace LMFS.Views.Pages
                 // 다이어그램이 비어있는지 확인
                 if (LmfControl.Items.Count == 0)
                 {
-                    MessageBox.Show("인쇄할 내용이 없습니다.", "알림",
+                    MessageBox.Show(Application.Current.MainWindow, "인쇄할 내용이 없습니다.", "알림",
                         MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
@@ -176,7 +176,7 @@ namespace LMFS.Views.Pages
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"인쇄 실패: {ex.Message}\n\n상세 정보: {ex.StackTrace}", "오류",
+                MessageBox.Show(Application.Current.MainWindow, $"인쇄 실패: {ex.Message}\n\n상세 정보: {ex.StackTrace}", "오류",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -188,7 +188,7 @@ namespace LMFS.Views.Pages
                 // 다이어그램이 비어있는지 확인
                 if (LmfControl.Items.Count == 0)
                 {
-                    MessageBox.Show("미리보기할 내용이 없습니다.", "알림",
+                    MessageBox.Show(Application.Current.MainWindow, "미리보기할 내용이 없습니다.", "알림",
                         MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
@@ -198,7 +198,7 @@ namespace LMFS.Views.Pages
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"인쇄 미리보기 실패: {ex.Message}\n\n상세 정보: {ex.StackTrace}", "오류",
+                MessageBox.Show(Application.Current.MainWindow, $"인쇄 미리보기 실패: {ex.Message}\n\n상세 정보: {ex.StackTrace}", "오류",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -211,28 +211,28 @@ namespace LMFS.Views.Pages
                 {
                     case ExportDiagramFormat.Pdf:
                         LmfControl.ExportToPdf(filePath);
-                        MessageBox.Show("PDF 파일로 저장되었습니다.", "성공",
+                        MessageBox.Show(Application.Current.MainWindow, "PDF 파일로 저장되었습니다.", "성공",
                             MessageBoxButton.OK, MessageBoxImage.Information);
                         break;
 
                     case ExportDiagramFormat.Jpg:
                         // JPG의 경우 - Stream 사용
                         ExportImageWithSettings(filePath, DiagramImageExportFormat.JPEG);
-                        MessageBox.Show("JPG 파일로 저장되었습니다.", "성공",
+                        MessageBox.Show(Application.Current.MainWindow, "JPG 파일로 저장되었습니다.", "성공",
                             MessageBoxButton.OK, MessageBoxImage.Information);
                         break;
 
                     case ExportDiagramFormat.Png:
                         // PNG의 경우 - Stream 사용
                         ExportImageWithSettings(filePath, DiagramImageExportFormat.PNG);
-                        MessageBox.Show("PNG 파일로 저장되었습니다.", "성공",
+                        MessageBox.Show(Application.Current.MainWindow, "PNG 파일로 저장되었습니다.", "성공",
                             MessageBoxButton.OK, MessageBoxImage.Information);
                         break;
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"저장 실패: {ex.Message}", "오류",
+                MessageBox.Show(Application.Current.MainWindow, $"저장 실패: {ex.Message}", "오류",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

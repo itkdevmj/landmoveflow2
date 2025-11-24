@@ -111,7 +111,7 @@ namespace LMFS.ViewModels.Pages
             {
                 IsFlowData = false;//표시 설정 [이동정리목록 내보내기(엑셀), 다이어그램 내보내기(Pdf, Jpg, Png)]
 
-                ShowNoDataPopup();
+                ShowNoDataPopup(false);
 
                 // 다이어그램 초기화 (null이 가장 안전)
                 //XAML에 바인딩 되어 있으므로 XML 다이어그램 화면도 초기화됨//
@@ -132,30 +132,55 @@ namespace LMFS.ViewModels.Pages
             BusPopup.WindowStartupLocation = WindowStartupLocation.CenterOwner; // Owner의 중앙에 뜨게 설정
             BusPopup.Show();
 
-            // XML 구성 등 시간이 오래 걸릴 수 있는 작업은 비동기로 처리
-            await Task.Run(() =>
+            try
             {
-                // 4. 그리드 데이터 처리
-                UpdateFlowXml();
-            });
+                // XML 구성 등 시간이 오래 걸릴 수 있는 작업은 비동기로 처리
+                await Task.Run(() =>
+                {
+                    // 4. 그리드 데이터 처리
+                    System.Threading.Thread.Sleep(2000); // 작업 지연 실험 (문제 원인 판별용)
+                    UpdateFlowXml();
+                });
+            }
+            finally
+            {
+                // 4. UI 업데이트가 완료될 수 있도록 한 프레임 "더 기다림"
+                await Application.Current.Dispatcher.InvokeAsync(() => {
+                    BusPopup.Close();           // BusyWindow**를 여기서** 닫는다!
+                    IsDiagramReady = true; // 필요할 경우 UI 표시 활성화(Visibility 등)
+                }, DispatcherPriority.Background);
 
-            // 4. UI 업데이트가 완료될 수 있도록 한 프레임 "더 기다림"
-            await Application.Current.Dispatcher.InvokeAsync(() => {
-                BusPopup.Close();           // BusyWindow**를 여기서** 닫는다!
-                IsDiagramReady = true; // 필요할 경우 UI 표시 활성화(Visibility 등)
-            }, DispatcherPriority.Background);
+                //실제 데이터가 없는 경우가 아니라, '지목변경'건만 존재하는데, 체크되어 있지 않은 경우에 표시
+                if (GridDataSource == null || !GridDataSource.Any())//표시 설정 [이동정리목록 내보내기(엑셀), 다이어그램 내보내기(Pdf, Jpg, Png)]
+                {
+                    ShowNoDataPopup(true);
+                }
+            }
             //--------------------------------------------------------
         }
 
-        private void ShowNoDataPopup()
+        private void ShowNoDataPopup(bool exitsJimokChg)
         {
-            // WPF MessageBox 사용
-            MessageBox.Show(
-                "조회된 데이터가 없습니다.",
-                "알림",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information
-            );
+            if ( !exitsJimokChg )
+            {
+                // WPF MessageBox 사용
+                MessageBox.Show(Application.Current.MainWindow,
+                    "조회된 데이터가 없습니다.",
+                    "알림",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information
+                );
+            }
+            else
+            {
+                // WPF MessageBox 사용
+                MessageBox.Show(Application.Current.MainWindow,
+                    "조회된 데이터가 없습니다.(지목변경 자료 존재)",
+                    "알림",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information
+                );
+            }
 
             // 또는 커스텀 팝업을 사용하는 경우
             // var popup = new CustomPopup("조회된 데이터가 없습니다.");
@@ -459,7 +484,7 @@ namespace LMFS.ViewModels.Pages
             {
                 filteredList = GridDataSource.Where(item => item.rsn != "지목변경").ToList();
                 GridDataSource = filteredList;
-                categoryList = GridCategoryDataSource.Where(item => item.rsn != "지목변경").ToList();
+                categoryList = GridCategoryDataSource.Where(item => item.rsn != "40").ToList();
                 GridCategoryDataSource = categoryList;
             }
 
@@ -494,7 +519,6 @@ namespace LMFS.ViewModels.Pages
             else
             {
                 IsFlowData = false;//표시 설정 [이동정리목록 내보내기(엑셀), 다이어그램 내보내기(Pdf, Jpg, Png)]
-                //MessageBox.Show("데이터가 존재하지 않습니다.");
             }
         }
 
