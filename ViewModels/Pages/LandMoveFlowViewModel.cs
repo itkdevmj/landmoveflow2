@@ -302,6 +302,28 @@ namespace LMFS.ViewModels.Pages
             window.ShowDialog();//부모화면 제어 불가
         }
 
+
+        [RelayCommand]
+        //검색필지내역 화면으로 이동//
+        private void OnQueryCommand()
+        {
+            var page = new LandMoveQueryPage();
+            Window window = new Window
+            {
+                Content = page,
+                Title = "검색필지내역",
+                Width = 800,
+                Height = 350,
+                Owner = Application.Current.MainWindow,
+
+                //[닫기]버튼만 남긴다.
+                WindowStyle = WindowStyle.SingleBorderWindow,
+                ResizeMode = ResizeMode.NoResize
+            };
+
+            window.ShowDialog();//부모화면 제어 불가
+        }
+
         partial void OnSelectedUmdChanged(SidoCode value)
         {
             if (value == null)
@@ -438,6 +460,7 @@ namespace LMFS.ViewModels.Pages
             // 검색 로직 실행
             OnSearch();   // 또는 SearchCommand.Execute(null);
         }
+
 
         private string BuildPnu()
         {
