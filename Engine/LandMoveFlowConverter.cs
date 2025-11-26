@@ -26,6 +26,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Xml.Linq;
+using System.Xml.XPath;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrayNotify;
 
 namespace LMFS.Engine;
@@ -55,6 +56,7 @@ public class LandMoveFlowConverter
     private List<SidoCode> _listLawd = new();
     private Dictionary<string, string> _listJimok = new();
     private Dictionary<string, string> _listMovRsn = new();
+    private Dictionary<string, string> _listActType = new();//UserHist
 
     // -----------------------------------------------------------
     // 코드 조회 결과 저장용 (외부)
@@ -156,6 +158,8 @@ public class LandMoveFlowConverter
 
     public LandMoveFlowConverter()
     {
+        //위치이동 - 프로그램 로딩 시 1회만// 시군구 코드 등 공통 코드 조회
+        ReadCodeTables();
     }
     #endregion 생성자  ----------------------------------------
 
@@ -169,6 +173,7 @@ public class LandMoveFlowConverter
         _listLawd = GlobalDataManager.Instance.sidoCodeList;
         _listJimok = GlobalDataManager.Instance.JimokCode;
         _listMovRsn = GlobalDataManager.Instance.ReasonCode;
+        _listActType = GlobalDataManager.Instance.ActionCode;
     }
 
     public string GetCodeValue(int opt, string find)//private => private
@@ -182,6 +187,7 @@ public class LandMoveFlowConverter
             //명칭(value) => 코드(key)
             4 => _listJimok.FirstOrDefault(kvp => kvp.Value == find).Key ?? "", // value => key (LINQ)
             5 => _listMovRsn.FirstOrDefault(kvp => kvp.Value == find).Key ?? "", // value => key (LINQ)
+            6 => _listActType.FirstOrDefault(kvp => kvp.Value == find).Key ?? "", // value => key (LINQ)
             _ => ""
         };
     }
@@ -203,7 +209,18 @@ public class LandMoveFlowConverter
         var lawdCd = landCd.Substring(5, 5);
         string lawdNm = "";
 
-        if (option == 1)//지역명(동 or 리))
+        if (option == 0)//지역명(동 or 읍면동+리)
+        {
+            foreach (var item in _listLawd)
+            {
+                if (item.umdCd + item.riCd == lawdCd)
+                {
+                    lawdNm = item.riCd == "00" ? item.umdNm + " " : item.umdNm + " " + item.riNm + " ";
+                    break;
+                }
+            }
+        }
+        else if (option == 1)//지역명(동 or 리))
         {
             foreach (var item in _listLawd)
             {
@@ -251,20 +268,17 @@ public class LandMoveFlowConverter
 
         return flowList;
     }
-    private List<LandMoveInfo> ChangeCodeToNameBatch2(List<LandMoveInfo> flowList)
-    {
-        foreach (var row in flowList)
-        {
-            row.bfPnu = GetJibun(row.bfPnu, 3);//'읍면' 명칭 제거
-            row.afPnu = GetJibun(row.afPnu, 3);//'읍면' 명칭 제거               
 
-            row.bfJimok = GetCodeValue(2, row.bfJimok);//지목 코드 => 명칭
-            row.afJimok = GetCodeValue(2, row.afJimok);//지목 코드 => 명칭
-            row.rsn = GetCodeValue(3, row.rsn);//이동종목 코드 => 명칭
+    public List<UserHist> ChangeCodeToNameBatch2(List<UserHist> histList)
+    {
+        foreach (var row in histList)
+        {
+            row.qryPnu = GetJibun(row.qryPnu, 0);
         }
 
-        return flowList;
+        return histList;
     }
+
 
     private void ProcessLandMoveFlow(List<LandMoveInfo> rtnList, LandMoveFlowViewModel vm)
     {
@@ -720,7 +734,7 @@ public class LandMoveFlowConverter
                             else
                             {
                                 if (focus && rowIdx != thumbidx)//조회필지 && 모번지 => 꺽은선에 배경색 속성 추가//
-                                    UpdateItem(begin - 1, "BackgroundId", "Accent5");
+                                    UpdateItem(begin - 1, "Background");
                                 MakeXmlConnector(bfDepth, depIdx + 1, begin - 1, end - 1, rowIdx, thumbidx, focus);//Vit.G//[add]focus
                             }
                         }
@@ -730,7 +744,7 @@ public class LandMoveFlowConverter
                             if (focus && rowIdx != thumbidx)//조회필지 && 모번지 => 꺽은선에 배경색 속성 추가//
                             {
                                 UpdateLabelTuples(_labelTuples.Count - 1, true);
-                                UpdateItem(begin - 1, "BackgroundId", "Accent5");
+                                UpdateItem(begin - 1, "Background");
                             }
                                 
                             MakeXmlConnector(bfDepth, depIdx + 1, begin - 1, end - 1, thumbidx, rowIdx, focus);//Vit.G//[add]focus
@@ -890,7 +904,7 @@ public class LandMoveFlowConverter
         {
             item = new XElement($"Item{_itemList.Count + 1}",
                 //251027//[색상설정 - 사용자정의]
-                //focus ? new XAttribute("StrokeId", "Accent5") : null,//Vit.G//251014 : 조회 필지 => StrokeId 속성 추가
+                focus ? new XAttribute("StrokeThickness", "3") : null,//조회 필지 => StrokeThickness 속성 추가
                 new XAttribute("Stroke", focus ? connCol[1, 0] : connCol[0, 0]),//테두리
                 new XAttribute("Points", "(Empty)"),
                 new XAttribute("ItemKind", "DiagramConnector"),
@@ -911,7 +925,7 @@ public class LandMoveFlowConverter
 
             item = new XElement($"Item{_itemList.Count + 1}",
                     //251027//[색상설정 - 사용자정의]
-                    //focus ? new XAttribute("StrokeId", "Accent5") : null,//Vit.G//251014 : 조회 필지 => StrokeId 속성 추가
+                    focus ? new XAttribute("StrokeThickness", "3") : null,//조회 필지 => StrokeThickness 속성 추가
                     new XAttribute("Stroke", focus ? connCol[1, 0] : connCol[0, 0]),//테두리                    
                     new XAttribute("BeginItemPointIndex", _isPortrait ? "2" : "1"),
                     new XAttribute("EndItemPointIndex", _isPortrait ? "0" : "3"),
@@ -930,7 +944,7 @@ public class LandMoveFlowConverter
     }
 
     // 기존 아이템의 속성 수정
-    private void UpdateItem(int index, string attrName, string newValue)
+    private void UpdateItem(int index, string attrName)
     {
         if (index < 0 || index >= _itemList.Count) return;
 
@@ -938,10 +952,16 @@ public class LandMoveFlowConverter
         XElement element = XElement.Parse(_itemList[index]);
 
         // 속성값 변경 (기존 없으면 새로 추가)
-        element.SetAttributeValue(attrName, newValue);
+        element.SetAttributeValue(attrName, _settingVM.JibunColors[1,0]);
 
         // 다시 string으로 저장
         _itemList[index] = element.ToString();
+        
+        // xdoc의 해당 노드를 찾아 변경 사항 반영해야 함.
+        // 예를 들어 xdoc의 특정 element를 업데이트 해야 함
+        var xdocElement = _xdoc.XPathSelectElement($"/XtraSerializer/Items/Item1/Children/Item{index+1}");
+        if (xdocElement != null)
+            xdocElement.ReplaceWith(element);
     }
     private void UpdateLabelTuples(int index, bool newValue)
     {

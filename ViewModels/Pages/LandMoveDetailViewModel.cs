@@ -93,7 +93,7 @@ namespace LMFS.ViewModels.Pages
 
         [ObservableProperty] private LandMoveFlowConverter _converter;
 
-        public LandMoveFlowViewModel ParentVM { get; }
+        public LandMoveFlowViewModel FlowVM { get; }
 
         public Action CloseAction { get; set; }
         public ICommand CloseCommand { get; }
@@ -108,9 +108,9 @@ namespace LMFS.ViewModels.Pages
         // 1. 생성자에 상위 VM을 파라미터로 받음
         public LandMoveDetailViewModel(LandMoveFlowViewModel parent)
         {
-            ParentVM = parent;
+            FlowVM = parent;
 
-            _converter = ParentVM.Converter;
+            _converter = FlowVM.Converter;
 
             // 필요시 바로 복사
             this.SelectedUmd = parent.SelectedUmd;
@@ -320,10 +320,10 @@ namespace LMFS.ViewModels.Pages
                 if (result == MessageBoxResult.Yes)
                 {
                     // 검색 로직 실행
-                    ParentVM.IsSan = IsSan;
-                    ParentVM.Bobn = Bobn;
-                    ParentVM.Bubn = Bubn;
-                    ParentVM.OnSearch();
+                    FlowVM.IsSan = IsSan;
+                    FlowVM.Bobn = Bobn;
+                    FlowVM.Bubn = Bubn;
+                    FlowVM.OnSearch();
 
                     CloseAction?.Invoke(); // Yes일 때만 닫기!
                 }
@@ -399,6 +399,10 @@ namespace LMFS.ViewModels.Pages
             // (6) DB 에 <필지추가 레코드> Insert
             //------------------------------------------
             DBService.InsertLandMoveInfo(landMoveInfo);
+
+            // 검색필지 [추가(개별)] 정보 User_Hist 테이블에 추가
+            var actCd = FlowVM.Converter.GetCodeValue(6, "추가(개별)");
+            DBService.InsertUserHist(FlowVM.CurrentPnu, actCd);
 
         }
 

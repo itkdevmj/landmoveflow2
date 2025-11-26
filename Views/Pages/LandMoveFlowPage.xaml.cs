@@ -7,11 +7,13 @@ using DevExpress.Xpf.Editors;
 using DevExpress.Xpf.Grid;// WPF용
 using DevExpress.XtraBars;
 using DevExpress.XtraPrinting;
+using LMFS.Db;
 using LMFS.Engine;
 using LMFS.Messages;
 using LMFS.ViewModels;
 using LMFS.ViewModels.Pages;
 using System;
+using System.ComponentModel;
 using System.IO;// FileStream
 using System.Threading.Tasks;
 using System.Windows;// Rect
@@ -30,6 +32,29 @@ namespace LMFS.Views.Pages
         public LandMoveFlowViewModel FlowVM { get; set; }
 
         private bool _diagramShown = false;
+
+        private double _zoomFactor = 1.0;
+        public double ZoomFactor
+        {
+            get => _zoomFactor;
+            set
+            {
+                if (Math.Abs(_zoomFactor - value) > 0.0001)
+                {
+                    _zoomFactor = value;
+                    // 다이어그램이나 원하는 컨트롤에 실제 zoom 적용
+                    LmfControl.ZoomFactor = _zoomFactor;
+                    // 반드시 PropertyChanged 호출 (INotifyPropertyChanged 구현)
+                    OnPropertyChanged(nameof(ZoomFactor));
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
 
         public LandMoveFlowPage(LandMoveSettingViewModel settingVM)
@@ -173,6 +198,11 @@ namespace LMFS.Views.Pages
 
                 // 또는 바로 인쇄
                 // LmfControl.QuickPrint();
+
+                // 검색필지 [인쇄] 정보 User_Hist 테이블에 추가
+                var actCd = FlowVM.Converter.GetCodeValue(6, "인쇄");
+                DBService.InsertUserHist(FlowVM.CurrentPnu, actCd);
+
             }
             catch (Exception ex)
             {
@@ -229,6 +259,11 @@ namespace LMFS.Views.Pages
                             MessageBoxButton.OK, MessageBoxImage.Information);
                         break;
                 }
+
+                // 검색필지 [내보내기] 정보 User_Hist 테이블에 추가
+                var actCd = FlowVM.Converter.GetCodeValue(6, "내보내기");
+                DBService.InsertUserHist(FlowVM.CurrentPnu, actCd);
+
             }
             catch (Exception ex)
             {
@@ -274,6 +309,22 @@ namespace LMFS.Views.Pages
             FlowVM.IsDiagramReady = true;
 
 
+        }
+
+        private void ZoomTrackBar_EditValueChanged(object sender, RoutedEventArgs e)
+        {
+            // 예시: TrackBar의 Value 값을 얻어서 처리
+            var trackBar = sender as DevExpress.Xpf.Editors.TrackBarEdit;
+            if (trackBar != null)
+            {
+                double newZoom = trackBar.Value;
+                // 필요시 직접 ZoomFactor에 할당 (MVVM이 아니라면)
+                this.ZoomFactor = newZoom;
+                // 혹은 다이어그램/컨트롤에 확대 적용
+                LmfControl.ZoomFactor = newZoom;
+            }
+            // 추가적으로 디버깅 출력해볼 수도 있음
+            // Debug.WriteLine($"TrackBar 현재값: {newZoom}");
         }
 
         /*

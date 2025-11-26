@@ -13,7 +13,7 @@
       xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
       xmlns:xtraEditors="clr-namespace:DevExpress.XtraEditors;assembly=DevExpress.XtraEditors.v23.2"
       mc:Ignorable="d" 
-      d:DesignHeight="320" d:DesignWidth="400"
+      d:DesignHeight="300" d:DesignWidth="400"
       Title="검색필지내역"
       Loaded="LandMoveQueryPage_OnLoaded"
       SizeChanged="LandMoveQueryPage_OnSizeChanged">
@@ -21,7 +21,7 @@
     <DockPanel>
 
         <Grid DockPanel.Dock="Left" Width="380">
-            <dxg:GridControl Grid.Row="1" 
+            <dxg:GridControl Grid.Row="0" 
                              x:Name="GridControl"
                              ItemsSource="{Binding GridQueryDataSource}">
                 <!-- 우클릭 팝업메뉴 -->
@@ -31,9 +31,9 @@
                     </ContextMenu>
                 </dxg:GridControl.ContextMenu>
                 <dxg:GridControl.Columns>
-                    <dxg:GridColumn FieldName="BfJibun" Header="검색필지" Width="0.8*" 
+                    <dxg:GridColumn FieldName="qryPnu" Header="검색 필지" Width="0.8*" 
                         HorizontalHeaderContentAlignment="Center" />
-                    <dxg:GridColumn FieldName="AfJibun" Header="검색일자" Width="0.8*" 
+                    <dxg:GridColumn FieldName="actDt" Header="검색 일자" Width="0.8*" 
                         HorizontalHeaderContentAlignment="Center" />
                 </dxg:GridControl.Columns>
             </dxg:GridControl>

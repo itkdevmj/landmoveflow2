@@ -36,11 +36,21 @@ namespace LMFS.ViewModels
 
         //[토지이동흐름도] 메뉴 숨김(Hide)
         [ObservableProperty] private bool _isLandMoveFlowVisible = false;
-        //public bool IsLandMoveFlowVisible
-        //{
-        //    get => _isLandMoveFlowVisible;
-        //    set => SetProperty(ref _isLandMoveFlowVisible, value);
-        //}
+
+
+        public IRelayCommand PrintCommand => new RelayCommand(OnPrint, () => FlowPage.FlowVM.LandMoveFlowData != null);
+        public IRelayCommand PrintPreviewCommand => new RelayCommand(OnPrintPreview, () => FlowPage.FlowVM.LandMoveFlowData != null);
+        public IRelayCommand ExportPdfCommand => new RelayCommand(OnExportPdf, () => FlowPage.FlowVM.LandMoveFlowData != null);
+        public IRelayCommand ExportJpgCommand => new RelayCommand(OnExportJpg, () => FlowPage.FlowVM.LandMoveFlowData != null);
+        public IRelayCommand ExportPngCommand => new RelayCommand(OnExportPng, () => FlowPage.FlowVM.LandMoveFlowData != null);
+        public IRelayCommand ExportGridCommand => new RelayCommand(OnExportGrid, () => FlowPage.FlowVM.LandMoveFlowData != null);
+
+        public void OnPrint() => FlowPage.FlowVM.OnPrint();
+        private void OnPrintPreview() => FlowPage.FlowVM.OnPrintPreview();
+        private void OnExportPdf() => FlowPage.FlowVM.OnExportPdf();
+        private void OnExportJpg() => FlowPage.FlowVM.OnExportJpg();
+        private void OnExportPng() => FlowPage.FlowVM.OnExportPng();
+        private void OnExportGrid() => FlowPage.FlowVM.OnExportGrid();
 
 
         #region 생성자
@@ -124,5 +134,6 @@ namespace LMFS.ViewModels
 
         //[주의사항] 메뉴가 MainWindow.xaml에 존재하는데
         //DiagramControl은 LandMoveFlowPage에 존재해서 함수 정의는 LandMoveFlowViewModel에 존재합니다.
+
     }
 }

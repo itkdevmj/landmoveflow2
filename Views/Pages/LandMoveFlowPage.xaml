@@ -14,7 +14,7 @@
       xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
       xmlns:xtraEditors="clr-namespace:DevExpress.XtraEditors;assembly=DevExpress.XtraEditors.v23.2"
       mc:Ignorable="d" 
-      d:DesignHeight="600" d:DesignWidth="1000"
+      d:DesignHeight="600" d:DesignWidth="1200"
       Title="토지이동흐름도"
       Loaded="LandMoveFlowPage_OnLoaded"
       Unloaded="LandMoveFlowPage_Unloaded"
@@ -275,7 +275,7 @@
                     <ColumnDefinition Width="195" />
                     <ColumnDefinition Width="180" />
                     <ColumnDefinition Width="*" /><!-- Space -->
-                    <ColumnDefinition Width="290" />
+                    <ColumnDefinition Width="360" />
                 </Grid.ColumnDefinitions>
                 <Border Grid.Row="0" Grid.Column="0" BorderBrush="#A3C6C4" Background="#E0E7E9" BorderThickness="1" CornerRadius="5" Height="40" Margin="5 0 0 0">
                     <!-- 내부 Grid는 4컬럼을 하나로 감싸는 역할 -->
@@ -324,9 +324,9 @@
                             <RowDefinition Height = "Auto"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="0.7*" />
-                            <ColumnDefinition Width="1.5*" />
-                            <ColumnDefinition Width="1.*" />
+                            <ColumnDefinition Width="0.3*" />
+                            <ColumnDefinition Width="1.4*" />
+                            <ColumnDefinition Width="0.3*" />
                         </Grid.ColumnDefinitions>
                         <!--Mode=TwoWay 라는 건 화면에서 변경해도 ViewModel로 반영되고, ViewModel에서 변경해도 화면에 반영된다는 뜻-->
                         <CheckBox Grid.Column="0" IsChecked="{Binding Portrait, Mode=TwoWay}" Content="세로형" Foreground="#6C7A89" FontWeight="Bold" Height="25" Margin="5 10 0 10" />
@@ -340,12 +340,13 @@
                             <dxe:TrackBarEdit 
                                     x:Name="ZoomTrackBar"   
                                     Grid.Column="0"
-                                    Minimum="0.5" 
+                                    Minimum="0.1" 
                                     Maximum="3"
                                     Value="{Binding ElementName=LmfControl, Path=ZoomFactor, Mode=TwoWay}"
                                     Margin="10 10 10 10"
-                                    Steps="0.05"
-                                    TickFrequency="0.1">
+                                    Steps="0.1"
+                                    TickFrequency="0.1"
+                                    EditValueChanged="ZoomTrackBar_EditValueChanged">
                             </dxe:TrackBarEdit>
                             <!--<dxe:TrackBarEdit 
                                     x:Name="ZoomTrackBar"   
@@ -366,7 +367,10 @@
                                     Margin="0 0 0 0"
                                     Foreground="#21808D"/>
                         </Grid>
-                        <Button Grid.Column="2" Content="색상 설정" Width="80" Height="28" Command="{Binding SettingColorCommand}" Margin="0 0 0 10" BorderBrush="White" Background="#FF66B821" Foreground="White" FontWeight="Bold"/>
+                        <!--<Button Grid.Column="2" Content="색상" Width="80" Height="28" Command="{Binding SettingColorCommand}" Margin="0 0 0 10" BorderBrush="White" Background="#FF66B821" Foreground="White" FontWeight="Bold"/>-->
+                        <Button Grid.Column="2" Command="{Binding SettingColorCommand}" ToolTip="색상설정" Width="42" Height="36" Margin="0,0,0,0" Background="Transparent" BorderThickness="0">
+                            <Image Source="pack://application:,,,/Resources/Images/setcolorIcon.png" Stretch="Uniform" Width="32" Height="32" Margin="-10,-5,-10,5" />
+                        </Button>
                     </Grid>
                 </Border>
             </Grid>

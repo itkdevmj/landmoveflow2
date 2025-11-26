@@ -23,10 +23,11 @@ namespace LMFS.Views.Pages
         // 폴더 선택 다이얼로그 코드 (이벤트 혹은 Main 함수 등에서 사용)
         string folderPath = string.Empty;
 
-        public CsvUploaderPage()
+
+        public CsvUploaderPage(LandMoveFlowViewModel flowVM)
         {
             InitializeComponent();
-            var vm = new CsvUploaderViewModel();//Binding OpenFolderCommand => OnOpenFolder()로 연결//
+            var vm = new CsvUploaderViewModel(flowVM);//Binding OpenFolderCommand => OnOpenFolder()로 연결//
             this.DataContext = vm;
         }
 

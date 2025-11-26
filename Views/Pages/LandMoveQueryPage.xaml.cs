@@ -1,7 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
+using DevExpress.CodeParser;
 using DevExpress.Xpf.Core.Native;
 using DevExpress.Xpf.Grid;
+using DevExpress.Xpo.DB.Helpers;
 using LMFS.Engine;
 using LMFS.Messages;
 using LMFS.Models;
@@ -23,17 +25,26 @@ namespace LMFS.Views.Pages
     //------------------------------------------------------
     public partial class LandMoveQueryPage : Page
     {
+        public LandMoveQueryViewModel QueryVM { get; private set; }
+
         public LandMoveQueryPage()
         {
             InitializeComponent();
-            this.DataContext = new LandMoveQueryViewModel();
+            QueryVM = new LandMoveQueryViewModel();
+
+            // 필수! 아래처럼 할당
+            // Page에서는 이렇게!
+            QueryVM.CloseAction = () => this.NavigationService?.GoBack();
+
+            this.DataContext = QueryVM;
+            QueryVM.FilterQuery();
         }
 
         private void UpdateDataGridMaxHeight()
         {
             double windowHeight = this.ActualHeight;
-            double otherControlsHeight = 30 + 10 + 10;
-            double systemUiHeight = 40;
+            double otherControlsHeight = 5;
+            double systemUiHeight = 5;
             double calculatedMaxHeight = windowHeight - otherControlsHeight - systemUiHeight;
 
             if (calculatedMaxHeight > 0)

@@ -5,7 +5,7 @@
     xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
     xmlns:local="clr-namespace:LMFS.Views"
     x:Class="LMFS.MainWindow"
-    Title="토지이동 흐름도 시스템" Height="800" Width="1000"
+    Title="토지이동 흐름도 시스템" Height="800" Width="1200"
     Closing="MainWindow_OnClosing">
     <DockPanel>
         <dxb:MainMenuControl DockPanel.Dock="Top">
@@ -15,7 +15,6 @@
                 <dxb:BarItemLinkSeparator />
 
                 <dxb:BarButtonItem Content="다이어그램 인쇄" Command="{Binding PrintCommand}" />
-                <!--<dxb:BarButtonItem Content="다이어그램 인쇄" Command="{Binding DataContext.PrintCommand, RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}}" />-->
                 <dxb:BarButtonItem Content="다이어그램 인쇄 미리보기" Command="{Binding PrintPreviewCommand}" />
                 <dxb:BarItemLinkSeparator />
                 <dxb:BarButtonItem Content="다이어그램 내보내기(pdf)" Command="{Binding ExportPdfCommand}" />
@@ -24,30 +23,6 @@
                 <dxb:BarItemLinkSeparator />
                 <dxb:BarButtonItem Content="이동정리목록 내보내기(엑셀)" Command="{Binding ExportGridCommand}" IsEnabled="{Binding CanExportGridCommand}" />
                 <dxb:BarItemLinkSeparator />
-<!--                
-                <dxb:BarButtonItem Content="다이어그램 인쇄" Command="{Binding DataContext.PrintCommand, ElementName=MainFrame}"/>
-                <dxb:BarButtonItem Content="다이어그램 인쇄 미리보기" Command="{Binding DataContext.PrintPreviewCommand, ElementName=MainFrame}"/>
-                <dxb:BarItemLinkSeparator />
-                <dxb:BarButtonItem Content="다이어그램 내보내기(pdf)" Command="{Binding DataContext.ExportPdfCommand, ElementName=MainFrame}"/>
-                <dxb:BarButtonItem Content="다이어그램 내보내기(jpg)" Command="{Binding DataContext.ExportJpgCommand, ElementName=MainFrame}"/>
-                <dxb:BarButtonItem Content="다이어그램 내보내기(png)" Command="{Binding DataContext.ExportPngCommand, ElementName=MainFrame}"/>
-                <dxb:BarItemLinkSeparator />
-                <dxb:BarButtonItem Content="이동정리목록 내보내기(엑셀)" Command="{Binding DataContext.ExportGridCommand, ElementName=MainFrame}"/>
-                <dxb:BarItemLinkSeparator />
--->                
-
-<!--
-                <dxb:BarButtonItem Content="다이어그램 인쇄" Command="{Binding PrintCommand}" IsEnabled="{Binding CanPrintCommand}" />
-                <dxb:BarButtonItem Content="다이어그램 인쇄 미리보기" Command="{Binding PrintPreviewCommand}" IsEnabled="{Binding CanPrintPreviewCommand}" />
-                <dxb:BarItemLinkSeparator />
-                <dxb:BarButtonItem Content="다이어그램 내보내기(pdf)" Command="{Binding ExportPdfCommand}" IsEnabled="{Binding CanExportPdfCommand}" />
-                <dxb:BarButtonItem Content="다이어그램 내보내기(jpg)" Command="{Binding ExportJpgCommand}" IsEnabled="{Binding CanExportJpgCommand}" />
-                <dxb:BarButtonItem Content="다이어그램 내보내기(png)" Command="{Binding ExportPngCommand}" IsEnabled="{Binding CanExportPngCommand}" />
-                <dxb:BarItemLinkSeparator />
-                <dxb:BarButtonItem Content="이동정리목록 내보내기(엑셀)" Command="{Binding ExportGridCommand}" IsEnabled="{Binding CanExportGridCommand}" />
-                <dxb:BarItemLinkSeparator />
--->
-                
                 <dxb:BarButtonItem Content="닫기"/>
             </dxb:BarSubItem>
 

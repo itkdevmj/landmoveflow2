@@ -44,6 +44,10 @@ namespace LMFS.ViewModels.Pages
         public bool ShowUploadButton => IsUploadReady && !IsCommitCompleted;//[DB 업로드] 버튼 : ShowUploadButton에 바인딩
         public bool ShowCommitButton => IsUploadCompleted && !IsCommitCompleted;//[DB 최종 적용] 버튼 : ShowCommitButton에 바인딩
 
+
+        public LandMoveFlowViewModel FlowVM { get; }
+
+
         // 버튼 표시용 변경 알림
         partial void OnIsUploadReadyChanged(bool oldValue, bool newValue)
         {
@@ -81,11 +85,13 @@ namespace LMFS.ViewModels.Pages
         public Action CloseAction { get; set; }
         public ICommand CloseCommand { get; }
 
-        public CsvUploaderViewModel()
+        public CsvUploaderViewModel(LandMoveFlowViewModel flowVM)
         {
             CloseCommand = new RelayCommand(ExecuteClose);
             _gridFileList = new ObservableCollection<LandMoveFileList>();//초기화를 해줘야 GridFileList.Add 시 예외가 발생하지 않음//
             //OpenFolderCommand = new RelayCommand(OnOpenFolder);
+
+            FlowVM = flowVM;
         }
 
         private void ExecuteClose()
@@ -205,6 +211,10 @@ namespace LMFS.ViewModels.Pages
                     if(uploadCount > 0)
                     {
                         MessageBox.Show(Application.Current.MainWindow, "최종 DB에 업로드 완료했습니다!");
+
+                        // 자료(csv) 추가 => [추가(일괄)] 정보 User_Hist 테이블에 추가
+                        var actCd = FlowVM.Converter.GetCodeValue(6, "추가(일괄)");
+                        DBService.InsertUserHist(FlowVM.CurrentPnu, actCd);
                     }
                 });
             }

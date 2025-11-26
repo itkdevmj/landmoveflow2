@@ -21,19 +21,19 @@ namespace LMFS
         public MainWindowViewModel ViewModel { get; private set; } = null;
 
 
-        public IRelayCommand PrintCommand => new RelayCommand(OnPrint, () => ViewModel.FlowPage.FlowVM.LandMoveFlowData != null);
-        public IRelayCommand PrintPreviewCommand => new RelayCommand(OnPrintPreview, () => ViewModel.FlowPage.FlowVM.LandMoveFlowData != null);
-        public IRelayCommand ExportPdfCommand => new RelayCommand(OnExportPdf, () => ViewModel.FlowPage.FlowVM.LandMoveFlowData != null);
-        public IRelayCommand ExportTpgCommand => new RelayCommand(OnExportJpg, () => ViewModel.FlowPage.FlowVM.LandMoveFlowData != null);
-        public IRelayCommand ExportPngCommand => new RelayCommand(OnExportPng, () => ViewModel.FlowPage.FlowVM.LandMoveFlowData != null);
-        public IRelayCommand ExportGridCommand => new RelayCommand(OnExportGrid, () => ViewModel.FlowPage.FlowVM.LandMoveFlowData != null);
+        //public IRelayCommand PrintCommand => new RelayCommand(OnPrint, () => ViewModel.FlowPage.FlowVM.LandMoveFlowData != null);
+        //public IRelayCommand PrintPreviewCommand => new RelayCommand(OnPrintPreview, () => ViewModel.FlowPage.FlowVM.LandMoveFlowData != null);
+        //public IRelayCommand ExportPdfCommand => new RelayCommand(OnExportPdf, () => ViewModel.FlowPage.FlowVM.LandMoveFlowData != null);
+        //public IRelayCommand ExportTpgCommand => new RelayCommand(OnExportJpg, () => ViewModel.FlowPage.FlowVM.LandMoveFlowData != null);
+        //public IRelayCommand ExportPngCommand => new RelayCommand(OnExportPng, () => ViewModel.FlowPage.FlowVM.LandMoveFlowData != null);
+        //public IRelayCommand ExportGridCommand => new RelayCommand(OnExportGrid, () => ViewModel.FlowPage.FlowVM.LandMoveFlowData != null);
 
-        public void OnPrint() => ViewModel.FlowPage.FlowVM.OnPrint();
-        private void OnPrintPreview() => ViewModel.FlowPage.FlowVM.OnPrintPreview();
-        private void OnExportPdf() => ViewModel.FlowPage.FlowVM.OnExportPdf();
-        private void OnExportJpg() => ViewModel.FlowPage.FlowVM.OnExportJpg();
-        private void OnExportPng() => ViewModel.FlowPage.FlowVM.OnExportPng();
-        private void OnExportGrid() => ViewModel.FlowPage.FlowVM.OnExportGrid();
+        //public void OnPrint() => ViewModel.FlowPage.FlowVM.OnPrint();
+        //private void OnPrintPreview() => ViewModel.FlowPage.FlowVM.OnPrintPreview();
+        //private void OnExportPdf() => ViewModel.FlowPage.FlowVM.OnExportPdf();
+        //private void OnExportJpg() => ViewModel.FlowPage.FlowVM.OnExportJpg();
+        //private void OnExportPng() => ViewModel.FlowPage.FlowVM.OnExportPng();
+        //private void OnExportGrid() => ViewModel.FlowPage.FlowVM.OnExportGrid();
 
 
         public MainWindow()

@@ -81,9 +81,11 @@ namespace LMFS.ViewModels.Pages
             GetSidoCodeList();
             GetJimokCodeDictionary();
             GetReasonCodeDictionary();
+            GetActionCodeDictionary();
 
-            //메인 테이블명 가져오기
-            GetTableNameLandMoveInfo();
+            //테이블명 가져오기
+            GetTableNameLandMoveInfo();//메인            
+            GetTableNameUserHist();//사용자로그
         }
 
         public void Dispose()
@@ -102,11 +104,11 @@ namespace LMFS.ViewModels.Pages
                 return;// 본번 & 부번 데이터가 없으면 이후 처리 중단
             }
 
-            // 1. PNU 구성
-            // 2. 그리드 데이터 조회(검색)
+            // [1]. PNU 구성
+            // [2]. 그리드 데이터 조회(검색)
             SearchLandMoveData();
 
-            // 3. GridDataSource가 비어있는지 확인
+            // [3]. GridDataSource가 비어있는지 확인
             if (GridDataSource == null || !GridDataSource.Any())
             {
                 IsFlowData = false;//표시 설정 [이동정리목록 내보내기(엑셀), 다이어그램 내보내기(Pdf, Jpg, Png)]
@@ -120,8 +122,6 @@ namespace LMFS.ViewModels.Pages
                 return; // 데이터가 없으면 이후 처리 중단
             }
 
-
-            // 4. 그리드 데이터 처리
             // 데이터 준비 및 명칭 변환 전
             IsDiagramReady = false;
             //--------------------------------------------------------
@@ -137,14 +137,19 @@ namespace LMFS.ViewModels.Pages
                 // XML 구성 등 시간이 오래 걸릴 수 있는 작업은 비동기로 처리
                 await Task.Run(() =>
                 {
-                    // 4. 그리드 데이터 처리
+                    // [4]. 그리드 데이터 처리
                     System.Threading.Thread.Sleep(2000); // 작업 지연 실험 (문제 원인 판별용)
                     UpdateFlowXml();
                 });
             }
             finally
             {
-                // 4. UI 업데이트가 완료될 수 있도록 한 프레임 "더 기다림"
+                // 검색필지 정보 User_Hist 테이블에 추가
+                var actCd = Converter.GetCodeValue(6, "검색");
+                DBService.InsertUserHist(CurrentPnu, actCd);
+
+
+                // [5]. UI 업데이트가 완료될 수 있도록 한 프레임 "더 기다림"
                 await Application.Current.Dispatcher.InvokeAsync(() => {
                     BusPopup.Close();           // BusyWindow**를 여기서** 닫는다!
                     IsDiagramReady = true; // 필요할 경우 UI 표시 활성화(Visibility 등)
@@ -275,7 +280,7 @@ namespace LMFS.ViewModels.Pages
         //Diagram Color 설정화면으로 이동//
         private void OnLoadCsvFileData()
         {
-            var page = new CsvUploaderPage();
+            var page = new CsvUploaderPage(this);
             Window window = new Window
             {
                 Content = page,
@@ -305,15 +310,15 @@ namespace LMFS.ViewModels.Pages
 
         [RelayCommand]
         //검색필지내역 화면으로 이동//
-        private void OnQueryCommand()
+        private void OnQuery()
         {
             var page = new LandMoveQueryPage();
             Window window = new Window
             {
                 Content = page,
                 Title = "검색필지내역",
-                Width = 800,
-                Height = 350,
+                Width = 400,
+                Height = 300,
                 Owner = Application.Current.MainWindow,
 
                 //[닫기]버튼만 남긴다.
@@ -397,7 +402,7 @@ namespace LMFS.ViewModels.Pages
             //'분할' > '지목변경'
             //'지목변경' > '합병'으로 변경
             // 사용자가 정의한 우선순위 리스트 (변할 수 있음)
-            var desiredOrder = new List<string> { "20", "40", "30" };
+            var desiredOrder = new List<string> { "10", "20", "40", "30" };
             // 리스트로 변환
             var list = dict.ToList();
             // "30"과 "40"의 순서 바꾸기
@@ -412,9 +417,19 @@ namespace LMFS.ViewModels.Pages
             GlobalDataManager.Instance.ReasonCode = dict;
         }
 
+        private void GetActionCodeDictionary()
+        {
+            Dictionary<string, string> dict = DBService.GetActionCodeDictionary("CD03");
+            GlobalDataManager.Instance.ActionCode = dict;
+        }
+
         private void GetTableNameLandMoveInfo()
         {
             GlobalDataManager.Instance.TB_LandMoveInfo = $"landmove_info_{GlobalDataManager.Instance.loginUser.areaCd}";
+        }
+        private void GetTableNameUserHist()
+        {
+            GlobalDataManager.Instance.TB_UserHistory = $"user_hist";
         }
 
 
