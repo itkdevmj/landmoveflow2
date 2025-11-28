@@ -324,9 +324,9 @@
                             <RowDefinition Height = "Auto"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="0.3*" />
+                            <ColumnDefinition Width="0.35*" />
                             <ColumnDefinition Width="1.4*" />
-                            <ColumnDefinition Width="0.3*" />
+                            <ColumnDefinition Width="0.25*" />
                         </Grid.ColumnDefinitions>
                         <!--Mode=TwoWay 라는 건 화면에서 변경해도 ViewModel로 반영되고, ViewModel에서 변경해도 화면에 반영된다는 뜻-->
                         <CheckBox Grid.Column="0" IsChecked="{Binding Portrait, Mode=TwoWay}" Content="세로형" Foreground="#6C7A89" FontWeight="Bold" Height="25" Margin="5 10 0 10" />
@@ -337,15 +337,16 @@
                             </Grid.ColumnDefinitions>
                             <!-- TrackBarEdit -->
                             <!-- x:Name을 추가하면:XAML에서 ElementName 바인딩으로 참조 가능. 코드비하인드에서 this.ZoomTrackBar로 접근 가능-->
+                            <!--IsEditable="True"-->
                             <dxe:TrackBarEdit 
                                     x:Name="ZoomTrackBar"   
-                                    Grid.Column="0"
+                                    Grid.Column="0"                                 
                                     Minimum="0.1" 
                                     Maximum="3"
                                     Value="{Binding ElementName=LmfControl, Path=ZoomFactor, Mode=TwoWay}"
                                     Margin="10 10 10 10"
-                                    Steps="0.1"
-                                    TickFrequency="0.1"
+                                    Steps="0.5"
+                                    TickFrequency="0.5"
                                     EditValueChanged="ZoomTrackBar_EditValueChanged">
                             </dxe:TrackBarEdit>
                             <!--<dxe:TrackBarEdit 

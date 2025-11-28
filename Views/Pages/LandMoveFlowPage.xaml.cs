@@ -314,9 +314,12 @@ namespace LMFS.Views.Pages
         private void ZoomTrackBar_EditValueChanged(object sender, RoutedEventArgs e)
         {
             // 예시: TrackBar의 Value 값을 얻어서 처리
-            var trackBar = sender as DevExpress.Xpf.Editors.TrackBarEdit;
+            var trackBar = sender as TrackBarEdit;
             if (trackBar != null)
             {
+                //[디버깅용]
+                //trackBar.Value = 0.7;
+
                 double newZoom = trackBar.Value;
                 // 필요시 직접 ZoomFactor에 할당 (MVVM이 아니라면)
                 this.ZoomFactor = newZoom;

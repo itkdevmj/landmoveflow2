@@ -73,6 +73,25 @@ namespace LMFS.Db
                 var list = connection.Query<ReasonCode>(query, new { GrpCd = grpCd }).ToList();
                 return list.ToDictionary(x => x.rsnCd, x => x.rsnNm);
             }
+        }        
+        
+        // 공통코드(이동종목) 조회
+        public static Dictionary<string, string> GetActionCodeDictionary(string grpCd)
+        {
+            using (var connection = MariaDBConnection.connectDB())
+            {
+                string query =
+                    $"""
+                     SELECT substring(comm_cd, 5, 2)  AS actCd
+                          , comm_nm  AS actNm
+                       FROM comn_cd
+                      WHERE comm_prnt = '{grpCd}'
+                     ORDER BY comm_cd, comm_ord
+                     """;
+
+                var list = connection.Query<ActionCode>(query, new { GrpCd = grpCd }).ToList();
+                return list.ToDictionary(x => x.actCd, x => x.actNm);
+            }
         }
 
         // test
@@ -191,7 +210,7 @@ namespace LMFS.Db
                        FROM {GlobalDataManager.Instance.TB_LandMoveInfo}
                       WHERE g_seq = ( SELECT g_seq
                                         FROM {GlobalDataManager.Instance.TB_LandMoveInfo}
-                                       WHERE af_pnu = '{pnu}' OR af_pnu = '{pnu}'
+                                       WHERE bf_pnu = '{pnu}' OR af_pnu = '{pnu}'
                                       LIMIT 1
                                     )
                      ORDER BY idx 
@@ -212,7 +231,7 @@ namespace LMFS.Db
                        FROM {GlobalDataManager.Instance.TB_LandMoveInfo}
                       WHERE g_seq = ( SELECT g_seq
                                         FROM {GlobalDataManager.Instance.TB_LandMoveInfo}
-                                       WHERE af_pnu = '{pnu}' OR af_pnu = '{pnu}'
+                                       WHERE bf_pnu = '{pnu}' OR af_pnu = '{pnu}'
                                       LIMIT 1
                                     )
                      GROUP BY rsn, regDt
@@ -678,5 +697,84 @@ namespace LMFS.Db
         }
         #endregion
 
+
+
+        #region 사용자 로그(검색,추가.인쇄,내보내기)
+        public static void InsertUserHist(String pnu, String actType)
+        {
+            using (var connection = MariaDBConnection.connectDB())
+            {
+                string today = DateTime.Now.ToString("yyyy-MM-dd HH:mm:dd");
+
+                string query =
+                    $"""
+                    INSERT INTO {GlobalDataManager.Instance.TB_UserHistory}
+                    (area_cd, user_id, qry_pnu, action_type, action_dt)
+                    VALUES
+                    (@areaCd, @userId, @qryPnu, @actType, @actDt)
+                    """;
+
+                using (var cmd = new MySqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@areaCd", GlobalDataManager.Instance.loginUser.areaCd);
+                    cmd.Parameters.AddWithValue("@userId", DbConInfo.id);
+                    cmd.Parameters.AddWithValue("@qryPnu", pnu);
+                    cmd.Parameters.AddWithValue("@actType", actType);
+                    cmd.Parameters.AddWithValue("@actDt", today);
+                    //
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+        
+        //user_hist_landmove_info 레코드 조회
+        public static List<UserHist> QueryUserHistoryCurrentUser()
+        {
+            using (var connection = MariaDBConnection.connectDB())
+            {
+                string query =
+                    $"""
+                    SELECT *
+                    FROM {GlobalDataManager.Instance.TB_UserHistory}
+                    WHERE area_cd = '{GlobalDataManager.Instance.loginUser.areaCd}' and user_id = '{DbConInfo.id}'
+                    ORDER BY qry_pnu
+                    """;
+
+                List<UserHist> resultList = new List<UserHist>();
+
+                //[방법1]
+                using (MySqlCommand cmd = new MySqlCommand(query, connection))
+                {
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            // LandMoveInfo 객체 생성 및 매핑
+                            // 컬럼명과 LandMoveInfo 클래스의 프로퍼티에 맞게 수정 필요
+                            var info = new UserHist
+                            {
+                                // Sreader에서 값을 읽어 객체에 할당
+                                // NULL 체크 및 안전한 타입 변환
+                                seq = reader.IsDBNull(reader.GetOrdinal("seq")) ? 0 : reader.GetInt32("seq"),
+                                areaCd = reader.IsDBNull(reader.GetOrdinal("area_cd")) ? null : reader.GetString("area_cd"),
+                                userId = reader.IsDBNull(reader.GetOrdinal("user_id")) ? null : reader.GetString("user_id"),
+                                qryPnu = reader.IsDBNull(reader.GetOrdinal("qry_pnu")) ? null : reader.GetString("qry_pnu"),
+                                actType = reader.IsDBNull(reader.GetOrdinal("action_type")) ? null : reader.GetString("action_type"),
+                                actDt = reader.IsDBNull(reader.GetOrdinal("action_dt")) ? null : reader.GetString("action_dt")
+                            };
+                            resultList.Add(info);
+                        }
+                    }
+                    Console.WriteLine(query); // 디버깅용
+                }
+
+                return resultList;
+
+                //[방법2]
+                //var result = connection.Query<LandMoveInfo>(query, new { grp = _grplist }).ToList();
+                //return result;
+            }
+        }
+        #endregion
     }
 }

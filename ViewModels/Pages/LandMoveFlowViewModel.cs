@@ -435,45 +435,30 @@ namespace LMFS.ViewModels.Pages
 
         partial void OnJimokChgChanged(bool value)
         {
-            //// 체크박스 값이 변경될 때마다 실행
-            //UpdateFlowXml();
-
             // 검색 로직 실행
-            OnSearch();   // 또는 SearchCommand.Execute(null);
+            OnSearch();
         }
         
         partial void OnPortraitChanged(bool value)
         {
-            //// 체크박스 값이 변경될 때마다 실행
-            //UpdateFlowXml();
-
             // 검색 로직 실행
-            OnSearch();   // 또는 SearchCommand.Execute(null);
+            OnSearch();
         }
         partial void OnIsOwnNameChanged(bool value)
         {
-            //// 체크박스 값이 변경될 때마다 실행
-            //UpdateFlowXml();
-
             // 검색 로직 실행
-            OnSearch();   // 또는 SearchCommand.Execute(null);
+            OnSearch();
         }
 
         partial void OnIsJimokChanged(bool value)
         {
-            //// 체크박스 값이 변경될 때마다 실행
-            //UpdateFlowXml();
-
             // 검색 로직 실행
-            OnSearch();   // 또는 SearchCommand.Execute(null);
+            OnSearch();
         }
         partial void OnIsAreaChanged(bool value)
         {
-            //// 체크박스 값이 변경될 때마다 실행
-            //UpdateFlowXml();
-
             // 검색 로직 실행
-            OnSearch();   // 또는 SearchCommand.Execute(null);
+            OnSearch();
         }
 
 
