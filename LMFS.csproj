@@ -4,10 +4,25 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
-    <AssemblyVersion>0.1.0</AssemblyVersion>
+    <AssemblyVersion>0.5.0</AssemblyVersion>
     <Company>(주)아이티코리아</Company>
     <Product>토지이동흐름도 시스템</Product>
+    <ApplicationIcon>LMFS.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="LMFS.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="LMFS.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="LMFS.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
@@ -18,13 +33,15 @@
     <PackageReference Include="Duende.IdentityModel.OidcClient" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
     <PackageReference Include="MySqlConnector" Version="2.4.0" />
     <PackageReference Include="NLog.Extensions.Logging" Version="6.0.4" />
-    <Resource Include="Resources/Images/printIcon.png"/>
-    <Resource Include="Resources/Images/pdfIcon.png"/>
-    <Resource Include="Resources/Images/jpgIcon.png"/>
-    <Resource Include="Resources/Images/pngIcon.png"/>
-	<Resource Include="Resources/Images/excelIcon.png"/>
+    <Resource Include="Resources/Images/printIcon.png" />
+    <Resource Include="Resources/Images/pdfIcon.png" />
+    <Resource Include="Resources/Images/jpgIcon.png" />
+    <Resource Include="Resources/Images/pngIcon.png" />
+	<Resource Include="Resources/Images/excelIcon.png" />
+	<Resource Include="Resources/Images/setcolorIcon.png" />
   </ItemGroup>
 
   <ItemGroup>

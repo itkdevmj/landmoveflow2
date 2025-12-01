@@ -33,8 +33,11 @@ public class ZoomPercentConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        double d = System.Convert.ToDouble(value);
-        return $"{d * 100:F0}%"; // 값 뒤에 % 직접 추가
+        //double d = System.Convert.ToDouble(value);
+        //return $"{d * 100:F0}%"; // 값 뒤에 % 직접 추가
+        if (value is double zoom)
+            return $"{Math.Round(zoom * 100)}%";
+        return "100%";
     }
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {

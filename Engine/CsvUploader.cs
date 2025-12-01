@@ -69,7 +69,7 @@ public class CsvUploader
     // -----------------------------------------------------------
     // DBMS 조회 데이터 및 그룹 정보
     // -----------------------------------------------------------
-    public static bool _nonExistData = false;//DB에 기존 데이터가 존재하는지 여부 - 기존 데이터 query하는 행동 하지 않기 위해(false=empty)//
+    public static bool _existData = false;//DB에 기존 데이터가 존재하는지 여부 - 기존 데이터 query하는 행동 하지 않기 위해(false=empty)//
     public static int _groupSeqno = 0;
 
 
@@ -86,7 +86,7 @@ public class CsvUploader
     //Page를 직접 접근하지 않고, ViewModel을 통해서 접근하기//
     public CsvUploader()
     {
-        _nonExistData = false;//초기화//
+        _existData = false;//초기화//
 
         // 임시 파일 저장할 경로 설정//
         _tempDir = SetTempDir();
@@ -349,7 +349,7 @@ public class CsvUploader
             value = DBService.BackupLandMoveInfoOrg();
             if (value == 0)
             {
-                _nonExistData = true;//DB에 기존 데이터가 존재하는지 여부 - 기존 데이터 query하는 행동 하지 않기 위해//
+                _existData = true;//DB에 기존 데이터가 존재하는지 여부 - 기존 데이터 query하는 행동 하지 않기 위해//
             }
             else if (value < 0)
             {
@@ -370,7 +370,7 @@ public class CsvUploader
             // [3] 현재 DB g_seq 최대값을 가져온다. (새로 추가할 데이터는 g_seq를 새로 count할 것이므로)
             //------------------------------------
             onProgress?.Invoke(0, totalCount, "그룹 번호 확인 중...");
-            if ( _nonExistData == false )
+            if (_existData == false )
                 _groupSeqno = DBService.GetMaxGroupSeqno();
 
 
@@ -569,17 +569,6 @@ public class CsvUploader
             return;
 
 
-        //// [디버깅용]
-        //bool exists = PnuList.Any(item => item.pnu == "4420010200101830018");
-        //if(exists)
-        //{
-        //    int a = 1;
-        //}
-
-        
-
-
-
         //----------------------------------------
         // 연관 필지 조회(확인) : 시작 //
         int idx = 1;
@@ -640,7 +629,7 @@ public class CsvUploader
                 //------------------------------------------
                 // (2) DB에서 기존 그룹 데이터 가져와서 병합
                 //------------------------------------------
-                if (_nonExistData)//DB에 기존 데이터가 존재하는지 여부 - 기존 데이터 query하는 행동 하지 않기 위해(true=데이터 존재)//
+                if (_existData)//DB에 기존 데이터가 존재하는지 여부 - 기존 데이터 query하는 행동 하지 않기 위해(true=데이터 존재)//
                 {
                     var dbFlowList = SqlQueryFlowList(); // List<LandMoveInfo>
                     if (dbFlowList.Count > 0)
@@ -689,6 +678,20 @@ public class CsvUploader
                 //    groupSeq++;
                 //}
 
+
+
+                // [디버깅용]
+                bool exists = PnuList.Any(item => item.pnu == "4477025027200400001");
+                if (exists || _groupSeqno >= 2091)
+                {
+                    
+                    int a = 1;
+                    
+                }
+
+
+
+
                 //------------------------------------------
                 // (5) 최종 정렬
                 //------------------------------------------
@@ -702,6 +705,7 @@ public class CsvUploader
                         return "00"; // 키가 없거나 x.rsn이 null인 경우 기본값
                     })
                     .ThenBy(x => x.rsn == "합병" ? x.afPnu : x.bfPnu)
+                    .ThenBy(x => x.afPnu)
                     .ToList();
             }
             catch (Exception ex)

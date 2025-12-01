@@ -462,7 +462,7 @@ namespace LMFS.ViewModels.Pages
         }
 
 
-        private string BuildPnu()
+        public string BuildPnu()//private => public (LandMoveFlowPage.xaml.cs에서 사용)
         {
             string umdCd = SelectedUmd.umdCd;
             string riCd = SelectedRi == null ? "00" : SelectedRi.riCd;

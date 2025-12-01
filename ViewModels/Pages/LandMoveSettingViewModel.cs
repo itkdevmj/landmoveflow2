@@ -126,7 +126,8 @@ namespace LMFS.ViewModels.Pages
             if (FlowVM != null)
             {
                 // 다이어그램 다시 그리기
-                XDocument rtnXml = FlowVM.Converter.RefreshDiagramLandMoveFlow(FlowVM.SettingVM);
+                FlowVM.Converter.UpdateWithNewSetting(FlowVM.SettingVM);//설정 색상 동기화
+                XDocument rtnXml = FlowVM.Converter.RefreshDiagramLandMoveFlow();
                 FlowVM.ProcessDiagramLandMoveFlow(rtnXml); 
             }
         }

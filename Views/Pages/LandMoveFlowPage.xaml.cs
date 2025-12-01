@@ -3,6 +3,7 @@ using DevExpress.Diagram.Core;// DiagramImageExportFormat
 using DevExpress.Diagram.Core.Native;
 using DevExpress.Mvvm;
 using DevExpress.Xpf.Core.Native;
+using DevExpress.Xpf.Diagram;
 using DevExpress.Xpf.Editors;
 using DevExpress.Xpf.Grid;// WPF용
 using DevExpress.XtraBars;
@@ -19,7 +20,10 @@ using System.Threading.Tasks;
 using System.Windows;// Rect
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Xml.Linq;
 using static LMFS.ViewModels.Pages.LandMoveFlowViewModel;
 
 namespace LMFS.Views.Pages
@@ -33,7 +37,22 @@ namespace LMFS.Views.Pages
 
         private bool _diagramShown = false;
 
-        private double _zoomFactor = 1.0;
+        private int _zoomPercent = 100; // 100%
+        public int ZoomPercent
+        {
+            get => _zoomPercent;
+            set
+            {
+                if (_zoomPercent != value)
+                {
+                    _zoomPercent = value;
+                    ZoomFactor = _zoomPercent / 100.0;  // 여기서만 변환
+                    OnPropertyChanged(nameof(ZoomPercent));
+                }
+            }
+        }
+
+        private double _zoomFactor = 1.0; // 1.0 = 100%
         public double ZoomFactor
         {
             get => _zoomFactor;
@@ -42,9 +61,7 @@ namespace LMFS.Views.Pages
                 if (Math.Abs(_zoomFactor - value) > 0.0001)
                 {
                     _zoomFactor = value;
-                    // 다이어그램이나 원하는 컨트롤에 실제 zoom 적용
-                    LmfControl.ZoomFactor = _zoomFactor;
-                    // 반드시 PropertyChanged 호출 (INotifyPropertyChanged 구현)
+                    LmfControl.ZoomFactor = _zoomFactor;   // DiagramControl에 실제 적용[web:28]
                     OnPropertyChanged(nameof(ZoomFactor));
                 }
             }
@@ -320,81 +337,56 @@ namespace LMFS.Views.Pages
                 //[디버깅용]
                 //trackBar.Value = 0.7;
 
-                double newZoom = trackBar.Value;
                 // 필요시 직접 ZoomFactor에 할당 (MVVM이 아니라면)
-                this.ZoomFactor = newZoom;
+                this.ZoomFactor = trackBar.Value / 100.0;                
                 // 혹은 다이어그램/컨트롤에 확대 적용
-                LmfControl.ZoomFactor = newZoom;
+                LmfControl.ZoomFactor = this.ZoomFactor;
             }
             // 추가적으로 디버깅 출력해볼 수도 있음
             // Debug.WriteLine($"TrackBar 현재값: {newZoom}");
         }
 
-        /*
-         더 나아가 사용자가 설정을 선택할 수 있도록 대화상자를 추가할 수 있습니다:
-
-        csharp
-        private void OnExportDiagramWithSettings(string filePath, ExportDiagramFormat format)
+        private void LmfControl_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            try
+            var diagram = sender as DiagramControl;
+            Point clickPoint = e.GetPosition(diagram);
+            var inputElement = diagram.InputHitTest(clickPoint) as DependencyObject;
+
+            while (inputElement != null && !(inputElement is DiagramShape))
             {
-                // 설정 대화상자 표시
-                var settingsDialog = new ImageExportSettingsDialog();
-                if (settingsDialog.ShowDialog() == true)
-                {
-                    double dpi = settingsDialog.SelectedDpi;      // 예: 96, 150, 300
-                    double scale = settingsDialog.SelectedScale;  // 예: 0.5, 1.0, 2.0
-                    int quality = settingsDialog.JpegQuality;     // JPG의 경우 1-100
-
-                    var imageFormat = format == ExportFormat.Jpg 
-                        ? System.Drawing.Imaging.ImageFormat.Jpeg 
-                        : System.Drawing.Imaging.ImageFormat.Png;
-
-                    // ExportToImage는 직접적인 품질 설정이 없으므로
-                    // BitmapEncoder를 사용하여 수동으로 저장
-                    if (format == ExportFormat.Jpg)
-                    {
-                        SaveAsJpegWithQuality(filePath, dpi, scale, quality);
-                    }
-                    else
-                    {
-                        LmfControl.ExportToImage(filePath, imageFormat, dpi, scale, 
-                            new System.Windows.Thickness(10));
-                    }
-
-                    MessageBox.Show("이미지가 저장되었습니다.", "성공",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
-                }
+                inputElement = VisualTreeHelper.GetParent(inputElement);
             }
-            catch (Exception ex)
+
+            if (inputElement is DiagramShape shape)
             {
-                MessageBox.Show($"저장 실패: {ex.Message}", "오류",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                ParseAndSearch(shape.Content);
+                e.Handled = true;
             }
         }
 
-        private void SaveAsJpegWithQuality(string filePath, double dpi, double scale, int quality)
+        private void ParseAndSearch(string content)
         {
-            // RenderTargetBitmap으로 다이어그램 렌더링
-            double width = LmfControl.ActualWidth * scale;
-            double height = LmfControl.ActualHeight * scale;
-    
-            RenderTargetBitmap renderBitmap = new RenderTargetBitmap(
-                (int)width, (int)height, dpi, dpi, PixelFormats.Pbgra32);
-    
-            renderBitmap.Render(LmfControl);
-    
-            // JPEG Encoder로 품질 설정
-            JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-            encoder.QualityLevel = quality; // 1-100
-            encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
-    
-            using (FileStream stream = new FileStream(filePath, FileMode.Create))
+            if (string.IsNullOrEmpty(content)) return;
+
+            bool isSan = content.StartsWith("산 ");
+            string cleanContent = isSan ? content.Substring(2) : content; // "산 " 제거
+
+            string[] parts = cleanContent.Split('-');
+            if (parts.Length == 2)            
             {
-                encoder.Save(stream);
+                string bobn = parts[0].Trim();
+                string bubn = parts[1].Trim();
+
+                // 선택한 지번으로 포커싱 하기 위함(실제 재검색 아니고 이미 구성한 xml 그대로 이용)
+                FlowVM.IsSan = isSan;
+                FlowVM.Bobn = int.Parse(bobn).ToString("D4");
+                FlowVM.Bubn = int.Parse(bubn).ToString("D4");
+                FlowVM.Converter._pnu = FlowVM.BuildPnu();
+                FlowVM.Converter.SaveMakedXmlData();
+                // 다이어그램 다시 그리기
+                XDocument rtnXml = FlowVM.Converter.RefreshDiagramLandMoveFlow();
+                FlowVM.ProcessDiagramLandMoveFlow(rtnXml);
             }
         }
-        */
-
     }
 }

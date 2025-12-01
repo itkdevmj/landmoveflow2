@@ -114,7 +114,7 @@ public class LandMoveFlowConverter
     // -----------------------------------------------------------
     // 외부로부터 받은 인수
     // -----------------------------------------------------------
-    private string _pnu;//Vit.G//조회 필지코드(19자리)
+    public string _pnu;//Vit.G//조회 필지코드(19자리)//다이어그램에서 클릭 후 사용//
     private bool _isJimokChg;
     private bool _isPortrait;
     private bool _isOwnName;
@@ -497,86 +497,120 @@ public class LandMoveFlowConverter
 
             rsnOld = rsnNew;
             dtOld = dtNew;
-            pnuOld = rsnNew.Equals("분할") ? bfPnu : afPnu;
+            //251127//TEST//pnuOld = rsnNew.Equals("분할") ? bfPnu : afPnu;
+            pnuOld = rsnNew.Equals("합병") ? afPnu : bfPnu;
 
             var pnu = rsnNew.Equals("합병") ? bfPnu : afPnu;
 
-            //if (pnu.Equals("120") || pnu.Equals("120-4") || _depthCount == 3)
-            //{
-            //    int x = 0;
-            //}
-
-            var pnuIdx = _pnuList.IndexOf(pnu);
-            if (pnuIdx >= 0)
+            //[디버깅용]
+            if (pnu.Equals("755-1") || pnu.Equals("산 40-1") || pnu.Equals("산 55") || pnuOld.Equals("산 55"))
             {
-                string dep0Itm = "DEP0_ITM";
-                string subCol = $"DEP{_depthCount}_SUB";
-                string tmbCol = $"DEP{_depthCount}_TMB";
-                string pnuCol = $"DEP{_depthCount}_PNU";
-                string itmCol = $"DEP{_depthCount}_ITM";
-                
-                if (!_dfXml.Columns.Contains(dep0Itm)) _dfXml.Columns.Add(dep0Itm, typeof(string));
-                if (!_dfXml.Columns.Contains(subCol)) _dfXml.Columns.Add(subCol, typeof(string));
-                if (!_dfXml.Columns.Contains(tmbCol)) _dfXml.Columns.Add(tmbCol, typeof(string));
-                if (!_dfXml.Columns.Contains(pnuCol)) _dfXml.Columns.Add(pnuCol, typeof(string));
-                if (!_dfXml.Columns.Contains(itmCol)) _dfXml.Columns.Add(itmCol, typeof(string));
+                int x = 0;
+            }
 
-                //DataRow existingRow = _dfXml.AsEnumerable().FirstOrDefault(r => r.Field<string>("PNU") == pnu);
-                // _dfXml의 인덱스 pnuIdx 값
-
-                bool isExist = true;
-                DataRow existingRow;
-                var pnuIdx2 = GetIndexDFXML(pnu);//251117//
-                if (pnuIdx2 > -1 && _dfXml.Rows.Count > pnuIdx2)
-                {
-                    existingRow = _dfXml.Rows[pnuIdx2];
-                }
+            int idx = rsnNew.Equals("등록전환") ? 0 : 1;
+           
+            for(int i = idx; i < 2; i++)
+            {
+                var pnuIdx = -1;
+                if (i == 0)//등록전환
+                    pnuIdx = _pnuList.IndexOf(pnuOld);
                 else
-                {
-                    isExist = false;
-                    existingRow = _dfXml.NewRow();
-                    existingRow["PNU"] = pnu;
-                }
+                    pnuIdx = _pnuList.IndexOf(pnu);
 
-                if (rsnNew.Equals("합병"))
+                if (pnuIdx >= 0)
                 {
-                    existingRow["PNU"] = pnu;
-                    //Vit.G//
-                    //existingRow[dep0Itm] = "0";
-                    if ( !isExist )
-                        existingRow[dep0Itm] = bfAtt != "" ? bfAtt : "0";
+                    string dep0Itm = "DEP0_ITM";
+                    string subCol = $"DEP{_depthCount}_SUB";
+                    string tmbCol = $"DEP{_depthCount}_TMB";
+                    string pnuCol = $"DEP{_depthCount}_PNU";
+                    string itmCol = $"DEP{_depthCount}_ITM";
+
+                    if (!_dfXml.Columns.Contains(dep0Itm)) _dfXml.Columns.Add(dep0Itm, typeof(string));
+                    if (!_dfXml.Columns.Contains(subCol)) _dfXml.Columns.Add(subCol, typeof(string));
+                    if (!_dfXml.Columns.Contains(tmbCol)) _dfXml.Columns.Add(tmbCol, typeof(string));
+                    if (!_dfXml.Columns.Contains(pnuCol)) _dfXml.Columns.Add(pnuCol, typeof(string));
+                    if (!_dfXml.Columns.Contains(itmCol)) _dfXml.Columns.Add(itmCol, typeof(string));
+
+                    //DataRow existingRow = _dfXml.AsEnumerable().FirstOrDefault(r => r.Field<string>("PNU") == pnu);
+                    // _dfXml의 인덱스 pnuIdx 값
+
+                    bool isExist = true;
+                    DataRow existingRow;
+                    var pnuIdx2 = -1;
+                    if (i == 0)//등록전환
+                        pnuIdx2 = GetIndexDFXML(pnuOld);
                     else
-                        existingRow[dep0Itm] = afAtt != "" ? afAtt : "0";
-                    existingRow[subCol] = _labelCount.ToString();
-                    existingRow[tmbCol] = (pnu == afPnu) ? "thumb" : "";
-                    existingRow[pnuCol] = (pnu == afPnu) ? afPnu : "";                    
-                    existingRow[itmCol] = (subIdx == 0) ? (afAtt != "" ? afAtt : "0") : "";
-                }
-                else
-                {
-                    existingRow["PNU"] = pnu;
-                    //Vit.G//
-                    //existingRow[dep0Itm] = "0";
-                    if( !isExist )
-                        existingRow[dep0Itm] = afAtt != "" ? afAtt : "0";                    
-                    existingRow[subCol] = _labelCount.ToString();
-                    existingRow[tmbCol] = (pnu == bfPnu) ? "thumb" : "";
-                    existingRow[pnuCol] = afPnu;
-                    existingRow[itmCol] = afAtt != "" ? afAtt : "0";
-                }
+                        pnuIdx2 = GetIndexDFXML(pnu);//251117//
+                    if (pnuIdx2 > -1 && _dfXml.Rows.Count > pnuIdx2)
+                    {
+                        existingRow = _dfXml.Rows[pnuIdx2];
+                    }
+                    else
+                    {
+                        isExist = false;
+                        existingRow = _dfXml.NewRow();
+                        if (i == 0)//등록전환
+                            existingRow["PNU"] = pnuOld;
+                        else
+                            existingRow["PNU"] = pnu;
 
-                if (isExist == false)
-                {
-                    _dfXml.Rows.Add(existingRow);
+                    }
+
+                    if (rsnNew.Equals("합병"))
+                    {
+                        //251117//위에서 처리함//existingRow["PNU"] = pnu;
+                        //Vit.G//
+                        //existingRow[dep0Itm] = "0";
+                        if (!isExist)
+                            existingRow[dep0Itm] = bfAtt != "" ? bfAtt : "0";
+                        else
+                            existingRow[dep0Itm] = afAtt != "" ? afAtt : "0";
+                        existingRow[subCol] = _labelCount.ToString();
+                        existingRow[tmbCol] = (pnu == afPnu) ? "thumb" : "";
+                        existingRow[pnuCol] = (pnu == afPnu) ? afPnu : "";
+                        existingRow[itmCol] = (subIdx == 0) ? (afAtt != "" ? afAtt : "0") : "";
+                    }
+                    else
+                    {
+                        //251117//위에서 처리함//existingRow["PNU"] = pnu;
+                        //Vit.G//
+                        //existingRow[dep0Itm] = "0";
+
+                        if (i == 0)//등록전환
+                        {
+                            if (!isExist)
+                                existingRow[dep0Itm] = afAtt != "" ? afAtt : "0";
+                            existingRow[subCol] = _labelCount.ToString();
+                            existingRow[tmbCol] = (pnuOld == bfPnu) ? "thumb" : "";
+                            existingRow[pnuCol] = "";
+                            existingRow[itmCol] = afAtt != "" ? afAtt : "0";
+                        }
+                        else
+                        { 
+                            if (!isExist)
+                                existingRow[dep0Itm] = afAtt != "" ? afAtt : "0";
+                            existingRow[subCol] = _labelCount.ToString();
+                            existingRow[tmbCol] = (pnu == bfPnu) ? "thumb" : "";
+                            existingRow[pnuCol] = afPnu;
+                            existingRow[itmCol] = afAtt != "" ? afAtt : "0";
+                            }
+                    }
+
+                    if (isExist == false)
+                    {
+                        _dfXml.Rows.Add(existingRow);
+                    }
                 }
             }
         }//foreach (var row in flowList)
 
-        //XML 내용 => CSV 저장하기
-        string pnuNm = GetJibun(_pnu, 2);
-        //String pathcsv = Path.Combine(_tempDir, $"DF_XML_{_currentGroupNo}.csv");
-        String pathcsv = Path.Combine(_tempDir, $"DF_XML_{pnuNm}_{_currentGroupNo}.csv");
-        SaveDfXmlToCsv(_dfXml, pathcsv);
+        ////XML 내용 => CSV 저장하기
+        //string pnuNm = GetJibun(_pnu, 2);
+        ////String pathcsv = Path.Combine(_tempDir, $"DF_XML_{_currentGroupNo}.csv");
+        //String pathcsv = Path.Combine(_tempDir, $"DF_XML_{pnuNm}_{_currentGroupNo}.csv");
+        //SaveDfXmlToCsv(_dfXml, pathcsv);
+        SaveMakedXmlData();
 
         //XML 구성하기
         MakeXmlData();
@@ -607,6 +641,18 @@ public class LandMoveFlowConverter
 
     #endregion
 
+    #region XML 저장
+    public void SaveMakedXmlData()
+    {
+        //XML 내용 => CSV 저장하기
+        string pnuNm = GetJibun(_pnu, 2);
+        //String pathcsv = Path.Combine(_tempDir, $"DF_XML_{_currentGroupNo}.csv");
+        String pathcsv = Path.Combine(_tempDir, $"DF_XML_{_currentGroupNo}_{pnuNm}.csv");
+        SaveDfXmlToCsv(_dfXml, pathcsv);
+    }
+    #endregion
+
+
     #region XML 생성
 
     //251027//private => public : Converter에서 참조//
@@ -624,6 +670,8 @@ public class LandMoveFlowConverter
         //
         try
         {
+            var colName = $"PNU";//251128//
+
             for (int depIdx = 0; depIdx < _depthList.Count; depIdx++)
             {
                 var label = _depthList[depIdx];
@@ -660,7 +708,8 @@ public class LandMoveFlowConverter
                         //var row = filtered[rowIdx];
                         var row = item.Row; 
                         int rowIdx = item.Index;
-                        
+
+                        var pnuOld = row.Field<string>(colName);//251128//등록전환 일 때 산지번 명이 PNU 컬럼에만 존재하는 경우에 표시하기 위함//
                         var pnu = row.Field<string>(pnuColName);
                         var bfAtt = row.Field<string>(attColName);
                         if (bfAtt == "0") bfAtt = ""; 
@@ -718,24 +767,42 @@ public class LandMoveFlowConverter
                             }
                             else
                             {
-                                if( (bNewPnu) || (thumb.Equals("thumb") && rsn.Equals("합병")) )
-                                    begin = MakeXmlJibun(bfAtt != "" ? pnu + "\r\n" + bfAtt : pnu, depIdx + 1, false, rowIdx, focus);//Vit.G//[add]focus
+                                //251128//if( (bNewPnu) || (thumb.Equals("thumb") && rsn.Equals("합병")) )
+                                if ((bNewPnu) || (thumb.Equals("thumb") && (rsn.Equals("합병") || rsn.Equals("등록전환")) ))
+                                    begin = MakeXmlJibun(bfAtt != "" ? pnuOld + "\r\n" + bfAtt : pnuOld, depIdx + 1, false, rowIdx, focus);//Vit.G//[add]focus
                                 else
                                     begin = MakeXmlJibun(afAtt != "" ? pnu + "\r\n" + afAtt : pnu, depIdx + 1, false, rowIdx, focus);//Vit.G//[add]focus
                             }
 
-                            if (thumb.Equals("thumb"))
+                            if ( rsn.Equals("등록전환") )//등록전환 => 산 Jibun요소, 이동사유/일자 라벨만 그린다.
                             {
-                                end = MakeXmlJibun(afAtt != "" ? pnu + "\r\n" + afAtt : pnu, depIdx + 1, true, rowIdx, focus);//Vit.G//[add]focus
-                                MakeXmlConnector(bfDepth, depIdx + 1, begin - 1, end - 1, rowIdx, rowIdx, focus);//Vit.G//[add]focus
-                                MakeXmlLabel(label, depIdx + 1, rowIdx, focus);//Vit.G//[add]focus
-                                thumbidx = rowIdx;
+                                if (thumb.Equals("thumb"))
+                                {
+                                    MakeXmlLabel(label, depIdx + 1, rowIdx, focus);//Vit.G//[add]focus
+                                    thumbidx = rowIdx;
+                                }
+                                else
+                                {
+                                    if (focus && rowIdx != thumbidx)//조회필지 && 모번지 => 꺽은선에 배경색 속성 추가//
+                                        UpdateItem(begin - 1, "Background");
+                                    MakeXmlConnector(bfDepth, depIdx + 1, begin - 1, end - 1, rowIdx, thumbidx, focus);//Vit.G//[add]focus
+                                }
                             }
                             else
                             {
-                                if (focus && rowIdx != thumbidx)//조회필지 && 모번지 => 꺽은선에 배경색 속성 추가//
-                                    UpdateItem(begin - 1, "Background");
-                                MakeXmlConnector(bfDepth, depIdx + 1, begin - 1, end - 1, rowIdx, thumbidx, focus);//Vit.G//[add]focus
+                                if (thumb.Equals("thumb"))
+                                {
+                                    end = MakeXmlJibun(afAtt != "" ? pnu + "\r\n" + afAtt : pnu, depIdx + 1, true, rowIdx, focus);//Vit.G//[add]focus
+                                    MakeXmlConnector(bfDepth, depIdx + 1, begin - 1, end - 1, rowIdx, rowIdx, focus);//Vit.G//[add]focus
+                                    MakeXmlLabel(label, depIdx + 1, rowIdx, focus);//Vit.G//[add]focus
+                                    thumbidx = rowIdx;
+                                }
+                                else
+                                {
+                                    if (focus && rowIdx != thumbidx)//조회필지 && 모번지 => 꺽은선에 배경색 속성 추가//
+                                        UpdateItem(begin - 1, "Background");
+                                    MakeXmlConnector(bfDepth, depIdx + 1, begin - 1, end - 1, rowIdx, thumbidx, focus);//Vit.G//[add]focus
+                                }
                             }
                         }
                         else
@@ -784,7 +851,7 @@ public class LandMoveFlowConverter
         //Vit.G//XML 파일 저장
         //DiagramControl.SaveFile()
         //SaveDocument(), LoadDocument()
-        String pathxml = Path.Combine(_tempDir, $"XML_{_pnu}.xml");
+        String pathxml = Path.Combine(_tempDir, $"XML_{_currentGroupNo}_{_pnu}.xml");
         _xdoc.Save(pathxml);
         //여기에서 오류발생으로 주석처리//--- string str = rtnXml.ToString();
         //String pathpdf = @"D:\MyDiagram.pdf";
@@ -1064,14 +1131,13 @@ public class LandMoveFlowConverter
     #region 색상 설정
     public void UpdateWithNewSetting(LandMoveSettingViewModel settingVM)
     {
-        _settingVM = settingVM; // 값이 실제 변경된 새 인스턴스라면 갱신
+        _settingVM = settingVM; // 값이 실제 변경된 새 인스턴스라면 갱신//설정 색상 동기화
     }
     #endregion
 
     #region 다시 그리기
-    public XDocument RefreshDiagramLandMoveFlow(LandMoveSettingViewModel settingVM)
+    public XDocument RefreshDiagramLandMoveFlow()
     {
-        UpdateWithNewSetting(settingVM);//설정 색상 동기화
         InitializeXMLForNewGroup();//XML 노드 구성 초기화
         MakeXmlData(); // 다이어그램 다시 그림
 

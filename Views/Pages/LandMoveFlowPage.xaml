@@ -338,15 +338,19 @@
                             <!-- TrackBarEdit -->
                             <!-- x:Name을 추가하면:XAML에서 ElementName 바인딩으로 참조 가능. 코드비하인드에서 this.ZoomTrackBar로 접근 가능-->
                             <!--IsEditable="True"-->
+                            <!--TrackBarEdit는 기본적으로 내부 Value 증감을 “정수 단위(1씩)”로 처리하는 것이 기본 동작입니다.-->
+                            <!---TrackBar와 LmfControl 둘 다에서 ZoomFactor를 설정하고 있어서 중복이어서 오동작-->
+                            <!---TrackBar는 정수 스케일(예: 10~300, step 5)로 두고, ZoomFactor = trackBar.Value / 100.0;처럼 변환해서 쓰거나,​
+                                또는 DevExpress 문서/샘플처럼 Ticks="0,0.5,1,1.5,2,2.5,3" 등을 명시해서 실제 동작 단위를 제어합니다.-->
                             <dxe:TrackBarEdit 
                                     x:Name="ZoomTrackBar"   
                                     Grid.Column="0"                                 
-                                    Minimum="0.1" 
-                                    Maximum="3"
-                                    Value="{Binding ElementName=LmfControl, Path=ZoomFactor, Mode=TwoWay}"
+                                    Minimum="10" 
+                                    Maximum="300"
+                                    Value="{Binding ZoomPercent, Mode=TwoWay}"
                                     Margin="10 10 10 10"
-                                    Steps="0.5"
-                                    TickFrequency="0.5"
+                                    Steps="20"
+                                    TickFrequency="20"
                                     EditValueChanged="ZoomTrackBar_EditValueChanged">
                             </dxe:TrackBarEdit>
                             <!--<dxe:TrackBarEdit 
@@ -361,7 +365,7 @@
                             <!-- 현재 배율 표시 라벨 -->
                             <TextBlock 
                                     Grid.Column="1"
-                                    Text="{Binding ElementName=LmfControl, Path=ZoomFactor, Converter={StaticResource ZoomPercentConverter}}"
+                                    Text="{Binding ZoomFactor, Converter={StaticResource ZoomPercentConverter}}"
                                     VerticalAlignment="Center"
                                     FontWeight="Bold"
                                     FontSize="14"
@@ -393,7 +397,8 @@
                                    ExportMargin="10"
                                    DocumentSource="{Binding LandMoveFlowData}"
                                    Visibility="{Binding IsDiagramReady, Converter={StaticResource BoolToVisibilityConverter}}" Opacity="1"
-                                   Loaded="LmfControl_Loaded">
+                                   Loaded="LmfControl_Loaded"
+                                   PreviewMouseDown="LmfControl_PreviewMouseDown">
 <!--            <dxdiag:DiagramControl ShowRulers="False" IsReadOnly="True" x:Name="LmfControl" 
                                    ExportDPI="300"
                                    ExportScale="1.0"

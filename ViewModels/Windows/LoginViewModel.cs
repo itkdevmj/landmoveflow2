@@ -47,6 +47,9 @@ namespace LMFS.ViewModels.Pages
             User user = await _keyCloakLoginService.LoginTask();
             if (user != null)
             {
+                //var session = UserSession.Instance;
+                //session.user = user;
+
                 WeakReferenceMessenger.Default.Send(new Messages.LoginSuccessMessage(user));
             }
         }
