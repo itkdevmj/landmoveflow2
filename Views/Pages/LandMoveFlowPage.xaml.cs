@@ -37,35 +37,46 @@ namespace LMFS.Views.Pages
 
         private bool _diagramShown = false;
 
-        private int _zoomPercent = 100; // 100%
-        public int ZoomPercent
-        {
-            get => _zoomPercent;
-            set
-            {
-                if (_zoomPercent != value)
-                {
-                    _zoomPercent = value;
-                    ZoomFactor = _zoomPercent / 100.0;  // 여기서만 변환
-                    OnPropertyChanged(nameof(ZoomPercent));
-                }
-            }
-        }
+        ///*
+        ////- DiagramControl: LmfControl.ZoomFactor (0.1~3.0 배율)
+        ////- TrackBar: 10~300 정수(%)
+        ////- 중간 속성: ZoomPercent (int, 10~300) ←→ TrackBar.Value
+        ////- ZoomFactor (double) ←→ DiagramControl.ZoomFactor
+        ////
+        //// => “배율(ZoomFactor)”와 “퍼센트(ZoomPercent)”를 한 군데에서만 상호 변환하게 만드는 게 핵심
+        //*/
+        //private int _zoomPercent = 100; // 100%
+        //public int ZoomPercent
+        //{
+        //    get => _zoomPercent;
+        //    set
+        //    {
+        //        if (_zoomPercent != value)
+        //        {
+        //            _zoomPercent = value;
+        //            ZoomFactor = _zoomPercent / 100.0;  // 여기서만 변환
+        //            OnPropertyChanged(nameof(ZoomPercent));
+        //        }
+        //    }
+        //}
 
-        private double _zoomFactor = 1.0; // 1.0 = 100%
-        public double ZoomFactor
-        {
-            get => _zoomFactor;
-            set
-            {
-                if (Math.Abs(_zoomFactor - value) > 0.0001)
-                {
-                    _zoomFactor = value;
-                    LmfControl.ZoomFactor = _zoomFactor;   // DiagramControl에 실제 적용[web:28]
-                    OnPropertyChanged(nameof(ZoomFactor));
-                }
-            }
-        }
+        //private double _zoomFactor = 1.0; // 1.0 = 100%
+        //public double ZoomFactor
+        //{
+        //    get => _zoomFactor;
+        //    set
+        //    {
+        //        if (Math.Abs(_zoomFactor - value) > 0.0001)
+        //        {
+        //            _zoomFactor = value;
+        //            // 여기서 TrackBar 쪽도 자동 반영되도록 ZoomPercent 재계산
+        //            _zoomPercent = (int)Math.Round(_zoomFactor * 100);
+        //            LmfControl.ZoomFactor = _zoomFactor;   // DiagramControl에 실제 적용[web:28]
+        //            OnPropertyChanged(nameof(ZoomFactor));
+        //            OnPropertyChanged(nameof(ZoomPercent));
+        //        }
+        //    }
+        //}
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
@@ -78,6 +89,8 @@ namespace LMFS.Views.Pages
         {
             InitializeComponent();
 
+            DataContextChanged += LandMoveFlowPage_DataContextChanged;//for GridCategoryDataSource 화면갱신
+
             //
             FlowVM = new LandMoveFlowViewModel(settingVM);
             this.DataContext = FlowVM;//자신의 ViewModel//
@@ -87,6 +100,21 @@ namespace LMFS.Views.Pages
             WeakReferenceMessenger.Default.Register<LoadXmlMessage>(this);
 
             RegisterMessages();// 생성자에서 이 함수 한번만!
+        }
+
+        //for GridCategoryDataSource 화면갱신
+        private void LandMoveFlowPage_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue is LandMoveFlowViewModel vm)
+            {
+                vm.FlowUpdated += Vm_FlowUpdated; // ViewModel에서 이벤트 발생시킴
+            }
+        }
+
+        //for GridCategoryDataSource 화면갱신
+        private void Vm_FlowUpdated(object? sender, EventArgs e)
+        {
+            AnotherFlowDataGrid.RefreshData();
         }
 
 
@@ -328,22 +356,42 @@ namespace LMFS.Views.Pages
 
         }
 
-        private void ZoomTrackBar_EditValueChanged(object sender, RoutedEventArgs e)
-        {
-            // 예시: TrackBar의 Value 값을 얻어서 처리
-            var trackBar = sender as TrackBarEdit;
-            if (trackBar != null)
-            {
-                //[디버깅용]
-                //trackBar.Value = 0.7;
+        ////FitToDrawing, BringIntoView, 코드에서 직접 ZoomFactor 변경 등 “모든 Zoom 변경”이 TrackBar에 반영
+        //private void ZoomTrackBar_EditValueChanged(object sender, RoutedEventArgs e)
+        //{
+        //    // 예시: TrackBar의 Value 값을 얻어서 처리
+        //    var trackBar = sender as TrackBarEdit;
+        //    if (trackBar != null)
+        //    {
+        //        //[디버깅용]
+        //        //trackBar.Value = 0.7;
 
-                // 필요시 직접 ZoomFactor에 할당 (MVVM이 아니라면)
-                this.ZoomFactor = trackBar.Value / 100.0;                
-                // 혹은 다이어그램/컨트롤에 확대 적용
-                LmfControl.ZoomFactor = this.ZoomFactor;
+        //        // 필요시 직접 ZoomFactor에 할당 (MVVM이 아니라면)
+        //        this.ZoomFactor = trackBar.Value / 100.0;                
+        //        // 혹은 다이어그램/컨트롤에 확대 적용
+        //        LmfControl.ZoomFactor = this.ZoomFactor;
+        //    }
+        //    // 추가적으로 디버깅 출력해볼 수도 있음
+        //    // Debug.WriteLine($"TrackBar 현재값: {newZoom}");
+        //}
+
+        private void LmfControl_ZoomFactorChanged(object sender, EventArgs e)
+        {
+            //// DiagramControl의 실제 ZoomFactor
+            //double z = LmfControl.ZoomFactor;           // 예: 1.25 → 125%
+            //this.ZoomFactor = z;                        // 속성 갱신
+            //this.ZoomPercent = (int)Math.Round(z * 100);
+            //ZoomTrackBar.Value = ZoomPercent;          // 필요시 직접 대입
+
+            // DataContext가 LandMoveFlowViewModel이라고 가정
+            if (DataContext is LandMoveFlowViewModel vm)
+            {
+                double z = LmfControl.ZoomFactor; // 실제 줌 값 (예: 1.25 = 125%)
+                vm.ZoomFactor = z;                // VM에 반영 (VM 내부에서 ZoomPercent도 같이 계산됨)
+                                                  // TrackBar는 ZoomPercent에 바인딩되어 있으므로 이 한 줄만으로도 충분
+                                                  // 필요하다면 아래 직접 세팅은 생략 가능
+                                                  // ZoomTrackBar.Value = vm.ZoomPercent;
             }
-            // 추가적으로 디버깅 출력해볼 수도 있음
-            // Debug.WriteLine($"TrackBar 현재값: {newZoom}");
         }
 
         private void LmfControl_PreviewMouseDown(object sender, MouseButtonEventArgs e)

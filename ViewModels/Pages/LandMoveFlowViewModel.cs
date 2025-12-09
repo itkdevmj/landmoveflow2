@@ -55,10 +55,11 @@ namespace LMFS.ViewModels.Pages
 
         [ObservableProperty] private int _currentGSeq;//상세화면에서 insert 시 사용될 예정//
 
-
         [ObservableProperty] private bool _isFlowData = false;
         //검색결과 많은 경우, 코드=>명칭 변경과 다이어그램 그리는데 시간이 소요되어 그리드가 깔끔하게 갱신되지 안아서 처리//
         [ObservableProperty] private bool isDiagramReady = false;
+
+        public event EventHandler? FlowUpdated;
 
 
         public LandMoveFlowConverter Converter { get; set; }
@@ -534,20 +535,24 @@ namespace LMFS.ViewModels.Pages
         {
             Converter = new LandMoveFlowConverter(SettingVM);
 
-            //var filteredList = GridDataSource;
+            var filteredList = GridDataSource;
+            var categoryList = GridCategoryDataSource;
             //코드=>명칭 변경 작업이 오래 걸려 AnalyzeData 내부에서 여기로 가져옴//(BusyWindow가 일찍 사라지기에 전처리)
-            GridDataSource = Converter.ChangeCodeToNameBatch(GridDataSource);
-            GridCategoryDataSource = Converter.GetCodeValueCategory(GridCategoryDataSource);
-            //var categoryList = GridCategoryDataSource;
+            filteredList = Converter.ChangeCodeToNameBatch(GridDataSource);
+            categoryList = Converter.GetCodeValueCategory(GridCategoryDataSource);
+            //GridCategoryDataSource = new List<LandMoveInfoCategory>(GridCategoryDataSource);
 
             if (!JimokChg)
             {
-                GridDataSource = GridDataSource.Where(item => item.rsn != "지목변경").ToList();
-                GridCategoryDataSource = GridCategoryDataSource.Where(item => item.rsn != "지목변경").ToList();
+                filteredList = GridDataSource.Where(item => item.rsn != "지목변경").ToList();
+                categoryList = GridCategoryDataSource.Where(item => item.rsn != "지목변경").ToList();
             }
 
-            var filteredList = GridDataSource;
-            var categoryList = GridCategoryDataSource;
+            GridDataSource = filteredList;
+            GridCategoryDataSource = categoryList;
+
+            FlowUpdated?.Invoke(this, EventArgs.Empty);
+
 
             ////Vit.G//TEST// 3th argu //
             if (filteredList.Count > 0)
