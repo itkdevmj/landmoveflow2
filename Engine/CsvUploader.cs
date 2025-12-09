@@ -680,14 +680,14 @@ public class CsvUploader
 
 
 
-                // [디버깅용]
-                bool exists = PnuList.Any(item => item.pnu == "4477025027200400001");
-                if (exists || _groupSeqno >= 2091)
-                {
+                //// [디버깅용]
+                //bool exists = PnuList.Any(item => item.pnu == "4477025027200400001");
+                //if (exists || _groupSeqno >= 2091)
+                //{
                     
-                    int a = 1;
+                //    int a = 1;
                     
-                }
+                //}
 
 
 

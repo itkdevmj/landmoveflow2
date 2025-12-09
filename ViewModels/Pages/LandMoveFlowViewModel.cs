@@ -69,6 +69,43 @@ namespace LMFS.ViewModels.Pages
         //public RelayCommand SearchCommand => new(async () => await OnSearch());
 
 
+
+        //------------------------------------------------------------
+        private int _zoomPercent = 100; // 100%
+        public int ZoomPercent
+        {
+            get => _zoomPercent;
+            set
+            {
+                if (_zoomPercent != value)
+                {
+                    _zoomPercent = value;
+                    ZoomFactor = _zoomPercent / 100.0;  // 여기서만 변환
+                    OnPropertyChanged(nameof(ZoomPercent));
+                }
+            }
+        }
+
+        private double _zoomFactor = 1.0; // 1.0 = 100%
+        public double ZoomFactor
+        {
+            get => _zoomFactor;
+            set
+            {
+                if (Math.Abs(_zoomFactor - value) > 0.0001)
+                {
+                    _zoomFactor = value;
+                    // 여기서 TrackBar 쪽도 자동 반영되도록 ZoomPercent 재계산
+                    _zoomPercent = (int)Math.Round(_zoomFactor * 100);
+                    OnPropertyChanged(nameof(ZoomFactor));
+                    OnPropertyChanged(nameof(ZoomPercent));
+                }
+            }
+        }
+        //------------------------------------------------------------
+
+
+
         public record RequestExportGridMessage(string ExportPath, string SheetName);
 
 
@@ -497,19 +534,20 @@ namespace LMFS.ViewModels.Pages
         {
             Converter = new LandMoveFlowConverter(SettingVM);
 
-            var filteredList = GridDataSource;
-            var categoryList = GridCategoryDataSource;
-
+            //var filteredList = GridDataSource;
             //코드=>명칭 변경 작업이 오래 걸려 AnalyzeData 내부에서 여기로 가져옴//(BusyWindow가 일찍 사라지기에 전처리)
             GridDataSource = Converter.ChangeCodeToNameBatch(GridDataSource);
+            GridCategoryDataSource = Converter.GetCodeValueCategory(GridCategoryDataSource);
+            //var categoryList = GridCategoryDataSource;
 
             if (!JimokChg)
             {
-                filteredList = GridDataSource.Where(item => item.rsn != "지목변경").ToList();
-                GridDataSource = filteredList;
-                categoryList = GridCategoryDataSource.Where(item => item.rsn != "40").ToList();
-                GridCategoryDataSource = categoryList;
+                GridDataSource = GridDataSource.Where(item => item.rsn != "지목변경").ToList();
+                GridCategoryDataSource = GridCategoryDataSource.Where(item => item.rsn != "지목변경").ToList();
             }
+
+            var filteredList = GridDataSource;
+            var categoryList = GridCategoryDataSource;
 
             ////Vit.G//TEST// 3th argu //
             if (filteredList.Count > 0)

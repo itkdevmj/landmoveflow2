@@ -192,13 +192,6 @@ public class LandMoveFlowConverter
         };
     }
 
-    private void GetCodeValueCategory(List<LandMoveInfoCategory> categoryList)
-    {        
-        foreach (var row in categoryList)
-        {
-            row.rsn = GetCodeValue(3, row.rsn);//이동종목 코드 => 명칭
-        }
-    }
 
     //option (1)지역명(동 or 리)
     //       (2)지번만
@@ -254,6 +247,7 @@ public class LandMoveFlowConverter
         //return $"{jibun}";
     }
 
+    //[조회] (GridDataSource) 코드 데이터 => 명칭 변환 //
     public List<LandMoveInfo> ChangeCodeToNameBatch(List<LandMoveInfo> flowList)
     {
         foreach (var row in flowList)
@@ -269,6 +263,7 @@ public class LandMoveFlowConverter
         return flowList;
     }
 
+    //[기록] 코드 데이터 => 명칭 변환 //
     public List<UserHist> ChangeCodeToNameBatch2(List<UserHist> histList)
     {
         foreach (var row in histList)
@@ -277,6 +272,17 @@ public class LandMoveFlowConverter
         }
 
         return histList;
+    }
+
+    //[조회] (GridCategoryDataSource) 코드 데이터 => 명칭 변환 //
+    public List<LandMoveInfoCategory> GetCodeValueCategory(List<LandMoveInfoCategory> cateList)
+    {
+        foreach (var row in cateList)
+        {            
+            row.rsn = GetCodeValue(3, row.rsn);//이동종목 코드 => 명칭
+        }
+
+        return cateList;
     }
 
 
@@ -389,6 +395,7 @@ public class LandMoveFlowConverter
         var afJimok = "";
         double afArea = 0;
         var ownName = "";
+        var memo = "";
 
         foreach (var row in flowList)
         {
@@ -399,6 +406,7 @@ public class LandMoveFlowConverter
             afJimok = row.afJimok ?? "";
             afArea = row?.afArea ?? 0.0;
             ownName = row.ownName ?? "";
+            memo = row.memo ?? string.Empty;
 
             //Vit.G//목록 : 지번만 표시, Diagram : (동 or 리) + 지번
             var bfPnu = row.bfPnu; //row.bfJibun;//row.bfPnu;
@@ -694,6 +702,7 @@ public class LandMoveFlowConverter
                     var pnuColName = $"DEP{depIdx + 1}_PNU";
                     var itmColName = $"DEP{depIdx + 1}_ITM";
                     var attColName = "DEP0_ITM";
+                    //MEMO
 
                     var filtered = _dfXml.AsEnumerable()
                         .Select((r, i) => new { Row = r, Index = i }) 
@@ -867,7 +876,6 @@ public class LandMoveFlowConverter
         int x = 0;
         int y = 0;
         var jibunCol = _settingVM.JibunColors;
-
 
         if (_isPortrait)//[세로형 그리기]
         {
@@ -1161,9 +1169,6 @@ public class LandMoveFlowConverter
 
             //Vit.G//조회 필지코드(19자리)
             _pnu = pnu;
-
-            //정리일+종목=Category 종목코드=>명칭 변경
-            GetCodeValueCategory(categoryList);
 
             ProcessLandMoveFlow(flowList, vm);
             string str = _xdoc.ToString();
