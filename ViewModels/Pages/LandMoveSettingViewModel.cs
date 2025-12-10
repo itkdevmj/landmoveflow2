@@ -125,10 +125,12 @@ namespace LMFS.ViewModels.Pages
             // Converter 등이 최신 Setting 값을 참조/반영
             if (FlowVM != null)
             {
+                //설정 색상 동기화
+                FlowVM.Converter.UpdateWithNewSetting(FlowVM.SettingVM);
                 // 다이어그램 다시 그리기
-                FlowVM.Converter.UpdateWithNewSetting(FlowVM.SettingVM);//설정 색상 동기화
-                XDocument rtnXml = FlowVM.Converter.RefreshDiagramLandMoveFlow();
-                FlowVM.ProcessDiagramLandMoveFlow(rtnXml); 
+                FlowVM.Converter.RefreshDiagramLandMoveFlow(FlowVM);
+                //XDocument rtnXml = FlowVM.Converter.RefreshDiagramLandMoveFlow();
+                //FlowVM.ProcessDiagramLandMoveFlow(rtnXml); 
             }
         }
     }

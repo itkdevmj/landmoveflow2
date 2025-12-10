@@ -3,6 +3,7 @@ using DevExpress.DataAccess.Native.Data;
 using DevExpress.Diagram.Core.Native;
 using DevExpress.Xpf.CodeView;
 using DevExpress.Xpf.Diagram;
+using DevExpress.Xpf.Printing.Native;
 using DevExpress.Xpo;
 using DevExpress.XtraPrinting.XamlExport;
 using DevExpress.XtraScheduler.Drawing;
@@ -286,7 +287,8 @@ public class LandMoveFlowConverter
     }
 
 
-    private void ProcessLandMoveFlow(List<LandMoveInfo> rtnList, LandMoveFlowViewModel vm)
+    //private => public
+    public void ProcessLandMoveFlow(List<LandMoveInfo> rtnList, LandMoveFlowViewModel vm)
     {
         // 각종 변수 초기화
         InitializeForNewGroup();
@@ -1143,16 +1145,28 @@ public class LandMoveFlowConverter
     }
     #endregion
 
-    #region 다시 그리기
-    public XDocument RefreshDiagramLandMoveFlow()
+    #region 다시 그리기(색상변경, 다이어그램 내 지번 클릭)
+    public void RefreshDiagramLandMoveFlow(LandMoveFlowViewModel vm)
     {
         InitializeXMLForNewGroup();//XML 노드 구성 초기화
         MakeXmlData(); // 다이어그램 다시 그림
 
-        return _xdoc;
+        vm.ProcessDiagramLandMoveFlow(_xdoc);
     }
     #endregion
 
+    #region 다시 그리기(XML 구성)
+    public void RefreshXMLLandMoveFlow(List<LandMoveInfo> flowList, LandMoveFlowViewModel vm)
+    {
+        var currentZoomFactor = vm.ZoomFactor;
+        // 다이어그램 다시 그리기
+        ProcessLandMoveFlow(flowList, vm);
+
+        vm.ProcessDiagramLandMoveFlow(_xdoc);
+
+        vm.ZoomFactor = currentZoomFactor;
+    }
+    #endregion
 
     // ===========================================================
     // 메인 실행 로직

@@ -468,7 +468,7 @@ namespace LMFS.ViewModels.Pages
 
         public void SearchLandMoveDetailData(string pnu)
         {            
-            GridDataSource = DBService.ListLandMoveHistory(pnu);
+            GridDataSource = DBService.ListLandMoveHistory(pnu, true/*필지추가 관련 조회이므로 '지목변경' 포함해서 검색해야 함*/);
         }
         #endregion
 

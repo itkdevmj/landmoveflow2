@@ -399,6 +399,9 @@ namespace LMFS.Views.Pages
         {
             if (string.IsNullOrEmpty(content)) return;
 
+            //소유자명, 지목, 면적 등 표기한 경우 '지번'만 가져오기 위함//
+            content = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)[0];
+
             bool isSan = content.StartsWith("산 ");
             string cleanContent = isSan ? content.Substring(2) : content; // "산 " 제거
 
@@ -415,8 +418,9 @@ namespace LMFS.Views.Pages
                 FlowVM.Converter._pnu = FlowVM.BuildPnu();
                 FlowVM.Converter.SaveMakedXmlData();
                 // 다이어그램 다시 그리기
-                XDocument rtnXml = FlowVM.Converter.RefreshDiagramLandMoveFlow();
-                FlowVM.ProcessDiagramLandMoveFlow(rtnXml);
+                FlowVM.Converter.RefreshDiagramLandMoveFlow(FlowVM);
+                //XDocument rtnXml = FlowVM.Converter.RefreshDiagramLandMoveFlow();
+                //FlowVM.ProcessDiagramLandMoveFlow(rtnXml);
             }
         }
     }

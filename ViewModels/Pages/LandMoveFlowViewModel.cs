@@ -141,6 +141,8 @@ namespace LMFS.ViewModels.Pages
                 return;// 본번 & 부번 데이터가 없으면 이후 처리 중단
             }
 
+            //[초기화] 검색결과 그리드
+            InitGridLandMoveData();
             // [1]. PNU 구성
             // [2]. 그리드 데이터 조회(검색)
             SearchLandMoveData();
@@ -469,33 +471,47 @@ namespace LMFS.ViewModels.Pages
             GlobalDataManager.Instance.TB_UserHistory = $"user_hist";
         }
 
-
+        //[지목변경] 표시
         partial void OnJimokChgChanged(bool value)
         {
             // 검색 로직 실행
             OnSearch();
         }
-        
+
+        //다이어그램 내 '세로형'
         partial void OnPortraitChanged(bool value)
         {
-            // 검색 로직 실행
-            OnSearch();
-        }
-        partial void OnIsOwnNameChanged(bool value)
-        {
-            // 검색 로직 실행
-            OnSearch();
+            //// 검색 로직 실행
+            //OnSearch();
+            // 다이어그램 다시 그리기
+            Converter.RefreshXMLLandMoveFlow(GridDataSource, this);
         }
 
+        //다이어그램 내 '소유자명' 표시
+        partial void OnIsOwnNameChanged(bool value)
+        {
+            //// 검색 로직 실행
+            //OnSearch();
+            // 다이어그램 다시 그리기
+            Converter.RefreshXMLLandMoveFlow(GridDataSource, this);
+        }
+
+        //다이어그램 내 '지목' 표시
         partial void OnIsJimokChanged(bool value)
         {
-            // 검색 로직 실행
-            OnSearch();
+            //// 검색 로직 실행
+            //OnSearch();
+            // 다이어그램 다시 그리기
+            Converter.RefreshXMLLandMoveFlow(GridDataSource, this);
         }
+
+        //다이어그램 내 '면적' 표시
         partial void OnIsAreaChanged(bool value)
         {
-            // 검색 로직 실행
-            OnSearch();
+            //// 검색 로직 실행
+            //OnSearch();
+            // 다이어그램 다시 그리기
+            Converter.RefreshXMLLandMoveFlow(GridDataSource, this);
         }
 
 
@@ -523,13 +539,22 @@ namespace LMFS.ViewModels.Pages
             return pnu;
         }
 
+        //[초기화] 검색결과 그리드
+        private void InitGridLandMoveData()
+        {
+            GridDataSource = null;
+            GridCategoryDataSource = null;
+        }
+
+        //[검색] PNU 구성 > DB Query
         private void SearchLandMoveData()
         {
             CurrentPnu = BuildPnu(); // 기존 방식
-            GridDataSource = DBService.ListLandMoveHistory(CurrentPnu);
-            GridCategoryDataSource = DBService.ListLandMoveCategory(CurrentPnu);
+            GridDataSource = DBService.ListLandMoveHistory(CurrentPnu, JimokChg);
+            GridCategoryDataSource = DBService.ListLandMoveCategory(CurrentPnu, JimokChg);
         }
 
+        //검색결과 => 정리(코드 -> 명칭 변경 등), XML 구성하는 함수 호출
         private void UpdateFlowXml()
         {
             Converter = new LandMoveFlowConverter(SettingVM);
@@ -540,18 +565,19 @@ namespace LMFS.ViewModels.Pages
             GridDataSource = Converter.ChangeCodeToNameBatch(GridDataSource);
             GridCategoryDataSource = Converter.GetCodeValueCategory(GridCategoryDataSource);
 
-            if (!JimokChg)
-            {
-                filteredList = GridDataSource.Where(item => item.rsn != "지목변경").ToList();
-                categoryList = GridCategoryDataSource.Where(item => item.rsn != "지목변경").ToList();
-            }
-            else
+            //화면 갱신 이슈로 직접 Query 방식으로 변경//[아래 코드는 추후 제거 예정]
+            //if (!JimokChg)
+            //{
+            //    filteredList = GridDataSource.Where(item => item.rsn != "지목변경").ToList();
+            //    categoryList = GridCategoryDataSource.Where(item => item.rsn != "지목변경").ToList();
+            //}
+            //else
             {
                 filteredList = GridDataSource;
                 categoryList = GridCategoryDataSource;
             }
 
-            ////Vit.G//TEST// 3th argu //
+            //3th argu//
             if (filteredList.Count > 0)
             {
                 IsFlowData = true;//표시 설정 [이동정리목록 내보내기(엑셀), 다이어그램 내보내기(Pdf, Jpg, Png)]
