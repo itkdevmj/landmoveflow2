@@ -189,10 +189,14 @@ namespace LMFS.Db
         }
         
         // 토지이동연혁조회 (pnu)
-        public static List<LandMoveInfo> ListLandMoveHistory(string pnu)
+        public static List<LandMoveInfo> ListLandMoveHistory(string pnu, bool jimokChg)
         {
             using (var connection = MariaDBConnection.connectDB())
             {
+                //[지목변경] 표시 => 조건 추가
+                string cdJimokChg = "40";
+                string conditionJimokChg = jimokChg ==false ? $" AND rsn != '{cdJimokChg}'" : "";
+
                 string query =
                     $"""
                      SELECT g_seq       AS gSeq
@@ -213,6 +217,7 @@ namespace LMFS.Db
                                        WHERE bf_pnu = '{pnu}' OR af_pnu = '{pnu}'
                                       LIMIT 1
                                     )
+                            {conditionJimokChg}
                      ORDER BY idx 
                      """;
                 return connection.Query<LandMoveInfo>(query).ToList();
@@ -220,10 +225,14 @@ namespace LMFS.Db
             }
         }
 
-        public static List<LandMoveInfoCategory> ListLandMoveCategory(string pnu)
+        public static List<LandMoveInfoCategory> ListLandMoveCategory(string pnu, bool jimokChg)
         {
             using (var connection = MariaDBConnection.connectDB())
             {
+                //[지목변경] 표시 => 조건 추가
+                string cdJimokChg = "40";
+                string conditionJimokChg = jimokChg == false ? $" AND rsn != '{cdJimokChg}'" : "";
+
                 string query =
                     $"""
                      SELECT distinct rsn
@@ -234,6 +243,7 @@ namespace LMFS.Db
                                        WHERE bf_pnu = '{pnu}' OR af_pnu = '{pnu}'
                                       LIMIT 1
                                     )
+                            {conditionJimokChg}                     
                      GROUP BY rsn, regDt
                      ORDER BY idx 
                      """;
@@ -539,8 +549,13 @@ namespace LMFS.Db
                                 ownName = reader.IsDBNull(reader.GetOrdinal("own_name")) ? null : reader.GetString("own_name"),
                                 pSeq = reader.IsDBNull(reader.GetOrdinal("p_seq")) ? 0 : reader.GetInt32("p_seq"),
                                 areaCd = reader.IsDBNull(reader.GetOrdinal("area_cd")) ? null : reader.GetString("area_cd"),
-                                userId = reader.IsDBNull(reader.GetOrdinal("user_id")) ? null : reader.GetString("user_id"),
-                                uploadDt = reader.IsDBNull(reader.GetOrdinal("upload_dt")) ? null : reader.GetString("upload_dt")
+                                uploadId = reader.IsDBNull(reader.GetOrdinal("upload_id")) ? null : reader.GetString("upload_id"),
+                                uploadDt = reader.IsDBNull(reader.GetOrdinal("upload_dt")) ? null : reader.GetString("upload_dt"),
+                                appendId = reader.IsDBNull(reader.GetOrdinal("upload_id")) ? null : reader.GetString("append_id"),
+                                appendDt = reader.IsDBNull(reader.GetOrdinal("upload_dt")) ? null : reader.GetString("append_dt"),
+                                memo = reader.IsDBNull(reader.GetOrdinal("upload_id")) ? null : reader.GetString("memo"),
+                                memoId = reader.IsDBNull(reader.GetOrdinal("upload_id")) ? null : reader.GetString("memo_id"),
+                                memoDt = reader.IsDBNull(reader.GetOrdinal("upload_dt")) ? null : reader.GetString("memo_dt")
                             };
                             resultList.Add(info);
                         }
@@ -606,7 +621,8 @@ namespace LMFS.Db
                 string query =
                     $"""
                       INSERT INTO {GlobalDataManager.Instance.TB_LandMoveInfo}_{DbConInfo.id}_{today}
-                      VALUES (@groupseqno, @seq, @bfpnu, @afpnu, @rsn, @creymd, @bfjimok, @bfarea, @afjimok, @afarea, @ownname, @pnuseq, @areacd, @userid, @uploaddt)
+                      (g_seq, idx, bf_pnu, af_pnu, rsn, reg_dt, bf_jimok, bf_area, af_jimok, af_area, own_name, p_seq, area_cd, upload_id, upload_dt)
+                      VALUES (@groupseqno, @seq, @bfpnu, @afpnu, @rsn, @creymd, @bfjimok, @bfarea, @afjimok, @afarea, @ownname, @pnuseq, @areacd, @uploadid, @uploaddt)
                       """;
 
                 int idx = 0;
@@ -627,7 +643,7 @@ namespace LMFS.Db
                         cmd.Parameters.AddWithValue("@ownname", rec.ownName);
                         cmd.Parameters.AddWithValue("@pnuseq", rec.pSeq);
                         cmd.Parameters.AddWithValue("@areacd", GlobalDataManager.Instance.loginUser.areaCd);
-                        cmd.Parameters.AddWithValue("@userid", DbConInfo.id);
+                        cmd.Parameters.AddWithValue("@uploadid", DbConInfo.id);
                         cmd.Parameters.AddWithValue("@uploaddt", today);
                         //
                         cmd.ExecuteNonQuery();
@@ -650,9 +666,9 @@ namespace LMFS.Db
                 string query =
                     $"""
                     INSERT INTO {GlobalDataManager.Instance.TB_LandMoveInfo}
-                    (g_seq, idx, bf_pnu, af_pnu, rsn, reg_dt, bf_jimok, bf_area, af_jimok, af_area, own_name, p_seq, area_cd, user_id, upload_dt)
+                    (g_seq, idx, bf_pnu, af_pnu, rsn, reg_dt, bf_jimok, bf_area, af_jimok, af_area, own_name, p_seq, area_cd, append_id, append_dt)
                     VALUES
-                    (@gSeq, @idx, @bfPnu, @afPnu, @rsn, @regDt, @bfJimok, @bfArea, @afJimok, @afArea, @ownName, @pSeq, @areaCd, @userId, @uploadDt)
+                    (@gSeq, @idx, @bfPnu, @afPnu, @rsn, @regDt, @bfJimok, @bfArea, @afJimok, @afArea, @ownName, @pSeq, @areaCd, @appendId, @appendDt)
                     """;
 
                 using (var cmd = new MySqlCommand(query, connection))
@@ -670,29 +686,11 @@ namespace LMFS.Db
                     cmd.Parameters.AddWithValue("@ownName", info.ownName);
                     cmd.Parameters.AddWithValue("@pSeq", info.pSeq);
                     cmd.Parameters.AddWithValue("@areaCd", GlobalDataManager.Instance.loginUser.areaCd);
-                    cmd.Parameters.AddWithValue("@userId", DbConInfo.id);
-                    cmd.Parameters.AddWithValue("@uploadDt", today);
+                    cmd.Parameters.AddWithValue("@appendId", DbConInfo.id);
+                    cmd.Parameters.AddWithValue("@appendDt", today);
                     //
                     cmd.ExecuteNonQuery();
                 }
-                //connection.Execute(query, new
-                //{
-                //    info.gSeq,
-                //    info.idx,
-                //    info.bfPnu,
-                //    info.afPnu,
-                //    info.rsn,      // 상단 label에서 값 대입
-                //    info.regDt,    // 상단 label에서 값 대입
-                //    info.bfJimok,
-                //    info.bfArea,
-                //    info.afJimok,
-                //    info.afArea,
-                //    info.ownName,
-                //    info.pSeq,
-                //    GlobalDataManager.Instance.loginUser.areaCd,
-                //    DbConInfo.id,
-                //    today
-                //});
             }
         }
         #endregion
@@ -773,6 +771,42 @@ namespace LMFS.Db
                 //[방법2]
                 //var result = connection.Query<LandMoveInfo>(query, new { grp = _grplist }).ToList();
                 //return result;
+            }
+        }
+        #endregion
+
+
+
+        #region 메모추가(다이어그램 특정 필지박스 선택)
+        public static void UpdateLandMoveMemo(string memo, LandMoveInfo info)
+        {
+            using (var connection = MariaDBConnection.connectDB())
+            {
+                string today = DateTime.Today.ToString("yyyyMMdd");
+
+                string query =
+                    $"""
+                    UPDATE {GlobalDataManager.Instance.TB_LandMoveInfo}
+                    SET memo = @memo, memo_id = @memoId, memo_dt = @memoDt
+                    WHERE g_seq = @gSeq and af_pnu = @afPnu and rsn = @rsn and reg_dt = @regDt)
+                    """;
+
+                using (var cmd = new MySqlCommand(query, connection))
+                {
+                    //SET
+                    cmd.Parameters.AddWithValue("@memo", memo);
+                    cmd.Parameters.AddWithValue("@memoId", DbConInfo.id);
+                    cmd.Parameters.AddWithValue("@memoDt", today); 
+                    //WHERE
+                    cmd.Parameters.AddWithValue("@gSeq", info.gSeq);
+                    cmd.Parameters.AddWithValue("@afPnu", info.afPnu);
+                    cmd.Parameters.AddWithValue("@rsn", info.rsn);
+                    cmd.Parameters.AddWithValue("@regDt", info.regDt);
+                    cmd.Parameters.AddWithValue("@areaCd", GlobalDataManager.Instance.loginUser.areaCd);
+                    
+                    //
+                    cmd.ExecuteNonQuery();
+                }
             }
         }
         #endregion

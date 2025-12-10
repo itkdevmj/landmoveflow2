@@ -9,5 +9,6 @@
         <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <local:BoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
         <local:InverseBoolConverter x:Key="InverseBoolConverter"/>
+        <local:AppendOwnerToVisibilityConverter x:Key="AppendOwnerToVisibilityConverter"/>
     </Application.Resources>
 </Application>

@@ -104,13 +104,33 @@
                     <dxg:GridColumn FieldName="ActionButton" AllowEditing="False" Header="" Width="80" HorizontalHeaderContentAlignment="Center">
                         <dxg:GridColumn.CellTemplate>
                             <DataTemplate>
-                                <!-- IsNewRow일 때만 버튼 노출, 아니면 빈 패널만 -->
+                                <!-- RowData.Row(LandMoveInfo)를 DataContext 로 사용 -->
                                 <StackPanel DataContext="{Binding RowData.Row}">
-                                    <Button Content="추가" 
-                                        Visibility="{Binding IsNewRow, Converter={StaticResource BoolToVisibilityConverter}}"
-                                        Command="{Binding DataContext.ConfirmAddCommand, RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                    <!-- 추가 버튼: 새 행일 때만 보이고, 사용자 정의 레코드가 아닐 때 -->
+                                    <Button Content="추가" Margin="2" Padding="5,2"
+                                        Command="{Binding DataContext.ConfirmAddCommand,
+                                             RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
                                         CommandParameter="{Binding}"
-                                        Margin="2" Padding="5,2" />
+                                        Visibility="{Binding IsNewRow,
+                                             RelativeSource={RelativeSource AncestorType=dxg:GridRowContent},
+                                             Converter={StaticResource BoolToVisibilityConverter}}">
+                                    </Button>
+                                    <!-- 삭제 버튼: append_id == CurrentUserId 일 때만 보이게 -->
+                                    <Button Content="삭제" Margin="2" Padding="5,2"
+                                        Background="Red" Foreground="White"
+                                        Command="{Binding DataContext.ConfirmDeleteCommand,
+                                             RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                        CommandParameter="{Binding}">
+                                        <Button.Visibility>
+                                            <MultiBinding Converter="{StaticResource AppendOwnerToVisibilityConverter}">
+                                                <!-- 행 데이터의 append_id -->
+                                                <Binding Path="append_id"/>
+                                                <!-- GridControl(ViewModel)의 CurrentUserId -->
+                                                <Binding Path="DataContext.CurrentUserId"
+                                                    RelativeSource="{RelativeSource AncestorType=dxg:GridControl}"/>
+                                            </MultiBinding>
+                                        </Button.Visibility>
+                                    </Button>
                                 </StackPanel>
                             </DataTemplate>
                         </dxg:GridColumn.CellTemplate>
