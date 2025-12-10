@@ -18,6 +18,7 @@ using Microsoft.Win32;// SaveFileDialog를 위해 필요
 using NLog;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.IO.Packaging;
@@ -58,8 +59,6 @@ namespace LMFS.ViewModels.Pages
         [ObservableProperty] private bool _isFlowData = false;
         //검색결과 많은 경우, 코드=>명칭 변경과 다이어그램 그리는데 시간이 소요되어 그리드가 깔끔하게 갱신되지 안아서 처리//
         [ObservableProperty] private bool isDiagramReady = false;
-
-        public event EventHandler? FlowUpdated;
 
 
         public LandMoveFlowConverter Converter { get; set; }
@@ -538,21 +537,19 @@ namespace LMFS.ViewModels.Pages
             var filteredList = GridDataSource;
             var categoryList = GridCategoryDataSource;
             //코드=>명칭 변경 작업이 오래 걸려 AnalyzeData 내부에서 여기로 가져옴//(BusyWindow가 일찍 사라지기에 전처리)
-            filteredList = Converter.ChangeCodeToNameBatch(GridDataSource);
-            categoryList = Converter.GetCodeValueCategory(GridCategoryDataSource);
-            //GridCategoryDataSource = new List<LandMoveInfoCategory>(GridCategoryDataSource);
+            GridDataSource = Converter.ChangeCodeToNameBatch(GridDataSource);
+            GridCategoryDataSource = Converter.GetCodeValueCategory(GridCategoryDataSource);
 
             if (!JimokChg)
             {
                 filteredList = GridDataSource.Where(item => item.rsn != "지목변경").ToList();
                 categoryList = GridCategoryDataSource.Where(item => item.rsn != "지목변경").ToList();
             }
-
-            GridDataSource = filteredList;
-            GridCategoryDataSource = categoryList;
-
-            FlowUpdated?.Invoke(this, EventArgs.Empty);
-
+            else
+            {
+                filteredList = GridDataSource;
+                categoryList = GridCategoryDataSource;
+            }
 
             ////Vit.G//TEST// 3th argu //
             if (filteredList.Count > 0)

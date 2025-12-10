@@ -89,8 +89,6 @@ namespace LMFS.Views.Pages
         {
             InitializeComponent();
 
-            DataContextChanged += LandMoveFlowPage_DataContextChanged;//for GridCategoryDataSource 화면갱신
-
             //
             FlowVM = new LandMoveFlowViewModel(settingVM);
             this.DataContext = FlowVM;//자신의 ViewModel//
@@ -100,21 +98,6 @@ namespace LMFS.Views.Pages
             WeakReferenceMessenger.Default.Register<LoadXmlMessage>(this);
 
             RegisterMessages();// 생성자에서 이 함수 한번만!
-        }
-
-        //for GridCategoryDataSource 화면갱신
-        private void LandMoveFlowPage_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if (e.NewValue is LandMoveFlowViewModel vm)
-            {
-                vm.FlowUpdated += Vm_FlowUpdated; // ViewModel에서 이벤트 발생시킴
-            }
-        }
-
-        //for GridCategoryDataSource 화면갱신
-        private void Vm_FlowUpdated(object? sender, EventArgs e)
-        {
-            AnotherFlowDataGrid.RefreshData();
         }
 
 
