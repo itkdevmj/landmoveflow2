@@ -10,13 +10,13 @@
         ShowInTaskbar="False"
         Topmost="True"
         ResizeMode="NoResize">
-    <Grid Background="#A3C6C4">
-        <!-- 다이어그램 전체를 살짝 어둡게 -->
-        <Border Background="#CCFFFFFF"
+    <Border Background="#A3C6C4"
                 CornerRadius="10"
                 Padding="5"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center" Height="112" Width="292">
+        <Grid Background="#CCFFFFFF">
+        <!-- 다이어그램 전체를 살짝 어둡게 -->
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock Text="다이어그램 생성중..."
                            FontSize="16"
@@ -26,6 +26,6 @@
                            Margin="0,0,0,10" />
                 <ProgressBar IsIndeterminate="True" Width="220" Height="18"/>
             </StackPanel>
-        </Border>
-    </Grid>
+        </Grid>
+    </Border>
 </Window>

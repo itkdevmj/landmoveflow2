@@ -83,7 +83,7 @@ public partial class GridDetailItem : ObservableObject  // ← partial + Observa
 
     [ObservableProperty] private bool _isTracking = false; // 추적 활성화 플래그
 
-    [ObservableProperty] private bool _isMyAppededRow;//#Mine//로그인 계정 사용자가 추가한 필지
+    [ObservableProperty] private bool _isAppendRow;//#Mine//로그인 계정 사용자가 추가한 필지
 
     #endregion
 
@@ -112,7 +112,7 @@ public partial class GridDetailItem : ObservableObject  // ← partial + Observa
         _bfJimok = string.Empty;
         _afJimok = string.Empty;
 
-        _isMyAppededRow = false;//#Mine//로그인 계정 사용자가 추가한 필지
+        _isAppendRow = false;//#Mine//로그인 계정 사용자가 추가한 필지
 
         _logger.Debug("GridDetailItem 인스턴스 생성");
 
@@ -208,7 +208,7 @@ public partial class GridDetailItem : ObservableObject  // ← partial + Observa
             OwnName = info.ownName ?? "",
 
             // 문자열이 비어있지 않다면 true, 그렇지 않으면 false를 bool 변수에 할당
-            IsMyAppededRow = !string.IsNullOrEmpty(info.appendId)//#Mine//로그인 계정 사용자가 추가한 필지
+            IsAppendRow = !string.IsNullOrEmpty(info.appendId)//#Mine//로그인 계정 사용자가 추가한 필지
         };
         Debug.WriteLine($"Row: BfJibun={item.BfJibun}, AfJibun={item.AfJibun}, IsNewRow={item.IsNewRow}");
 

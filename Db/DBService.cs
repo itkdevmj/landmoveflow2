@@ -211,6 +211,9 @@ namespace LMFS.Db
                           , af_area     AS afArea
                           , own_name    AS ownName
                           , p_seq       AS pSeq
+                          , append_id   AS appendId
+                          , memo
+                          , memo_id     AS memoId
                        FROM {GlobalDataManager.Instance.TB_LandMoveInfo}
                       WHERE g_seq = ( SELECT g_seq
                                         FROM {GlobalDataManager.Instance.TB_LandMoveInfo}

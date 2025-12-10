@@ -104,30 +104,31 @@
                     <dxg:GridColumn FieldName="ActionButton" AllowEditing="False" Header="" Width="80" HorizontalHeaderContentAlignment="Center">
                         <dxg:GridColumn.CellTemplate>
                             <DataTemplate>
-                                <!-- RowData.Row(LandMoveInfo)를 DataContext 로 사용 -->
-                                <StackPanel DataContext="{Binding RowData.Row}">
-                                    <!-- 추가 버튼: 새 행일 때만 보이고, 사용자 정의 레코드가 아닐 때 -->
+                                <!-- DataContext : RowData -->
+                                <StackPanel>
+                                    <!-- 추가 버튼: 새 행일 때만 -->
                                     <Button Content="추가" Margin="2" Padding="5,2"
-                                        Command="{Binding DataContext.ConfirmAddCommand,
-                                             RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
-                                        CommandParameter="{Binding}"
-                                        Visibility="{Binding IsNewRow,
-                                             RelativeSource={RelativeSource AncestorType=dxg:GridRowContent},
-                                             Converter={StaticResource BoolToVisibilityConverter}}">
-                                    </Button>
-                                    <!-- 삭제 버튼: append_id == CurrentUserId 일 때만 보이게 -->
-                                    <Button Content="삭제" Margin="2" Padding="5,2"
-                                        Background="Red" Foreground="White"
-                                        Command="{Binding DataContext.ConfirmDeleteCommand,
-                                             RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
-                                        CommandParameter="{Binding}">
+                                            Command="{Binding DataContext.ConfirmAddCommand,
+                                                              RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                            CommandParameter="{Binding Row}" >
                                         <Button.Visibility>
-                                            <MultiBinding Converter="{StaticResource AppendOwnerToVisibilityConverter}">
-                                                <!-- 행 데이터의 append_id -->
-                                                <Binding Path="append_id"/>
-                                                <!-- GridControl(ViewModel)의 CurrentUserId -->
-                                                <Binding Path="DataContext.CurrentUserId"
-                                                    RelativeSource="{RelativeSource AncestorType=dxg:GridControl}"/>
+                                            <Binding Path="IsNewRow"
+                                                     Converter="{StaticResource BoolToVisibilityConverter}" />
+                                        </Button.Visibility>
+                                    </Button>
+
+                                    <!-- 삭제 버튼: 새 행이 아니고, Row.uploadid 에 값이 있을 때 -->
+                                    <Button Content="삭제" Margin="2" Padding="5,2"
+                                            Background="Red" Foreground="White"
+                                            Command="{Binding DataContext.ConfirmDeleteCommand,
+                                                              RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                            CommandParameter="{Binding Row}">
+                                        <Button.Visibility>
+                                            <MultiBinding Converter="{StaticResource AppendIdToVisibilityConverter}">
+                                                <!-- IsNewItemRow (RowData) -->
+                                                <Binding Path="IsAppedRow" />
+                                                <!-- uploadid (RowData.Row.uploadid) -->
+                                                <Binding Path="Row.appendid" />
                                             </MultiBinding>
                                         </Button.Visibility>
                                     </Button>
