@@ -617,14 +617,7 @@ public class CsvUploader
                 // (2) 필요없는 컬럼 제거(예시: LandOwnerAddress)
                 // -> 클래스 정의에서 제외하면 됨 (혹은 csv 저장 시 제외)
                 //------------------------------------------
-
                 var converter = new LandMoveFlowConverter();
-                //resultData = resultData
-                //    .OrderBy(x => x.regDt)
-                //    .ThenBy(x => converter.ListMovRsn.ContainsKey(x.rsn) ? converter.ListMovRsn[x.rsn] : "00")
-                //    .ThenBy(x => x.bfPnu)
-                //    .ThenBy(x => x.afPnu)
-                //    .ToList();
 
                 //------------------------------------------
                 // (2) DB에서 기존 그룹 데이터 가져와서 병합
@@ -664,33 +657,6 @@ public class CsvUploader
                 // (4) 그룹번호 재부여
                 //------------------------------------------
                 foreach (var item in resultData) item.gSeq = _groupSeqno;
-
-                //Not Used//
-                // (7) PNU_SEQ 그룹순번 부여 (예를 들어, AfPnu 기준 그룹화)
-                //var grouped = resultData.GroupBy(x => x.afPnu).ToList();
-                //int groupSeq = 0;
-                //foreach (var group in grouped)
-                //{
-                //    foreach (var row in group)
-                //    {
-                //        row.pSeq = groupSeq;
-                //    }
-                //    groupSeq++;
-                //}
-
-
-
-                //// [디버깅용]
-                //bool exists = PnuList.Any(item => item.pnu == "4477025027200400001");
-                //if (exists || _groupSeqno >= 2091)
-                //{
-                    
-                //    int a = 1;
-                    
-                //}
-
-
-
 
                 //------------------------------------------
                 // (5) 최종 정렬

@@ -483,8 +483,8 @@ namespace LMFS.ViewModels.Pages
         {
             //// 검색 로직 실행
             //OnSearch();
-            // 다이어그램 다시 그리기
-            Converter.RefreshXMLLandMoveFlow(GridDataSource, this);
+            // 다이어그램 다시 그리기(+BusyWindow)
+            RefreshWithBusy();
         }
 
         //다이어그램 내 '소유자명' 표시
@@ -492,8 +492,8 @@ namespace LMFS.ViewModels.Pages
         {
             //// 검색 로직 실행
             //OnSearch();
-            // 다이어그램 다시 그리기
-            Converter.RefreshXMLLandMoveFlow(GridDataSource, this);
+            // 다이어그램 다시 그리기(+BusyWindow)
+            RefreshWithBusy();
         }
 
         //다이어그램 내 '지목' 표시
@@ -501,8 +501,8 @@ namespace LMFS.ViewModels.Pages
         {
             //// 검색 로직 실행
             //OnSearch();
-            // 다이어그램 다시 그리기
-            Converter.RefreshXMLLandMoveFlow(GridDataSource, this);
+            // 다이어그램 다시 그리기(+BusyWindow)
+            RefreshWithBusy();
         }
 
         //다이어그램 내 '면적' 표시
@@ -510,8 +510,26 @@ namespace LMFS.ViewModels.Pages
         {
             //// 검색 로직 실행
             //OnSearch();
-            // 다이어그램 다시 그리기
-            Converter.RefreshXMLLandMoveFlow(GridDataSource, this);
+            // 다이어그램 다시 그리기(+BusyWindow)
+            RefreshWithBusy();
+        }
+
+
+        private void RefreshWithBusy()
+        {
+            var busy = new BusyWindow();
+            try
+            {
+                busy.Owner = Application.Current.MainWindow; // 또는 this
+                busy.Show();
+
+                // 다이어그램 다시 그리기
+                Converter.RefreshXMLLandMoveFlow(GridDataSource, this);
+            }
+            finally
+            {
+                busy.Close();
+            }
         }
 
 

@@ -37,47 +37,6 @@ namespace LMFS.Views.Pages
 
         private bool _diagramShown = false;
 
-        ///*
-        ////- DiagramControl: LmfControl.ZoomFactor (0.1~3.0 배율)
-        ////- TrackBar: 10~300 정수(%)
-        ////- 중간 속성: ZoomPercent (int, 10~300) ←→ TrackBar.Value
-        ////- ZoomFactor (double) ←→ DiagramControl.ZoomFactor
-        ////
-        //// => “배율(ZoomFactor)”와 “퍼센트(ZoomPercent)”를 한 군데에서만 상호 변환하게 만드는 게 핵심
-        //*/
-        //private int _zoomPercent = 100; // 100%
-        //public int ZoomPercent
-        //{
-        //    get => _zoomPercent;
-        //    set
-        //    {
-        //        if (_zoomPercent != value)
-        //        {
-        //            _zoomPercent = value;
-        //            ZoomFactor = _zoomPercent / 100.0;  // 여기서만 변환
-        //            OnPropertyChanged(nameof(ZoomPercent));
-        //        }
-        //    }
-        //}
-
-        //private double _zoomFactor = 1.0; // 1.0 = 100%
-        //public double ZoomFactor
-        //{
-        //    get => _zoomFactor;
-        //    set
-        //    {
-        //        if (Math.Abs(_zoomFactor - value) > 0.0001)
-        //        {
-        //            _zoomFactor = value;
-        //            // 여기서 TrackBar 쪽도 자동 반영되도록 ZoomPercent 재계산
-        //            _zoomPercent = (int)Math.Round(_zoomFactor * 100);
-        //            LmfControl.ZoomFactor = _zoomFactor;   // DiagramControl에 실제 적용[web:28]
-        //            OnPropertyChanged(nameof(ZoomFactor));
-        //            OnPropertyChanged(nameof(ZoomPercent));
-        //        }
-        //    }
-        //}
-
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
         {
@@ -325,7 +284,12 @@ namespace LMFS.Views.Pages
         }
 
         private void LmfControl_Loaded(object sender, RoutedEventArgs e)
-        {
+        {   
+            //#DiagramPanning//다이어그램 로딩 후, 기본 툴을 Pan으로
+            var diagram = (DiagramControl)sender;
+            diagram.ActiveTool = diagram.PanTool;
+
+
             // 작업 끝나면 Busy 팝업 닫기 (예외 있어도 안전하게 처리)
             if (!FlowVM.IsDiagramReady || _diagramShown)
                 return;
@@ -335,8 +299,6 @@ namespace LMFS.Views.Pages
 
             // 3. 모든 작업이 끝난 시점에서
             FlowVM.IsDiagramReady = true;
-
-
         }
 
         ////FitToDrawing, BringIntoView, 코드에서 직접 ZoomFactor 변경 등 “모든 Zoom 변경”이 TrackBar에 반영
@@ -423,5 +385,9 @@ namespace LMFS.Views.Pages
                 //FlowVM.ProcessDiagramLandMoveFlow(rtnXml);
             }
         }
+
+        #region 다이어그램 패닝
+
+        #endregion
     }
 }
